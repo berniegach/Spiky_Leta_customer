@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.spikingacacia.spikyletabuyer.shop.BSOrderFragment">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:weightSum="10"
+        android:divider="?android:listDivider"
+        android:dividerPadding="10dp"
+        android:showDividers="middle">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="8"
+            android:orientation="vertical"
+            android:background="@color/secondary_background">
+            <ScrollView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/orders_base"
+                    android:orientation="vertical"
+                    android:divider="?android:listDivider"
+                    android:dividerPadding="10dp"
+                    android:showDividers="middle">
+
+                </LinearLayout>
+            </ScrollView>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="2"
+            android:orientation="vertical"
+            android:background="@color/secondary_background">
+            <TextView
+                android:id="@+id/total"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="@dimen/text_margin"
+                android:gravity="end"
+                android:text="Total: 0"/>
+            <Button
+                android:id="@+id/order"
+                style="?android:textAppearanceSmall"
+                android:layout_width="250dp"
+                android:layout_height="@dimen/button_minimum_height"
+                android:layout_gravity="center"
+                android:layout_marginTop="3dp"
+                android:background="@drawable/login_button_rounded"
+                android:fontFamily="@font/amita"
+                android:gravity="center"
+                android:text="Order"
+                android:textColor="@color/text"
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout>

@@ -1,0 +1,28 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <com.spikingacacia.spikyletabuyer.BPreferencePic/>
+    <EditTextPreference
+        android:defaultValue="Leta"
+        android:inputType="textCapWords"
+        android:key="username"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Full Names"
+        app:allowDividerAbove="true"/>
+    <EditTextPreference
+        android:enabled="false"
+        android:defaultValue="Leta"
+        android:inputType="text"
+        android:key="email"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="Email Address"
+        app:allowDividerAbove="true"/>
+    <Preference android:key="password"
+        android:title="Change Password"
+        app:allowDividerAbove="true">
+    </Preference>
+
+</PreferenceScreen>

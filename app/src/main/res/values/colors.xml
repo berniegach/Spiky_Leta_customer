@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="transparent">#00ffffff</color>
+    <color name="colorAccent">#987171</color>
+
+    <color name="main_background">#666666</color>
+    <color name="secondary_background">#505050</color>
+    <color name="tertiary_background">#464646</color>
+    <color name="button_normal">#987171</color>
+    <color name="button_focused">#ca8888</color>
+    <color name="text">#fafafa</color>
+
+</resources>
