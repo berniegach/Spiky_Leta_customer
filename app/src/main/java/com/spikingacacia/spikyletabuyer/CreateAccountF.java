@@ -70,8 +70,7 @@ public class CreateAccountF extends Fragment {
     private EditText mVerifyPassword;
 
     JSONParser jsonParser;
-    private SharedPreferences loginPreferences;
-    private SharedPreferences.Editor loginPreferencesEditor;
+    Preferences preferences;
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
@@ -107,8 +106,7 @@ public class CreateAccountF extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view= inflater.inflate(R.layout.f_create_account, container, false);
-        loginPreferences=getContext().getSharedPreferences("loginPrefs",MODE_PRIVATE);
-        loginPreferencesEditor=loginPreferences.edit();
+        preferences=new Preferences(getContext());
         //edittexts
         mEmail = view.findViewById(R.id.email);
         bVerifyEmail=view.findViewById(R.id.verify_email);
@@ -239,9 +237,8 @@ public class CreateAccountF extends Fragment {
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             Snackbar.make(mEmail,"Email sent\nPlease verify the email address to continue.",Snackbar.LENGTH_LONG).show();
-                            loginPreferencesEditor.putBoolean("verify",true);
-                            loginPreferencesEditor.putString("email_verify",email);
-                            loginPreferencesEditor.commit();
+                            preferences.setVerify_password(true);
+                            preferences.setEmail_to_verify(email);
                             Log.d(TAG, "Email sent.");
                         }
                     }
@@ -395,8 +392,7 @@ public class CreateAccountF extends Fragment {
             if (successful)
             {
                 Toast.makeText(getContext(), "Account added", Toast.LENGTH_SHORT).show();
-                loginPreferencesEditor.putBoolean("verify",false);
-                loginPreferencesEditor.commit();
+                preferences.setVerify_password(false);
                 if(mListener!=null)
                     mListener.onRegisterFinished();
             }
@@ -473,8 +469,7 @@ public class CreateAccountF extends Fragment {
             if (successful)
             {
                 Toast.makeText(getContext(), "Password Changed", Toast.LENGTH_SHORT).show();
-                loginPreferencesEditor.putBoolean("reset_password",false);
-                loginPreferencesEditor.commit();
+                preferences.setReset_password(false);
                 if(mListener!=null)
                     mListener.onRegisterFinished();
             }

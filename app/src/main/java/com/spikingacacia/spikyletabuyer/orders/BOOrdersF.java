@@ -12,6 +12,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
+import com.spikingacacia.spikyletabuyer.Preferences;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.LoginA;
 import com.spikingacacia.spikyletabuyer.database.BOrders;
@@ -27,6 +28,7 @@ public class BOOrdersF extends Fragment
 
     private static final String ARG_ORDER_DATE = "order_date";
     private String orderDate;
+    Preferences preferences;
 
 
     public static BOOrdersF newInstance(String date)
@@ -54,6 +56,12 @@ public class BOOrdersF extends Fragment
             Bundle savedInstanceState)
     {
         View root = inflater.inflate(R.layout.f_booorders, container, false);
+        //preference
+        preferences=new Preferences(getContext());
+        if(!preferences.isDark_theme_enabled())
+        {
+            root.findViewById(R.id.sec_main).setBackgroundColor(getResources().getColor(R.color.secondary_background_light));
+        }
         ProgressBar progressBar=root.findViewById(R.id.progress);
         LinearLayout l_base=root.findViewById(R.id.orders_base);
         TextView t_date=root.findViewById(R.id.date);

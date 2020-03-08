@@ -11,6 +11,8 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+
+import androidx.appcompat.widget.Toolbar;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragment;
@@ -31,6 +33,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.preference.EditTextPreference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.SwitchPreference;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -71,6 +74,7 @@ public class BSettingsA extends AppCompatActivity
     public static BuyerAccount tempBuyerAccount;
     //public static String permissions;
     public static Bitmap profilePic;
+    Preferences preferences;
 
 
 
@@ -79,6 +83,17 @@ public class BSettingsA extends AppCompatActivity
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.settings_activity);
+        //preference
+        preferences = new Preferences(getBaseContext());
+        if(!preferences.isDark_theme_enabled())
+        {
+            //setTheme(R.style.AppThemeLight_NoActionBarLight);
+            //toolbar.setTitleTextColor(getResources().getColor(R.color.text_light));
+            //toolbar.setPopupTheme(R.style.AppThemeLight_PopupOverlayLight);
+            //AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.appbar_layout);
+            //appBarLayout.getContext().setTheme(R.style.AppThemeLight_AppBarOverlayLight);
+            findViewById(R.id.main).setBackgroundColor(getResources().getColor(R.color.main_background_light));
+        }
         if (savedInstanceState == null)
         {
             getSupportFragmentManager()
@@ -105,6 +120,14 @@ public class BSettingsA extends AppCompatActivity
         if (actionBar != null)
         {
             actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+        //dark theme prefernce
+        if(!preferences.isDark_theme_enabled())
+        {
+            setTheme(R.style.NonFullscreenSSettingsLight);
+            Toolbar actionBarToolbar = (Toolbar)findViewById(R.id.action_bar);
+            if (actionBarToolbar != null)
+                actionBarToolbar.setTitleTextColor(getResources().getColor(R.color.text_light));
         }
         ///
         tempBuyerAccount =new BuyerAccount();
@@ -214,6 +237,7 @@ public class BSettingsA extends AppCompatActivity
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public static class GeneralPreferenceFragment  extends PreferenceFragmentCompat
     {
+        Preferences preferences;
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey)
         {
@@ -330,6 +354,24 @@ public class BSettingsA extends AppCompatActivity
                         }
                     });
                     dialog.show();
+                    return false;
+                }
+            });
+
+            //dark theme
+
+            //preference
+            preferences=new Preferences(context);
+            final SwitchPreference preference_dark=findPreference("dark_theme");
+            preference_dark.setChecked(preferences.isDark_theme_enabled());
+            preference_dark.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
+            {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue)
+                {
+                    boolean choice = (boolean) newValue;
+                    preference_dark.setChecked(choice);
+                    preferences.setDark_theme_enabled(choice);
                     return false;
                 }
             });

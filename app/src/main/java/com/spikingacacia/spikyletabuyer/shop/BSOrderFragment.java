@@ -15,6 +15,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.spikingacacia.spikyletabuyer.Preferences;
 import com.spikingacacia.spikyletabuyer.R;
 
 /**
@@ -39,6 +40,7 @@ public class BSOrderFragment extends Fragment
     private OnFragmentInteractionListener mListener;
     private  LinearLayout l_base;
     private TextView t_total;
+    private Preferences preferences;
 
     public BSOrderFragment()
     {
@@ -81,6 +83,12 @@ public class BSOrderFragment extends Fragment
     {
         // Inflate the layout for this fragment
         View view= inflater.inflate(R.layout.f_bsorder, container, false);
+        preferences = new Preferences(getContext());
+        if(!preferences.isDark_theme_enabled())
+        {
+            view.findViewById(R.id.sec_main).setBackgroundColor(getResources().getColor(R.color.secondary_background_light));
+            view.findViewById(R.id.sec_main_2).setBackgroundColor(getResources().getColor(R.color.secondary_background_light));
+        }
         Button b_order=view.findViewById(R.id.order);
         l_base=view.findViewById(R.id.orders_base);
         t_total=view.findViewById(R.id.total);

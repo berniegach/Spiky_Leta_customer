@@ -16,6 +16,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.Volley;
+import com.spikingacacia.spikyletabuyer.Preferences;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.CommonHelper;
 import com.spikingacacia.spikyletabuyer.LoginA;
@@ -36,7 +37,7 @@ public class SRRestaurantsRecyclerViewAdapter extends RecyclerView.Adapter<SRRes
     private final OnListFragmentInteractionListener mListener;
     private List<RestaurantItem>itemsCopy;
     private final Context mContext;
-
+    Preferences preferences;
 
     public SRRestaurantsRecyclerViewAdapter(List<RestaurantItem> items, OnListFragmentInteractionListener listener, Context context) {
         mValues = items;
@@ -44,6 +45,8 @@ public class SRRestaurantsRecyclerViewAdapter extends RecyclerView.Adapter<SRRes
         itemsCopy.addAll(items);
         mListener = listener;
         mContext=context;
+        //preference
+        preferences=new Preferences(context);
     }
 
     @Override
@@ -62,6 +65,10 @@ public class SRRestaurantsRecyclerViewAdapter extends RecyclerView.Adapter<SRRes
         holder.mPositionView.setText(mValues.get(position).position);
         holder.mNamesView.setText(names);
         holder.mDistanceView.setText(String.format("%.0f meters away",mValues.get(position).distance));
+        if(!preferences.isDark_theme_enabled())
+        {
+            holder.mView.setBackgroundColor(mContext.getResources().getColor(R.color.secondary_background_light));
+        }
         //get the category photo
         String url= LoginA.base_url+"src/sellers/"+String.format("%s/pics/prof_pic", CommonHelper.makeName(mValues.get(position).id), mValues.get(position).id)+".jpg";
         ImageRequest request=new ImageRequest(

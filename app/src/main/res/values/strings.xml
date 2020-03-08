@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name">Spiky Leta</string>
-    <string name="app_version">Version 1.0.3</string>
-    <string name="copyright">\u00A9 2019 Spiking Acacia</string>
+    <string name="app_name">Leta Customer</string>
+    <string name="app_version">Version 1.0.5</string>
+    <string name="copyright">\u00A9 2020 Spiking Acacia</string>
     <!-- my tsrings -->
     <string name="prompt_email">Email</string>
     <string name="prompt_password">Password</string>

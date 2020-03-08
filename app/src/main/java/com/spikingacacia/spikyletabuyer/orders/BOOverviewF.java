@@ -20,6 +20,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.material.snackbar.Snackbar;
+import com.spikingacacia.spikyletabuyer.Preferences;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.JSONParser;
 import com.spikingacacia.spikyletabuyer.LoginA;
@@ -83,8 +84,7 @@ public class BOOverviewF extends Fragment
    // private TextView tDeliveryName;
     //private TextView tPaymentName;
     private int countToShow = 0;
-    private SharedPreferences loginPreferences;
-    private SharedPreferences.Editor loginPreferencesEditor;
+    Preferences preferences;
 
     public BOOverviewF()
     {
@@ -118,8 +118,8 @@ public class BOOverviewF extends Fragment
     {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.f_booverview, container, false);
-        loginPreferences = getContext().getSharedPreferences("loginPrefs", MODE_PRIVATE);
-        loginPreferencesEditor = loginPreferences.edit();
+        //preference
+        preferences=new Preferences(getContext());
         //layouts
         lCurrent=((LinearLayout) view.findViewById(R.id.current));
         /*lPending = ((LinearLayout) view.findViewById(R.id.pending));
@@ -225,6 +225,12 @@ public class BOOverviewF extends Fragment
                     mListener.onChoiceClicked(5, orderFormat);
             }
         });
+        if(!preferences.isDark_theme_enabled())
+        {
+            view.findViewById(R.id.sec_main).setBackgroundColor(getResources().getColor(R.color.secondary_background_light));
+            lCurrent.setBackgroundColor(getResources().getColor(R.color.tertiary_background_light));
+            lFinished.setBackgroundColor(getResources().getColor(R.color.tertiary_background_light));
+        }
         return view;
     }
 
@@ -237,8 +243,8 @@ public class BOOverviewF extends Fragment
         //2. so we can set the texviews after setting the values. if not done here the texviews will show 0 during the initial run
         //3 so we can set the piechart with correct values during the initial run as above 2
         super.onResume();
-        countToShow = loginPreferences.getInt("order_format_to_show_count", 0);
-        orderFormat = loginPreferences.getInt("order_format", 1);
+        countToShow = preferences.getOrder_format_to_show_count();
+        orderFormat = preferences.getOrder_format();
         currentCount = 0;
         pendingCount = 0;
         inProgressCount = 0;

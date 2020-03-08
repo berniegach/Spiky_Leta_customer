@@ -16,6 +16,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.Volley;
+import com.spikingacacia.spikyletabuyer.Preferences;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.CommonHelper;
 import com.spikingacacia.spikyletabuyer.LoginA;
@@ -40,6 +41,7 @@ public class BSItemRecyclerViewAdapter extends RecyclerView.Adapter<BSItemRecycl
     private final Context mContext;
     private final int mCategoryId;
     private final int mGroupId;
+    Preferences preferences;
 
     public BSItemRecyclerViewAdapter(List<InventoryItem> items, OnListFragmentInteractionListener listener, Context context, int categoryId, int groupId) {
         mValues = items;
@@ -49,6 +51,8 @@ public class BSItemRecyclerViewAdapter extends RecyclerView.Adapter<BSItemRecycl
         mContext=context;
         mCategoryId=categoryId;
         mGroupId=groupId;
+        //preference
+        preferences=new Preferences(context);
     }
 
     @Override
@@ -71,6 +75,10 @@ public class BSItemRecyclerViewAdapter extends RecyclerView.Adapter<BSItemRecycl
         holder.mItemView.setText(item);
         holder.mPriceView.setText(Double.toString(mValues.get(position).sellingPrice));
         holder.mDescriptionView.setText(des);
+        if(!preferences.isDark_theme_enabled())
+        {
+            holder.mView.setBackgroundColor(mContext.getResources().getColor(R.color.secondary_background_light));
+        }
         //get the category photo
         String url= LoginA.base_url+"src/sellers/"+String.format("%s/pics/i_%d", CommonHelper.makeName(sellerId), mValues.get(position).id)+".jpg";
         ImageRequest request=new ImageRequest(

@@ -64,6 +64,7 @@ public class BMenuF extends Fragment {
     private TextView tMessagesCount;
     private int ordersCount=0;
     private int messagesCount=0;
+    Preferences preferences;
 
     public BMenuF() {
         // Required empty public constructor
@@ -103,6 +104,8 @@ public class BMenuF extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view= inflater.inflate(R.layout.f_bmenu, container, false);
+        //preference
+        preferences=new Preferences(getContext());
         tOrdersCount=view.findViewById(R.id.orders_count);
         tMessagesCount=view.findViewById(R.id.messages_count);
         //restaurant
@@ -163,12 +166,16 @@ public class BMenuF extends Fragment {
             {
                 if(ordersCount!=getOrdersCounts())
                 {
+                    if(mListener!=null)
+                        mListener.play_notification();
                     ordersCount=getOrdersCounts();
                     tOrdersCount.setText(String.valueOf(ordersCount));
                     Log.d(TAG,"orders count changed");
                 }
                 if(messagesCount!=bMessagesList.size())
                 {
+                    if(mListener!=null)
+                        mListener.play_notification();
                     messagesCount=bMessagesList.size();
                     tMessagesCount.setText(String.valueOf(messagesCount));
                     Log.d(TAG,"messages count changed");
@@ -184,7 +191,7 @@ public class BMenuF extends Fragment {
                 {
                     while(true)
                     {
-                        sleep(10000);
+                        sleep(2000);
                         refreshOrders();
                         refreshMessages();
                         handler.post(runnable);
@@ -197,6 +204,14 @@ public class BMenuF extends Fragment {
             }
         };
         thread.start();
+        if(!preferences.isDark_theme_enabled())
+        {
+            view.findViewById(R.id.restaurant).setBackgroundColor(getResources().getColor(R.color.secondary_background_light));
+            view.findViewById(R.id.orders).setBackgroundColor(getResources().getColor(R.color.secondary_background_light));
+            view.findViewById(R.id.explore).setBackgroundColor(getResources().getColor(R.color.secondary_background_light));
+            view.findViewById(R.id.messages).setBackgroundColor(getResources().getColor(R.color.secondary_background_light));
+            view.findViewById(R.id.settings).setBackgroundColor(getResources().getColor(R.color.secondary_background_light));
+        }
         return view;
     }
     @Override
@@ -259,6 +274,7 @@ public class BMenuF extends Fragment {
     {
         void onMenuClicked(int id);
         void onLogOut();
+        void play_notification();
     }
     private int getOrdersCounts()
     {

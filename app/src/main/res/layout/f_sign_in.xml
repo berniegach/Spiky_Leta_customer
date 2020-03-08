@@ -49,29 +49,24 @@
                         android:textSize="14sp" />
 
                 </com.google.android.material.textfield.TextInputLayout>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center">
-
-                    <EditText
-                        android:id="@+id/password"
-                        android:layout_width="220dp"
-                        android:layout_height="@dimen/button_minimum_height"
-                        android:background="@drawable/edittext_line"
-                        android:fontFamily="@font/arima_madurai"
-                        android:gravity="center"
-                        android:hint="@string/prompt_password"
-                        android:imeActionId="6"
-                        android:imeActionLabel="@string/action_sign_in_short"
-                        android:imeOptions="actionUnspecified"
-                        android:inputType="textPassword"
-                        android:maxLines="1"
-                        android:singleLine="true"
-                        android:textSize="14sp" />
-
-                </com.google.android.material.textfield.TextInputLayout>
+                <!-- the password edittext should not be put in a textinputlayout
+               for some reason it doesn't work-->
+                <EditText
+                    android:id="@+id/password"
+                    android:layout_width="220dp"
+                    android:layout_height="@dimen/button_minimum_height"
+                    android:background="@drawable/edittext_line"
+                    android:fontFamily="@font/arima_madurai"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:hint="@string/prompt_password"
+                    android:imeActionId="6"
+                    android:imeActionLabel="@string/action_sign_in_short"
+                    android:imeOptions="actionUnspecified"
+                    android:inputType="textPassword"
+                    android:maxLines="1"
+                    android:singleLine="true"
+                    android:textSize="14sp" />
 
                 <Button
                     android:id="@+id/email_sign_in_button"
@@ -88,6 +83,7 @@
                     android:textStyle="bold" />
 
                 <TextView
+                    android:id="@+id/forgot_password"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/textview_minimum_height"
                     android:layout_gravity="bottom|center_horizontal"
@@ -95,9 +91,7 @@
                     android:clickable="true"
                     android:fontFamily="@font/arima_madurai"
                     android:gravity="center"
-                    android:text="@string/forgotyourpassword"
-                    android:textColor="@color/text"
-                    android:visibility="invisible" />
+                    android:text="@string/forgotyourpassword" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -114,8 +108,7 @@
                         android:clickable="true"
                         android:focusable="true"
                         android:fontFamily="@font/amita"
-                        android:text="Sign Up"
-                        android:textColor="#f4eee1" />
+                        android:text="Sign Up" />
                 </LinearLayout>
 
             </LinearLayout>

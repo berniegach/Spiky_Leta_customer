@@ -10,4 +10,12 @@
     <color name="button_focused">#ca8888</color>
     <color name="text">#fafafa</color>
 
+    <!-- light theme -->
+    <color name="main_background_light">#ffffff</color>
+    <color name="secondary_background_light">#e6e7e8</color>
+    <color name="tertiary_background_light">#dcddde</color>
+    <color name="button_normal_light">#987171</color>
+    <color name="button_focused_light">#ca8888</color>
+    <color name="text_light">#000000</color>
+
 </resources>

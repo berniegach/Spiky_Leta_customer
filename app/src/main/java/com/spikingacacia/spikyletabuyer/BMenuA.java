@@ -20,6 +20,8 @@ import android.graphics.Typeface;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.media.MediaPlayer;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -33,6 +35,7 @@ import android.widget.Toast;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.snackbar.Snackbar;
 import com.spikingacacia.spikyletabuyer.R;
@@ -71,10 +74,15 @@ implements BMenuF.OnFragmentInteractionListener
     public static  List<BRestaurants>bRestaurantsList;
     private TextView tWho;
     private boolean runRate=true;
+    Preferences preferences;
+    private final static String default_notification_channel_id = "default";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.a_bmenu);
+        //preference
+        preferences=new Preferences(getBaseContext());
         //set the toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         CollapsingToolbarLayout collapsingToolbarLayout=findViewById(R.id.collapsingToolbar);
@@ -92,6 +100,21 @@ implements BMenuF.OnFragmentInteractionListener
         fusedLocationProviderClient= LocationServices.getFusedLocationProviderClient(this);
         jsonParser=new JSONParser();
         bRestaurantsList=new LinkedList<>();
+        if(!preferences.isDark_theme_enabled())
+        {
+            setTheme(R.style.AppThemeLight);
+            findViewById(R.id.main).setBackgroundColor(getResources().getColor(R.color.main_background_light));
+            findViewById(R.id.sec_main).setBackgroundColor(getResources().getColor(R.color.secondary_background_light));
+            collapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(R.color.text_light));
+            collapsingToolbarLayout.setCollapsedTitleTextColor(getResources().getColor(R.color.text_light));
+            collapsingToolbarLayout.setBackgroundColor(getResources().getColor(R.color.main_background_light));
+            ((TextView)findViewById(R.id.who)).setTextColor(getResources().getColor(R.color.text_light));
+            ((TextView)findViewById(R.id.welcome)).setTextColor(getResources().getColor(R.color.text_light));
+            toolbar.setTitleTextColor(getResources().getColor(R.color.text_light));
+            toolbar.setPopupTheme(R.style.AppThemeLight_PopupOverlayLight);
+            AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.appbar_layout);
+            appBarLayout.getContext().setTheme(R.style.AppThemeLight_AppBarOverlayLight);
+        }
     }
     @Override
     protected void onPostCreate(Bundle savedInstanceState)
@@ -399,5 +422,22 @@ implements BMenuF.OnFragmentInteractionListener
                 Toast.makeText(getBaseContext(),"Error getting restaurants",Toast.LENGTH_SHORT).show();
             }
         }
+    }
+    @Override
+    public void play_notification()
+    {
+        Uri alarmSound =
+                RingtoneManager. getDefaultUri (RingtoneManager. TYPE_NOTIFICATION );
+        MediaPlayer mp = MediaPlayer. create (getBaseContext(), alarmSound);
+        mp.start();
+       /* NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(SMenuA.this, default_notification_channel_id )
+                        .setSmallIcon(R.mipmap.ic_launcher )
+                        .setContentTitle( "New Order" )
+                        .setContentText( "a new order has arrived" ) ;
+        NotificationManager mNotificationManager = (NotificationManager)
+                getSystemService(Context. NOTIFICATION_SERVICE );
+        mNotificationManager.notify(( int ) System. currentTimeMillis () ,
+                mBuilder.build());*/
     }
 }

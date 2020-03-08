@@ -5,4 +5,6 @@
     <dimen name="textview_minimum_height">48dp</dimen>
     <dimen name="edittext_minimum_height">48dp</dimen>
     <dimen name="button_minimum_height">48dp</dimen>
+    <dimen name="button_width">152dp</dimen>
+    <dimen name="button_height">48dp</dimen>
 </resources>
