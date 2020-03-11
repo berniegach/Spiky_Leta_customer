@@ -374,7 +374,6 @@ public class SignInF extends Fragment
                     buyerAccount.setUsername(accountObject.getString("username"));
                     buyerAccount.setCountry(accountObject.getString("country"));
                     buyerAccount.setLocation(accountObject.getString("location"));
-                    buyerAccount.setOrders(accountObject.getString("orders"));
                     buyerAccount.setDateadded(accountObject.getString("dateadded"));
                     buyerAccount.setDatechanged(accountObject.getString("datechanged"));
                     return true;

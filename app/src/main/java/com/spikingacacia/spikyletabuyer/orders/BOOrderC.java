@@ -70,6 +70,7 @@ public class BOOrderC
             String orderName="";
             double price=0.0;
             String restaurant="";
+            String waiter_names="";
             int tableNumber=0;
             String dateAdded="";
             //String dateChanged="";
@@ -99,13 +100,14 @@ public class BOOrderC
                     orderName=bOrders.getOrderName();
                     price=bOrders.getPrice();
                     restaurant=bOrders.getRestaurantName();
+                    waiter_names=bOrders.getWaiter_names();
                     tableNumber=bOrders.getTableNumber();
                     //dateChanged=bOrders.getDateChanged();
                    break;
                 }
 
             }
-            addItem(CreateItem(position+1,id,itemId,orderNumber,orderStatus,orderName,price,restaurant,tableNumber,dateAdded));
+            addItem(CreateItem(position+1,id,itemId,orderNumber,orderStatus,orderName,price,restaurant,waiter_names,tableNumber,dateAdded));
             position+=1;
 
         }
@@ -117,9 +119,10 @@ public class BOOrderC
         ITEM_MAP.put(item.position, item);
     }
 
-    public  OrderItem CreateItem(int position, int id, int itemId, int orderNumber, int orderStatus, String orderName, double price, String username, int tableNumber, String dateAdded)
+    public  OrderItem CreateItem(int position, int id, int itemId, int orderNumber, int orderStatus, String orderName, double price,
+                                 String username, String waiter_names, int tableNumber, String dateAdded)
     {
-        return new OrderItem(String.valueOf(position), id, itemId, orderNumber, orderStatus, orderName, price, username, tableNumber, dateAdded);
+        return new OrderItem(String.valueOf(position), id, itemId, orderNumber, orderStatus, orderName, price, username, waiter_names,tableNumber, dateAdded);
     }
 
     public class OrderItem
@@ -133,11 +136,13 @@ public class BOOrderC
         public String orderName;
         public double price;
         public String restaurantName;
+        public String waiter_names;
         public int tableNumber;
         public String dateAdded;
         //public String dateChanged;
 
-        public OrderItem(String position, int id, int itemId, int orderNumber, int orderStatus, String orderName, double price, String restaurantName, int tableNumber, String dateAdded)
+        public OrderItem(String position, int id, int itemId, int orderNumber, int orderStatus, String orderName, double price,
+                         String restaurantName, String waiter_names, int tableNumber, String dateAdded)
         {
             this.position = position;
             this.id = id;
@@ -148,6 +153,7 @@ public class BOOrderC
             this.orderName = orderName;
             this.price = price;
             this.restaurantName=restaurantName;
+            this.waiter_names=waiter_names;
             this.tableNumber=tableNumber;
             this.dateAdded = dateAdded;
             //this.dateChanged = dateChanged;

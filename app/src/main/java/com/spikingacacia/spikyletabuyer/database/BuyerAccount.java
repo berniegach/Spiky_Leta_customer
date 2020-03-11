@@ -8,20 +8,18 @@ public class BuyerAccount
     private String username;
     private String country;
     private String location;
-    private String orders;
     private String dateadded;
     private String datechanged;
 
     public BuyerAccount(){}
 
-    public BuyerAccount(int id, String email, String password, String username, String country, String location, String orders, String dateadded, String datechanged) {
+    public BuyerAccount(int id, String email, String password, String username, String country, String location,  String dateadded, String datechanged) {
         this.id = id;
         this.email = email;
         this.password = password;
         this.username = username;
         this.country = country;
         this.location = location;
-        this.orders=orders;
         this.dateadded = dateadded;
         this.datechanged = datechanged;
     }
@@ -72,16 +70,6 @@ public class BuyerAccount
 
     public void setLocation(String location) {
         this.location = location;
-    }
-
-    public String getOrders()
-    {
-        return orders;
-    }
-
-    public void setOrders(String orders)
-    {
-        this.orders = orders;
     }
 
     public String getDateadded() {

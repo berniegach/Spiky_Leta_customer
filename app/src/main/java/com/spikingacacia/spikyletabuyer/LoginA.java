@@ -52,8 +52,8 @@ public class LoginA extends AppCompatActivity
 {
     private static final int OVERLAY_PERMISSION_CODE=541;
     //REMEMBER TO CHANGE THIS WHEN CHANGING BETWEEN ONLINE AND LOCALHOST
-    public static final String base_url="https://www.spikingacacia.com/leta_project/android/"; //online
-    //public static final String base_url="http://10.0.2.2/leta_project/android/"; //localhost no connection for testing user accounts coz it doesnt require subscription checking
+    //public static final String base_url="https://www.spikingacacia.com/leta_project/android/"; //online
+    public static final String base_url="http://10.0.2.2/leta_project/android/"; //localhost no connection for testing user accounts coz it doesnt require subscription checking
     //buyers php files
     private String url_get_b_notifications=base_url+"get_buyer_notifications.php";
     private String url_get_b_orders=base_url+"get_buyer_orders.php";
@@ -365,7 +365,6 @@ public class LoginA extends AppCompatActivity
             //getting columns list
             List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
             info.add(new BasicNameValuePair("userid",Integer.toString(buyerAccount.getId())));
-            info.add(new BasicNameValuePair("orders",buyerAccount.getOrders()));
             // making HTTP request
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_b_orders,"POST",info);
             Log.d("sItems",""+jsonObject.toString());
@@ -390,8 +389,9 @@ public class LoginA extends AppCompatActivity
                         double selling_price=jsonObjectNotis.getDouble("sellingprice");
                         int order_format=jsonObjectNotis.getInt("order_format");
                         String restaurant=jsonObjectNotis.getString("restaurant_name");
+                        String waiter_names=jsonObjectNotis.getString("waiter_names");
 
-                        BOrders bOrders=new BOrders(id,item_id,order_number,orderstatus,item,selling_price, order_format,table_number,restaurant,dateadded);
+                        BOrders bOrders=new BOrders(id,item_id,order_number,orderstatus,item,selling_price, order_format,table_number,restaurant,waiter_names,dateadded);
                         bOrdersList.put(id,bOrders);
                     }
                     return true;

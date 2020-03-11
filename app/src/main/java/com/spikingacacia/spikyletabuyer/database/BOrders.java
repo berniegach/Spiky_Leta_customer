@@ -11,9 +11,11 @@ public class BOrders
     private int orderFormat;
     public int tableNumber;
     public String restaurantName;
+    public String waiter_names;
     private String dateAdded;
 
-    public BOrders(int id, int itemId, int orderNumber, int orderStatus, String orderName, double price, int orderFormat, int tableNumber, String restaurantName, String dateAdded)
+    public BOrders(int id, int itemId, int orderNumber, int orderStatus, String orderName, double price, int orderFormat, int tableNumber,
+                   String restaurantName, String waiter_names, String dateAdded)
     {
         this.id = id;
         this.itemId = itemId;
@@ -24,6 +26,7 @@ public class BOrders
         this.orderFormat=orderFormat;
         this.tableNumber=tableNumber;
         this.restaurantName=restaurantName;
+        this.waiter_names=waiter_names;
         this.dateAdded = dateAdded;
     }
 
@@ -116,6 +119,17 @@ public class BOrders
     {
         this.restaurantName = restaurantName;
     }
+
+    public String getWaiter_names()
+    {
+        return waiter_names;
+    }
+
+    public void setWaiter_names(String waiter_names)
+    {
+        this.waiter_names = waiter_names;
+    }
+
 
     public String getDateAdded()
     {

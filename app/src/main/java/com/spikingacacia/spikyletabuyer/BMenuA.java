@@ -42,6 +42,7 @@ import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.JSONParser;
 import com.spikingacacia.spikyletabuyer.LoginA;
 import com.spikingacacia.spikyletabuyer.MapsExploreA;
+import com.spikingacacia.spikyletabuyer.board.BoardA;
 import com.spikingacacia.spikyletabuyer.messages.BMMessageListActivity;
 import com.spikingacacia.spikyletabuyer.orders.BOOrdersA;
 import com.spikingacacia.spikyletabuyer.restaurants.SRRestaurantsA;
@@ -217,11 +218,17 @@ implements BMenuF.OnFragmentInteractionListener
         }
         else if(id==4)
         {
+            //tasty boards
+            Intent intent=new Intent(this, BoardA.class);
+            startActivity(intent);
+        }
+        else if(id==5)
+        {
             //notifications
             Intent intent=new Intent(this, BMMessageListActivity.class);
             startActivity(intent);
         }
-        else if(id==5)
+        else if(id==6)
         {
             //settings
             Intent intent=new Intent(this, BSettingsA.class);

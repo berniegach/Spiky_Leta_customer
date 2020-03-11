@@ -136,6 +136,18 @@ public class BMenuF extends Fragment {
             {
                 if(mListener!=null)
                     mListener.onMenuClicked(3);
+
+            }
+        });
+        //tasty board
+        ((LinearLayout)view.findViewById(R.id.board)).setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                if(mListener!=null)
+                    mListener.onMenuClicked(4);
+
             }
         });
         //messages
@@ -145,7 +157,7 @@ public class BMenuF extends Fragment {
             public void onClick(View view)
             {
                 if(mListener!=null)
-                    mListener.onMenuClicked(4);
+                    mListener.onMenuClicked(5);
             }
         });
         //settings
@@ -155,7 +167,7 @@ public class BMenuF extends Fragment {
             public void onClick(View view)
             {
                 if(mListener!=null)
-                    mListener.onMenuClicked(5);
+                    mListener.onMenuClicked(6);
             }
         });
         final Handler handler=new Handler();
@@ -209,6 +221,7 @@ public class BMenuF extends Fragment {
             view.findViewById(R.id.restaurant).setBackgroundColor(getResources().getColor(R.color.secondary_background_light));
             view.findViewById(R.id.orders).setBackgroundColor(getResources().getColor(R.color.secondary_background_light));
             view.findViewById(R.id.explore).setBackgroundColor(getResources().getColor(R.color.secondary_background_light));
+            view.findViewById(R.id.board).setBackgroundColor(getResources().getColor(R.color.secondary_background_light));
             view.findViewById(R.id.messages).setBackgroundColor(getResources().getColor(R.color.secondary_background_light));
             view.findViewById(R.id.settings).setBackgroundColor(getResources().getColor(R.color.secondary_background_light));
         }
@@ -309,7 +322,6 @@ public class BMenuF extends Fragment {
         //getting columns list
         List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
         info.add(new BasicNameValuePair("userid",Integer.toString(buyerAccount.getId())));
-        info.add(new BasicNameValuePair("orders",buyerAccount.getOrders()));
         // making HTTP request
         JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_b_orders,"POST",info);
        // Log.d("sItems",""+jsonObject.toString());
@@ -334,8 +346,10 @@ public class BMenuF extends Fragment {
                     double selling_price=jsonObjectNotis.getDouble("sellingprice");
                     int order_format=jsonObjectNotis.getInt("order_format");
                     String restaurant=jsonObjectNotis.getString("restaurant_name");
+                    String waiter_names=jsonObjectNotis.getString("waiter_names");
 
-                    BOrders bOrders=new BOrders(id,item_id,order_number,orderstatus,item,selling_price, order_format,table_number,restaurant,dateadded);
+
+                    BOrders bOrders=new BOrders(id,item_id,order_number,orderstatus,item,selling_price, order_format,table_number,restaurant, waiter_names,dateadded);
                     tempOrdersLHM.put(id,bOrders);
                     //bOrdersList.put(id,bOrders);
                 }

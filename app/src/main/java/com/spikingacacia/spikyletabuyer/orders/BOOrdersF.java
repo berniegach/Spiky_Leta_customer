@@ -67,6 +67,9 @@ public class BOOrdersF extends Fragment
         TextView t_date=root.findViewById(R.id.date);
         TextView t_status=root.findViewById(R.id.status);
         TextView t_table=root.findViewById(R.id.table);
+        TextView t_seller=root.findViewById(R.id.seller);
+        TextView t_waiter=root.findViewById(R.id.waiter);
+
         int count=0;
         double total_price=0.0;
         String date_to_show="";
@@ -83,6 +86,8 @@ public class BOOrdersF extends Fragment
             double price=bOrders.getPrice();
             int order_format=bOrders.getOrderFormat();
             int table=bOrders.getTableNumber();
+            String restaurant=bOrders.getRestaurantName();
+            String waiter=bOrders.getWaiter_names();
             String dateAdded=bOrders.getDateAdded();
             String[] date=dateAdded.split(" ");
             if(!(date[0]+":"+order_number).contentEquals(orderDate))
@@ -91,6 +96,8 @@ public class BOOrdersF extends Fragment
             {
                 progressBar.setProgress(orderStatus);
                 t_table.setText("Table "+table);
+                t_seller.setText(restaurant);
+                t_waiter.setText(waiter);
                 String[] status_1=new String[]{"Pending","In progress","Delivery","Payment","Finished"};
                 String[] status_2=new String[]{"Pending","Payment","In Progress","Delivery","Finished"};
                 t_status.setText(order_format==1? status_1[orderStatus-1]: status_2[orderStatus-1]);

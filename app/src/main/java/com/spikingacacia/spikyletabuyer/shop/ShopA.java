@@ -65,7 +65,7 @@ public class ShopA extends AppCompatActivity
     int whichFragment=1;
     String previousTitle[]=new String[2];
     public static int cartCount=0;
-    public static  int totalPrice=0;
+    public static  double totalPrice=0;
     private  ExtendedFloatingActionButton fab;
     public static List<Integer>items;
     public static List<String>names;

@@ -29,6 +29,9 @@
             </intent-filter>
         </activity>
         <activity
+            android:name="com.spikingacacia.spikyletabuyer.board.BoardA"
+            android:theme="@style/AppTheme.NoActionBar"/>
+        <activity
             android:name="com.spikingacacia.spikyletabuyer.orders.BOOrdersA"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
