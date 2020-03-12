@@ -14,6 +14,9 @@
         <item name="colorControlActivated">@color/colorAccent</item>
         <item name="android:fontFamily">@font/arima_madurai</item>
     </style>
+    <style name="splashScreenTheme" parent="AppTheme.NoActionBar">
+        <item name="android:windowBackground">@drawable/ic_about</item>
+    </style>
 
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>

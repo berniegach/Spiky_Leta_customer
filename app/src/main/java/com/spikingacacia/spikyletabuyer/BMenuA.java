@@ -32,6 +32,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -42,6 +43,7 @@ import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.JSONParser;
 import com.spikingacacia.spikyletabuyer.LoginA;
 import com.spikingacacia.spikyletabuyer.MapsExploreA;
+import com.spikingacacia.spikyletabuyer.barcode.BarcodeCaptureActivity;
 import com.spikingacacia.spikyletabuyer.board.BoardA;
 import com.spikingacacia.spikyletabuyer.messages.BMMessageListActivity;
 import com.spikingacacia.spikyletabuyer.orders.BOOrdersA;
@@ -59,6 +61,10 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import com.google.android.gms.vision.Frame;
+import com.google.android.gms.vision.barcode.Barcode;
+import com.google.android.gms.vision.barcode.BarcodeDetector;
+import com.spikingacacia.spikyletabuyer.shop.ShopA;
 
 import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
 
@@ -68,6 +74,7 @@ implements BMenuF.OnFragmentInteractionListener
     private static final int PERMISSION_REQUEST_INTERNET=2;
     private FusedLocationProviderClient fusedLocationProviderClient;
     private String url_get_restaurants=base_url+"get_near_restaurants.php";
+    private String url_get_restaurants_qr=base_url+"get_restaurant_from_qr_code.php";
     private String TAG_SUCCESS="success";
     private String TAG_MESSAGE="message";
     private String TAG="BMenuA";
@@ -77,6 +84,9 @@ implements BMenuF.OnFragmentInteractionListener
     private boolean runRate=true;
     Preferences preferences;
     private final static String default_notification_channel_id = "default";
+    private static final int RC_BARCODE_CAPTURE = 9001;
+    boolean autofocus=true;
+    boolean use_flash=true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -191,6 +201,7 @@ implements BMenuF.OnFragmentInteractionListener
                             if(i==0)
                             {
                                 //scan the QR code to access the restaurant
+                                bar_code();
                             }
                             else if(i==1)
                             {
@@ -266,13 +277,59 @@ implements BMenuF.OnFragmentInteractionListener
                     }
                 }).create().show();
     }
+    /**
+     * Called when an activity you launched exits, giving you the requestCode
+     * you started it with, the resultCode it returned, and any additional
+     * data from it.  The <var>resultCode</var> will be
+     * {@link #RESULT_CANCELED} if the activity explicitly returned that,
+     * didn't return any result, or crashed during its operation.
+     * <p/>
+     * <p>You will receive this call immediately before onResume() when your
+     * activity is re-starting.
+     * <p/>
+     *
+     * @param requestCode The integer request code originally supplied to
+     *                    startActivityForResult(), allowing you to identify who this
+     *                    result came from.
+     * @param resultCode  The integer result code returned by the child activity
+     *                    through its setResult().
+     * @param data        An Intent, which can return result data to the caller
+     *                    (various data can be attached to Intent "extras").
+     * @see #startActivityForResult
+     * @see #createPendingResult
+     * @see #setResult(int)
+     */
     @Override
     public void onActivityResult(final int requestCode, int resultCode, Intent data)
     {
-        super.onActivityResult(requestCode,resultCode,data);
         if (requestCode == PERMISSION_REQUEST_INTERNET && resultCode == RESULT_OK )
         {
             getCurrentLocation();
+        }
+        else if (requestCode == RC_BARCODE_CAPTURE)
+        {
+            if (resultCode == CommonStatusCodes.SUCCESS)
+            {
+                if (data != null)
+                {
+                    Barcode barcode = data.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
+                    new RestaurantQRTask(barcode.displayValue).execute((Void)null);
+                }
+                else
+                {
+                    Toast.makeText(this,R.string.barcode_failure,Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, "No barcode captured, intent data is null");
+                }
+            }
+            else
+            {
+                Toast.makeText(this,String.format(getString(R.string.barcode_error),   CommonStatusCodes.getStatusCodeString(resultCode)),Toast.LENGTH_SHORT).show();
+                //statusMessage.setText(String.format(getString(R.string.barcode_error),   CommonStatusCodes.getStatusCodeString(resultCode)));
+            }
+        }
+        else
+        {
+            super.onActivityResult(requestCode, resultCode, data);
         }
     }
     private void getCurrentLocation()
@@ -430,6 +487,91 @@ implements BMenuF.OnFragmentInteractionListener
             }
         }
     }
+    private class RestaurantQRTask extends AsyncTask<Void, Void, Boolean>
+    {
+        //final private String country;
+        final private String email;
+        int id;
+        String username;
+        int online;
+        int deliver;
+        String country;
+        String location;
+        int order_radius;
+        int order_format;
+        int number_of_tables;
+
+        public RestaurantQRTask( String email)
+        {
+            this.email=email;
+        }
+        @Override
+        protected Boolean doInBackground(Void... params)
+        {
+            //getting columns list
+            List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
+            //info.add(new BasicNameValuePair("country",country));
+            info.add(new BasicNameValuePair("email",email));
+            // making HTTP request
+            JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_restaurants_qr,"POST",info);
+            Log.d("cTasks",""+jsonObject.toString());
+            try
+            {
+                JSONArray restArrayList=null;
+                int success=jsonObject.getInt(TAG_SUCCESS);
+                if(success==1)
+                {
+                    //seccesful
+                    JSONArray accountArray=jsonObject.getJSONArray("account");
+                    JSONObject accountObject=accountArray.getJSONObject(0);
+
+                    id = accountObject.getInt("id");
+                    username = accountObject.getString("username");
+                    online = accountObject.getInt("online");
+                    deliver = accountObject.getInt("deliver");
+                    country = accountObject.getString("country");
+                    location = accountObject.getString("location");
+                    order_radius = accountObject.getInt("order_radius");
+                    order_format = accountObject.getInt("order_format");
+                    number_of_tables = accountObject.getInt("number_of_tables");
+                    return true;
+                }
+                else
+                {
+                    String message=jsonObject.getString(TAG_MESSAGE);
+                    Log.e(TAG_MESSAGE,""+message);
+                    return false;
+                }
+            }
+            catch (JSONException e)
+            {
+                Log.e("JSON",""+e.getMessage());
+                return false;
+            }
+        }
+        @Override
+        protected void onPostExecute(final Boolean successful)
+        {
+
+            if (successful)
+            {
+                run_shop(id,order_radius,5,number_of_tables);
+            }
+            else
+            {
+                Toast.makeText(getBaseContext(),"Error getting restaurant",Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+    private void run_shop(int id, int radius, int distance, int numberOfTables)
+    {
+        Intent intent=new Intent(this, ShopA.class);
+        intent.putExtra("seller_id",id);
+        intent.putExtra("order_radius",radius);
+        intent.putExtra("buyer_distance",distance);
+        intent.putExtra("number_of_tables",numberOfTables);
+        startActivity(intent);
+    }
     @Override
     public void play_notification()
     {
@@ -447,4 +589,56 @@ implements BMenuF.OnFragmentInteractionListener
         mNotificationManager.notify(( int ) System. currentTimeMillis () ,
                 mBuilder.build());*/
     }
+    private void bar_code()
+    {
+
+        // String array for alert dialog multi choice items
+        String[] colors = new String[]{ "Autofocus",   "Flash",   };
+
+        // Boolean array for initial selected items
+        final boolean[] checkedColors = new boolean[]{
+                true, // autofocus
+                true, // flash
+        };
+        new AlertDialog.Builder(BMenuA.this)
+                .setMultiChoiceItems(
+                        colors,
+                        checkedColors,
+                        new DialogInterface.OnMultiChoiceClickListener()
+                        {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which, boolean isChecked)
+                            {
+                                if(which==0)
+                                    autofocus=isChecked;
+                                else
+                                    use_flash=isChecked;
+                            }
+                        }
+                )
+                .setPositiveButton("Proceed", new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        //scan the QR code to access the restaurant
+                        // launch barcode activity.
+                        start_qr_code_reader();
+                        dialog.dismiss();
+                    }
+                })
+                .create().show();
+
+    }
+    private void start_qr_code_reader()
+    {
+        // launch barcode activity.
+        Intent intent = new Intent(this, BarcodeCaptureActivity.class);
+        intent.putExtra(BarcodeCaptureActivity.AutoFocus, autofocus);
+        intent.putExtra(BarcodeCaptureActivity.UseFlash, use_flash);
+
+        startActivityForResult(intent, RC_BARCODE_CAPTURE);
+    }
+
+
 }

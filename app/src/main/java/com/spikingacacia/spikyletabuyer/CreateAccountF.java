@@ -3,11 +3,8 @@ package com.spikingacacia.spikyletabuyer;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,24 +17,14 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.gms.internal.firebase_auth.zzew;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.snackbar.Snackbar;
-import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.ActionCodeSettings;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.auth.FirebaseUserMetadata;
-import com.google.firebase.auth.UserInfo;
-import com.google.firebase.auth.zzy;
-import com.google.firebase.auth.zzz;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -46,8 +33,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static android.content.Context.MODE_PRIVATE;
 
 public class CreateAccountF extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
@@ -237,7 +222,7 @@ public class CreateAccountF extends Fragment {
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
                             Snackbar.make(mEmail,"Email sent\nPlease verify the email address to continue.",Snackbar.LENGTH_LONG).show();
-                            preferences.setVerify_password(true);
+                            preferences.setVerify_email(true);
                             preferences.setEmail_to_verify(email);
                             Log.d(TAG, "Email sent.");
                         }
@@ -392,7 +377,7 @@ public class CreateAccountF extends Fragment {
             if (successful)
             {
                 Toast.makeText(getContext(), "Account added", Toast.LENGTH_SHORT).show();
-                preferences.setVerify_password(false);
+                preferences.setVerify_email(false);
                 if(mListener!=null)
                     mListener.onRegisterFinished();
             }

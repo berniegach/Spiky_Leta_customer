@@ -16,6 +16,7 @@ public class Preferences
         dark_theme_enabled=shared_preferences.getBoolean("dark_theme",false);
         remember_me= shared_preferences.getBoolean("rememberme",false);
         email_to_verify = shared_preferences.getString("email_verify","");
+        verify_email = shared_preferences.getBoolean("verify_email",false);
         reset_password = shared_preferences.getBoolean("reset_password",false);
         email_to_remember = shared_preferences.getString("email","");
         password_to_remember = shared_preferences.getString("password","");
@@ -35,15 +36,15 @@ public class Preferences
         preferences_editor.commit();
     }
 
-    public boolean isVerify_password()
+    public boolean isVerify_email()
     {
-        return verify_password;
+        return verify_email;
     }
 
-    public void setVerify_password(boolean verify_password)
+    public void setVerify_email(boolean verify_email)
     {
-        this.verify_password = verify_password;
-        preferences_editor.putBoolean("verify",verify_password);
+        this.verify_email = verify_email;
+        preferences_editor.putBoolean("verify_email", verify_email);
         preferences_editor.commit();
     }
 
@@ -148,7 +149,7 @@ public class Preferences
         preferences_editor.commit();
     }
     private boolean dark_theme_enabled=false;
-    private boolean verify_password=false;
+    private boolean verify_email =false;
     private boolean reset_password=false;
     private boolean remember_me=false;
     private SharedPreferences shared_preferences;
