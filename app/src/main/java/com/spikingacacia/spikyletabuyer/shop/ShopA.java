@@ -5,15 +5,12 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
-import androidx.appcompat.app.AlertDialog;
-
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.NumberPicker;
-import android.widget.Toast;
 
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
@@ -34,7 +31,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 
 import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
@@ -518,7 +514,7 @@ public class ShopA extends AppCompatActivity
             //getting columns list
             List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
             info.add(new BasicNameValuePair("seller_id",Integer.toString(sellerId)));
-            info.add(new BasicNameValuePair("buyer_id",Integer.toString(LoginA.buyerAccount.getId())));
+            info.add(new BasicNameValuePair("buyer_id",Integer.toString(LoginA.serverAccount.getId())));
             info.add(new BasicNameValuePair("items_ids",itemsIds));
             info.add(new BasicNameValuePair("table_number",String.valueOf(tableNumber)));
             // making HTTP request

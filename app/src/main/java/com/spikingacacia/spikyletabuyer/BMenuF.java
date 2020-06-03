@@ -16,9 +16,6 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.spikingacacia.spikyletabuyer.R;
-import com.spikingacacia.spikyletabuyer.JSONParser;
-import com.spikingacacia.spikyletabuyer.LoginA;
 import com.spikingacacia.spikyletabuyer.database.BMessages;
 import com.spikingacacia.spikyletabuyer.database.BOrders;
 
@@ -38,7 +35,7 @@ import java.util.Set;
 import static com.spikingacacia.spikyletabuyer.LoginA.bMessagesList;
 import static com.spikingacacia.spikyletabuyer.LoginA.bOrdersList;
 import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
-import static com.spikingacacia.spikyletabuyer.LoginA.buyerAccount;
+import static com.spikingacacia.spikyletabuyer.LoginA.serverAccount;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -321,7 +318,7 @@ public class BMenuF extends Fragment {
         LinkedHashMap<Integer,BOrders>tempOrdersLHM=new LinkedHashMap<>();
         //getting columns list
         List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
-        info.add(new BasicNameValuePair("userid",Integer.toString(buyerAccount.getId())));
+        info.add(new BasicNameValuePair("userid",Integer.toString(serverAccount.getId())));
         // making HTTP request
         JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_b_orders,"POST",info);
        // Log.d("sItems",""+jsonObject.toString());
@@ -372,7 +369,7 @@ public class BMenuF extends Fragment {
         LinkedHashMap<String,BMessages>tempMessagesLHM=new LinkedHashMap<>();
         //getting columns list
         List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
-        info.add(new BasicNameValuePair("id",Integer.toString(buyerAccount.getId())));
+        info.add(new BasicNameValuePair("id",Integer.toString(serverAccount.getId())));
         // making HTTP request
         JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_b_notifications,"POST",info);
        // Log.d("bNotis",""+jsonObject.toString());

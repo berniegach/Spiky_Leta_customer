@@ -1,33 +1,27 @@
 package com.spikingacacia.spikyletabuyer;
 
 import android.content.Intent;
-import android.graphics.Typeface;
-import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.res.ResourcesCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.appbar.CollapsingToolbarLayout;
-import com.google.firebase.dynamiclinks.FirebaseDynamicLinks;
-import com.google.firebase.dynamiclinks.PendingDynamicLinkData;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.SignInButton;
+import com.google.android.gms.common.api.ApiException;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.spikingacacia.spikyletabuyer.database.BMessages;
 import com.spikingacacia.spikyletabuyer.database.BOrders;
-import com.spikingacacia.spikyletabuyer.database.BuyerAccount;
+import com.spikingacacia.spikyletabuyer.database.ServerAccount;
+import com.spikingacacia.spikyletabuyer.main.MainActivity;
 
 
 import org.apache.http.NameValuePair;
@@ -41,20 +35,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 
-public class LoginA extends AppCompatActivity
-    implements   SignInF.OnFragmentInteractionListener, CreateAccountF.OnFragmentInteractionListener
+public class LoginA extends AppCompatActivity implements View.OnClickListener
 {
     private static final int OVERLAY_PERMISSION_CODE=541;
     //REMEMBER TO CHANGE THIS WHEN CHANGING BETWEEN ONLINE AND LOCALHOST
-    public static final String base_url="https://www.spikingacacia.com/leta_project/android/"; //online
-    //public static final String base_url="http://10.0.2.2/leta_project/android/"; //localhost no connection for testing user accounts coz it doesnt require subscription checking
-    //buyers php files
-    private String url_get_b_notifications=base_url+"get_buyer_notifications.php";
-    private String url_get_b_orders=base_url+"get_buyer_orders.php";
-    private String TAG_SUCCESS="success";
-    private String TAG_MESSAGE="message";
-    private String TAG="LoginActivity";
-    private JSONParser jsonParser;
+    //public static final String base_url="https://www.spikingacacia.com/leta_project/android/"; //online
+    public static final String base_url="http://10.0.2.2/leta_project/android/"; //localhost no connection for testing user accounts coz it doesnt require subscription checking
+    private String TAG="LoginA";
     private Intent intentLoginProgress;
     private static int loginProgress;
     public static boolean AppRunningInThisActivity=true;//check if the app is running the in this activity
@@ -62,196 +49,269 @@ public class LoginA extends AppCompatActivity
     private static int sFinalProgress=5;
     private static int bFinalProgress=2;
     //buyers
-    public static BuyerAccount buyerAccount;
+    public static ServerAccount serverAccount;
     public static LinkedHashMap<String, BMessages> bMessagesList;
     public static LinkedHashMap<Integer, BOrders>bOrdersList;
     public static int who;
     Preferences preferences;
+    public static GoogleSignInClient mGoogleSignInClient;
+    private int RC_SIGN_IN = 21;
+    static public GoogleSignInAccount account;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
+        setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.a_login);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        CollapsingToolbarLayout collapsingToolbarLayout=findViewById(R.id.collapsingToolbar);
-        final Typeface tf= ResourcesCompat.getFont(this,R.font.amita);
-        collapsingToolbarLayout.setCollapsedTitleTypeface(tf);
-        collapsingToolbarLayout.setExpandedTitleTypeface(tf);
-        setSupportActionBar(toolbar);
-        //preference
-        preferences=new Preferences(getBaseContext());
-        //dark theme prefernce
-        View main_view=findViewById(R.id.main);
-        if(!preferences.isDark_theme_enabled())
-        {
-            setTheme(R.style.AppThemeLight);
-            main_view.setBackgroundColor(getResources().getColor(R.color.main_background_light));
-            findViewById(R.id.sec_main).setBackgroundColor(getResources().getColor(R.color.secondary_background_light));
-            ((TextView)findViewById(R.id.who)).setTextColor(getResources().getColor(R.color.text_light));
-            collapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(R.color.text_light));
-            collapsingToolbarLayout.setCollapsedTitleTextColor(getResources().getColor(R.color.text_light));
-            collapsingToolbarLayout.setBackgroundColor(getResources().getColor(R.color.main_background_light));
-        }
-        //background intent
-        intentLoginProgress=new Intent(LoginA.this,ProgressView.class);
-        loginProgress=0;
-        jsonParser=new JSONParser();
+
+        // Set the dimensions of the sign-in button.
+        SignInButton signInButton = findViewById(R.id.sign_in_button);
+        signInButton.setSize(SignInButton.SIZE_WIDE);
+        signInButton.setOnClickListener(this);
+        // Configure sign-in to request the user's ID, email address, and basic
+        // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+        // Build a GoogleSignInClient with the options specified by gso.
+        mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
         //initialize the containers
         //buyers
-        buyerAccount=new BuyerAccount();
+        serverAccount =new ServerAccount();
         bMessagesList=new LinkedHashMap<>();
         bOrdersList=new LinkedHashMap<>();
-        //firebase links
-        if(preferences.isVerify_email() || preferences.isReset_password())
+
+
+
+    }
+    @Override
+    public void onStart()
+    {
+
+        super.onStart();
+        // Check for existing Google Sign In account, if the user is already signed in
+        // the GoogleSignInAccount will be non-null.
+        account = GoogleSignIn.getLastSignedInAccount(this);
+        //proceed to sign in
+        if(account!=null)
         {
-            Toast.makeText(getBaseContext(),"Please wait",Toast.LENGTH_SHORT).show();
-            FirebaseDynamicLinks.getInstance()
-                    .getDynamicLink(getIntent())
-                    .addOnSuccessListener(this, new OnSuccessListener<PendingDynamicLinkData>() {
-                        @Override
-                        public void onSuccess(PendingDynamicLinkData pendingDynamicLinkData) {
-                            // Get deep link from result (may be null if no link is found)
-                            Uri deepLink = null;
-                            if (pendingDynamicLinkData != null)
-                            {
-                                deepLink = pendingDynamicLinkData.getLink();
-                                if(preferences.isVerify_email())
-                                {
-                                    setTitle("Sign Up");
-                                    Fragment fragment=CreateAccountF.newInstance(1,preferences.getEmail_to_verify());
-                                    FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
-                                    transaction.replace(R.id.loginbase,fragment,"createnewaccount");
-                                    transaction.addToBackStack("createaccount");
-                                    transaction.commit();
-                                }
-                                else if(preferences.isReset_password())
-                                {
-                                    setTitle("Reset Password");
-                                    Fragment fragment=CreateAccountF.newInstance(2,preferences.getEmail_to_reset_password());
-                                    FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
-                                    transaction.replace(R.id.loginbase,fragment,"createnewaccount");
-                                    transaction.addToBackStack("createaccount");
-                                    transaction.commit();
-                                }
-
-                            }
-
-
-                            // Handle the deep link. For example, open the linked
-                            // content, or apply promotional credit to the user's
-                            // account.
-                            // ...
-
-                            // ...
-                        }
-                    })
-                    .addOnFailureListener(this, new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Log.w(TAG, "getDynamicLink:onFailure", e);
-                        }
-                    });
+            proceedToLogin();
         }
 
-        //fragment manager
-        getSupportFragmentManager().addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener()
-        {
-            @Override
-            public void onBackStackChanged()
-            {
-                int count=getSupportFragmentManager().getBackStackEntryCount();
-                if(count==0)
-                    setTitle("Sign In");
-            }
-        });
-        setTitle("Sign In");
-        Fragment fragment=SignInF.newInstance("","");
-        FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.loginbase,fragment,"signin");
-        transaction.commit();
     }
     @Override
-    protected void onDestroy()
-    {
-        //super.onDestroy();
-        if(intentLoginProgress!=null)
-            stopService(intentLoginProgress);
-        super.onDestroy();
-    }
-    @Override
-    protected void onResume()
-    {
-        super.onResume();
-        //clear the variables . if not done youll find some list contents add up on top of the previous ones
-        loginProgress=0;
-        //buyers
-        if(!bMessagesList.isEmpty())bMessagesList.clear();
-        if(!bOrdersList.isEmpty())bOrdersList.clear();
-        AppRunningInThisActivity=true;
-    }
-    @Override
-    protected void onActivityResult(int requestCode,int resultCode,Intent data)
-    {
-        super.onActivityResult(requestCode,resultCode,data);
-        if(requestCode==OVERLAY_PERMISSION_CODE)
-        {
-            if(Settings.canDrawOverlays(this))
-            {
-                startService(intentLoginProgress);
-            }
-            startBackgroundTasks();
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.sign_in_button:
+                signIn();
+                break;
+            // ...
         }
     }
-
-
-    /** Implementation of SignInFragment.java**/
+    private void signIn() {
+        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+        startActivityForResult(signInIntent, RC_SIGN_IN);
+    }
     @Override
-    public void onSuccesfull()
+    public void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        //start the floating service
-        if(Build.VERSION.SDK_INT>=23)
-        {
-            if(!Settings.canDrawOverlays(this))
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
+        if (requestCode == RC_SIGN_IN) {
+            // The Task returned from this call is always completed, no need to attach
+            // a listener.
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            handleSignInResult(task);
+        }
+    }
+    private void handleSignInResult(Task<GoogleSignInAccount> completedTask)
+    {
+        try {
+            account = completedTask.getResult(ApiException.class);
+            // Signed in successfully, show authenticated UI.
+            if(account!=null)
             {
-                //open permissions page
-                Intent intent=new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
-                        Uri.parse("package:"+getPackageName()));
-                startActivityForResult(intent,OVERLAY_PERMISSION_CODE);
-                //return;
+                proceedToLogin();
+                Log.d(TAG, "email: " + account.getEmail());
+                new RegisterTask(account.getEmail(),"null").execute((Void)null);
+            }
+        } catch (ApiException e) {
+            // The ApiException status code indicates the detailed failure reason.
+            // Please refer to the GoogleSignInStatusCodes class reference for more information.
+            Log.w(TAG, "signInResult:failed code=" + e.getStatusCode());
+        }
+    }
+    private void proceedToLogin()
+    {
+        Intent intent=new Intent(LoginA.this, MainActivity.class);
+        //prevent this activity from flickering as we call the next one
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        startActivity(intent);
+        //get the account details
+        new LoginTask(account.getEmail()).execute((Void)null);
+    }
+    public class LoginTask extends AsyncTask<Void, Void, Boolean>
+    {
+        private String url_get_account =base_url+"get_buyer_account.php";
+        private String TAG_SUCCESS="success";
+        private String TAG_MESSAGE="message";
+        private final String mEmail;
+        private  JSONParser jsonParser;
+        private int success=0;
+
+        LoginTask(String email) {
+            mEmail = email;
+            jsonParser = new JSONParser();
+        }
+        @Override
+        protected void onPreExecute()
+        {
+            super.onPreExecute();
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... params) {
+            //logIn=handler.LogInStaff(mEmail,mPassword);
+            //building parameters
+            List<NameValuePair>info=new ArrayList<NameValuePair>();
+            info.add(new BasicNameValuePair("email",mEmail));
+            //getting all account details by making HTTP request
+            JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_account,"POST",info);
+            try
+            {
+                success=jsonObject.getInt(TAG_SUCCESS);
+                if(success==1)
+                {
+                    //seccesful
+                    JSONArray accountArray=jsonObject.getJSONArray("account");
+                    JSONObject accountObject=accountArray.getJSONObject(0);
+
+                    serverAccount.setId(accountObject.getInt("id"));
+                    serverAccount.setEmail(accountObject.getString("email"));
+                    serverAccount.setPassword(accountObject.getString("password"));
+                    serverAccount.setUsername(accountObject.getString("username"));
+                    serverAccount.setLocation(accountObject.getString("location"));
+                    serverAccount.setDateadded(accountObject.getString("dateadded"));
+                    serverAccount.setDatechanged(accountObject.getString("datechanged"));
+                    return true;
+                }
+                else
+                {
+                    String message=jsonObject.getString(TAG_MESSAGE);
+                    Log.e(TAG_MESSAGE,""+message);
+                    return false;
+                }
+            }
+            catch (JSONException e)
+            {
+                Log.e("JSON",""+e.getMessage());
+                return false;
+            }
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean successful) {
+
+
+            if (successful) {
+
             }
             else
-                startBackgroundTasks();
+            {
+                Toast.makeText(getBaseContext(), "Sign in failed", Toast.LENGTH_SHORT).show();
+                mGoogleSignInClient.signOut().addOnCompleteListener(LoginA.this, new OnCompleteListener<Void>()
+                {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task)
+                    {
+                        Log.d(TAG,"gmail signed out");
+                    }
+                });
+            }
         }
-        else
-            startBackgroundTasks();
+
     }
-    private void startBackgroundTasks()
+    public class RegisterTask extends AsyncTask<Void, Void, Boolean>
     {
-        startService(intentLoginProgress);
-        new BMessagesTask().execute((Void)null);
-        new BOrdersTask().execute((Void)null);
-        Intent intent=new Intent(this, BMenuA.class);
-        intent.putExtra("NOTHING","nothing");
-        startActivity(intent);
+        private String url_create_account = LoginA.base_url+"create_buyer_account.php";
+        private String TAG_SUCCESS="success";
+        private String TAG_MESSAGE="message";
+        private JSONParser jsonParser;
+        private final String mEmail;
+        private final String mPassword;
+        private int success;
+
+        RegisterTask(String email, String password)
+        {
+            mEmail = email;
+            mPassword = password;
+            jsonParser = new JSONParser();
+        }
+        @Override
+        protected void onPreExecute()
+        {
+            super.onPreExecute();
+            Log.d(TAG,"Account creation started....");        }
+
+        @Override
+        protected Boolean doInBackground(Void... params)
+        {
+            //building parameters
+            List<NameValuePair> info=new ArrayList<NameValuePair>();
+            info.add(new BasicNameValuePair("email",mEmail));
+            info.add(new BasicNameValuePair("password",mPassword));
+            //getting the json object using post method
+            JSONObject jsonObject=jsonParser.makeHttpRequest(url_create_account,"POST",info);
+            Log.d("Create response",""+jsonObject.toString());
+            try
+            {
+                success=jsonObject.getInt(TAG_SUCCESS);
+                if(success==1)
+                    return true;
+                else
+                {
+                    String message=jsonObject.getString(TAG_MESSAGE);
+                    Log.e(TAG_MESSAGE,""+message);
+                    return false;
+                }
+            }
+            catch (JSONException e)
+            {
+                Log.e("JSON",""+e.getMessage());
+                return false;
+            }
+
+        }
+
+        @Override
+        protected void onPostExecute(final Boolean successful) {
+            if (successful)
+            {
+                Toast.makeText(getBaseContext(), "Successfully registered", Toast.LENGTH_SHORT).show();
+            }
+            else if(success==-1)
+            {
+                //email already there do nothing
+                Log.d(TAG,"email already there");
+            }
+            else
+            {
+                Toast.makeText(getBaseContext(), "Registration failed", Toast.LENGTH_SHORT).show();
+                mGoogleSignInClient.signOut().addOnCompleteListener(LoginA.this, new OnCompleteListener<Void>()
+                {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task)
+                    {
+                        Log.d(TAG,"gmail signed out");
+                    }
+                });
+            }
+        }
+
     }
-    @Override
-    public void createAccount()
-    {
-        setTitle("Sign Up");
-        Fragment fragment=CreateAccountF.newInstance(0,"");
-        FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.loginbase,fragment,"createnewaccount");
-        transaction.addToBackStack("createaccount");
-        transaction.commit();
-    }
-    /** Implementation of CreateAccountF.java**/
-    @Override
-    public  void onRegisterFinished()
-    {
-        setTitle("Sign In");
-        onBackPressed();
-    }
+
     /**
      * Following code will get the buyers notifications
      * The returned infos are id,  classes, messages, dateadded.
@@ -263,19 +323,25 @@ public class LoginA extends AppCompatActivity
      **/
     private class BMessagesTask extends AsyncTask<Void, Void, Boolean>
     {
+        private String url_get_b_notifications = base_url + "get_buyer_notifications.php";
+        private String TAG_SUCCESS="success";
+        private String TAG_MESSAGE="message";
+        private JSONParser jsonParser;
+
         @Override
         protected void onPreExecute()
         {
             Log.d("BNOTIFICATIONS: ","starting....");
             super.onPreExecute();
+            jsonParser = new JSONParser();
         }
         @Override
         protected Boolean doInBackground(Void... params)
         {
             //getting columns list
             List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
-            info.add(new BasicNameValuePair("id",Integer.toString(buyerAccount.getId())));
-            // making HTTP request
+            info.add(new BasicNameValuePair("id",Integer.toString(serverAccount.getId())));
+
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_b_notifications,"POST",info);
             Log.d("bNotis",""+jsonObject.toString());
             try
@@ -346,9 +412,14 @@ public class LoginA extends AppCompatActivity
      **/
     private class BOrdersTask extends AsyncTask<Void, Void, Boolean>
     {
+        private String url_get_b_orders = base_url + "get_buyer_orders.php";
+        private String TAG_SUCCESS="success";
+        private String TAG_MESSAGE="message";
+        private JSONParser jsonParser;
         @Override
         protected void onPreExecute()
         {
+            jsonParser = new JSONParser();
             Log.d("BORDERS: ","starting....");
             if(!bOrdersList.isEmpty())bOrdersList.clear();
             super.onPreExecute();
@@ -358,7 +429,7 @@ public class LoginA extends AppCompatActivity
         {
             //getting columns list
             List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
-            info.add(new BasicNameValuePair("userid",Integer.toString(buyerAccount.getId())));
+            info.add(new BasicNameValuePair("userid",Integer.toString(serverAccount.getId())));
             // making HTTP request
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_b_orders,"POST",info);
             Log.d("sItems",""+jsonObject.toString());

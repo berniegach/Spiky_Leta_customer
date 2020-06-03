@@ -5,7 +5,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -15,12 +14,10 @@ import android.os.Bundle;
 import androidx.appcompat.widget.Toolbar;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
-import androidx.preference.PreferenceFragment;
-import androidx.preference.PreferenceManager;
+
 import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -41,10 +38,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.material.textfield.TextInputLayout;
-import com.spikingacacia.spikyletabuyer.R;
-import com.spikingacacia.spikyletabuyer.JSONParser;
-import com.spikingacacia.spikyletabuyer.LoginA;
-import com.spikingacacia.spikyletabuyer.database.BuyerAccount;
+import com.spikingacacia.spikyletabuyer.database.ServerAccount;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -54,24 +48,19 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 
 
 public class BSettingsA extends AppCompatActivity
         implements    PreferenceFragmentCompat.OnPreferenceStartFragmentCallback
 {
     private static final String TITLE_TAG = "Settings";
-    private static String url_update_account= LoginA.base_url+"update_buyer_account.php";
-    private static String url_delete_account= LoginA.base_url+"delete_buyer_account.php";
-    private static JSONParser jsonParser;
-    private static String TAG_SUCCESS="success";
-    private static String TAG_MESSAGE="message";
-    private UpdateAccount updateTask;
+
+
    // private UpdatePermissions updatePermissions;
     public static boolean settingsChanged;
    // public static boolean permissionsChanged;
     static private Context context;
-    public static BuyerAccount tempBuyerAccount;
+    public static ServerAccount tempServerAccount;
     //public static String permissions;
     public static Bitmap profilePic;
     Preferences preferences;
@@ -85,15 +74,7 @@ public class BSettingsA extends AppCompatActivity
         setContentView(R.layout.settings_activity);
         //preference
         preferences = new Preferences(getBaseContext());
-        if(!preferences.isDark_theme_enabled())
-        {
-            //setTheme(R.style.AppThemeLight_NoActionBarLight);
-            //toolbar.setTitleTextColor(getResources().getColor(R.color.text_light));
-            //toolbar.setPopupTheme(R.style.AppThemeLight_PopupOverlayLight);
-            //AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.appbar_layout);
-            //appBarLayout.getContext().setTheme(R.style.AppThemeLight_AppBarOverlayLight);
-            findViewById(R.id.main).setBackgroundColor(getResources().getColor(R.color.main_background_light));
-        }
+
         if (savedInstanceState == null)
         {
             getSupportFragmentManager()
@@ -121,26 +102,16 @@ public class BSettingsA extends AppCompatActivity
         {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-        //dark theme prefernce
-        if(!preferences.isDark_theme_enabled())
-        {
-            setTheme(R.style.NonFullscreenSSettingsLight);
-            Toolbar actionBarToolbar = (Toolbar)findViewById(R.id.action_bar);
-            if (actionBarToolbar != null)
-                actionBarToolbar.setTitleTextColor(getResources().getColor(R.color.text_light));
-        }
         ///
-        tempBuyerAccount =new BuyerAccount();
-        tempBuyerAccount =LoginA.buyerAccount;
+        tempServerAccount =new ServerAccount();
+        tempServerAccount =LoginA.serverAccount;
         //permissionsChanged=false;
        // permissions="";
-        jsonParser=new JSONParser();
-        updateTask=new UpdateAccount();
        // updatePermissions=new UpdatePermissions();
         settingsChanged=false;
         context=this;
         //get the profile pic
-        String url= LoginA.base_url+"src/buyers/"+String.format("%s/pics/prof_pic",makeName(LoginA.buyerAccount.getId()))+".jpg";
+        String url= LoginA.base_url+"src/buyers/"+String.format("%s/pics/prof_pic",makeName(LoginA.serverAccount.getId()))+".jpg";
         ImageRequest request=new ImageRequest(
                 url,
                 new Response.Listener<Bitmap>()
@@ -177,7 +148,7 @@ public class BSettingsA extends AppCompatActivity
             {
                 if (settingsChanged)
                 {
-                    updateTask.execute((Void)null);
+                    //updateTask.execute((Void)null);
                    /* if(permissionsChanged)
                         updatePermissions.execute((Void)null);*/
                 }
@@ -243,28 +214,12 @@ public class BSettingsA extends AppCompatActivity
         {
             setPreferencesFromResource(R.xml.pref_bgeneral, rootKey);
 
-            //feedback preference click listener
-            EditTextPreference preference_est=findPreference("username");
-            preference_est.setSummary(LoginA.buyerAccount.getUsername());
-            preference_est.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
-            {
-                @Override
-                public boolean onPreferenceChange(Preference preference, Object o)
-                {
-                    String name = o.toString();
-                    tempBuyerAccount.setUsername(name);
-                    settingsChanged=true;
-                    preference.setSummary(name);
-                    return false;
-                }
-            });
-            //you cannot change the email
-            Preference preference_est_type=findPreference("email");
-            preference_est_type.setSummary(LoginA.buyerAccount.getEmail());
+
+
 
             //password change
             final Preference preference_password=findPreference("password");
-            preference_password.setSummary(passwordStars(LoginA.buyerAccount.getPassword()));
+            preference_password.setSummary(passwordStars(LoginA.serverAccount.getPassword()));
             preference_password.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener()
             {
                 @Override
@@ -330,7 +285,7 @@ public class BSettingsA extends AppCompatActivity
                                     String old=oldPassword.getText().toString();
                                     String newPass=newPassword.getText().toString();
                                     String confirm=confirmPassword.getText().toString();
-                                    if(!old.contentEquals(LoginA.buyerAccount.getPassword()))
+                                    if(!old.contentEquals(LoginA.serverAccount.getPassword()))
                                     {
                                         oldPassword.setError("Incorrect old password");
                                     }
@@ -344,7 +299,7 @@ public class BSettingsA extends AppCompatActivity
                                     }
                                     else
                                     {
-                                        tempBuyerAccount.setPassword(newPass);
+                                        tempServerAccount.setPassword(newPass);
                                         settingsChanged=true;
                                         preference_password.setSummary(passwordStars(newPass));
                                         dialog.dismiss();
@@ -398,27 +353,24 @@ public class BSettingsA extends AppCompatActivity
         {
             setPreferencesFromResource(R.xml.pref_blocation, rootKey);
             //countries
-            String countryCode= LoginA.buyerAccount.getCountry();
+            //String countryCode= LoginA.serverAccount.getCountry();
             ListPreference pref_countries=(ListPreference) findPreference("countries");
             pref_countries.setEntries(getCountriesList());
             pref_countries.setEntryValues(getCountriesListValues());
-            pref_countries.setSummary(countryCode.contentEquals("null")?"Please set the country":getCountryFromCode(countryCode));
+            //pref_countries.setSummary(countryCode.contentEquals("null")?"Please set the country":getCountryFromCode(countryCode));
             pref_countries.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
             {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object o)
                 {
                     String s=o.toString();
-                    tempBuyerAccount.setCountry(s);
+                    //tempServerAccount.setCountry(s);
                     settingsChanged=true;
                     preference.setSummary(getCountryFromCode(s));
                     return false;
                 }
             });
-            //location
-            String[] pos=LoginA.buyerAccount.getLocation().split(",");
-            final Preference pref_location=findPreference("location");
-            pref_location.setSummary(pos.length==3?pos[2]:"Please set your location");
+
             /*
             //visible online
             int online=Integer.parseInt(LoginActivity.accountSeller.getOnline());
@@ -618,7 +570,7 @@ public class BSettingsA extends AppCompatActivity
                                 public void onClick(DialogInterface dialog, int which)
                                 {
                                     String pass=password.getText().toString();
-                                    if(!pass.contentEquals(LoginA.buyerAccount.getPassword()))
+                                    if(!pass.contentEquals(LoginA.serverAccount.getPassword()))
                                     {
                                         password.setError("Incorrect password");
                                         Toast.makeText(context,"Incorrect password.",Toast.LENGTH_SHORT).show();
@@ -642,7 +594,7 @@ public class BSettingsA extends AppCompatActivity
                                                     @Override
                                                     public void onClick(DialogInterface dialog, int which)
                                                     {
-                                                        new DeleteAccount().execute((Void)null);
+                                                        //new DeleteAccount().execute((Void)null);
                                                     }
                                                 }).create().show();
                                     }
@@ -654,67 +606,7 @@ public class BSettingsA extends AppCompatActivity
             });
 
         }
-        public class DeleteAccount extends AsyncTask<Void, Void, Boolean>
-        {
-            DeleteAccount()
-            {
-                Log.d("DELETINGACCOUNT","delete started started...");
-                //setDialog(true);
-            }
-            @Override
-            protected Boolean doInBackground(Void... params)
-            {
-                //building parameters
-                List<NameValuePair>info=new ArrayList<NameValuePair>();
-                info.add(new BasicNameValuePair("id",String.valueOf(LoginA.buyerAccount.getId())));
-                JSONObject jsonObject= jsonParser.makeHttpRequest(url_delete_account,"POST",info);
-                Log.d("jsonaccountdelete",jsonObject.toString());
-                try
-                {
-                    int success=jsonObject.getInt(TAG_SUCCESS);
-                    if(success==1)
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        String message=jsonObject.getString(TAG_MESSAGE);
-                        Log.e(TAG_MESSAGE,""+message);
-                        return false;
-                    }
-                }
-                catch (JSONException e)
-                {
-                    Log.e("JSON",""+e.getMessage());
-                    return false;
-                }
-            }
-            @Override
-            protected void onPostExecute(final Boolean success)
-            {
-                Log.d("settings permissions","finished");
-                //setDialog(false);
-                if(success)
-                {
-                    Toast.makeText(context,"Account deleted",Toast.LENGTH_SHORT).show();
-                    Intent intent=new Intent(context,LoginA.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivity(intent);
-                    getActivity().finish();
-                    /*Intent intent=new Intent(context,LoginActivity.class);
-                    int mPendingIntentId=12356;
-                    PendingIntent pendingIntent=PendingIntent.getActivity(context,mPendingIntentId,intent,PendingIntent.FLAG_CANCEL_CURRENT);
-                    AlarmManager alarmManager=(AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
-                    alarmManager.set(AlarmManager.RTC,System.currentTimeMillis()+100,pendingIntent);
-                    System.exit(0);*/
-                }
-                else
-                {
 
-                }
-
-            }
-        }
 
 
     }
@@ -743,203 +635,10 @@ public class BSettingsA extends AppCompatActivity
             setPreferencesFromResource(R.xml.pref_about, rootKey);
         }
     }
-    /**
-     * This fragment shows privileges preferences only. It is used when the
-     * activity is showing a two-pane settings UI.
-     */
-   /* @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public static class PrivilegesPreferenceFragment extends PreferenceFragmentCompat
-    {
-        @Override
-        public void onCreate(Bundle savedInstanceState)
-        {
-            super.onCreate(savedInstanceState);
-            addPreferencesFromResource(R.xml.pref_cprivileges);
-            setHasOptionsMenu(true);
 
-            // Bind the summaries of EditText/List/Dialog/Ringtone preferences
-            // to their values. When their values change, their summaries are
-            // updated to reflect the new value, per the Android Design
-            // guidelines.
-            //bindPreferenceSummaryToValue(findPreference("online_visibility"));
-            //bindPreferenceSummaryToValue(findPreference("online_delivery"));
-            
 
-        }
 
-        @Override
-        public boolean onOptionsItemSelected(MenuItem item)
-        {
-            int id = item.getItemId();
-            if (id == android.R.id.home)
-            {
-                startActivity(new Intent(getActivity(), BSettingsA.class));
-                return true;
-            }
-            return super.onOptionsItemSelected(item);
-        }
-        private CharSequence[] getCountriesList()
-        {
-            CharSequence[] countriesList;
-            String[] isoCountryCodes= Locale.getISOCountries();
-            countriesList=new CharSequence[isoCountryCodes.length];
-            for(int count=0; count<isoCountryCodes.length; count+=1)
-            {
-                String countryCode=isoCountryCodes[count];
-                Locale locale=new Locale("",countryCode);
-                String countryName=locale.getDisplayCountry();
-                countriesList[count]=countryName;
-            }
-            return countriesList;
-        }
-        private  CharSequence[] getCountriesListValues()
-        {
-            CharSequence[] countriesListValues;
-            String[] isoCountryCodes= Locale.getISOCountries();
-            countriesListValues=new CharSequence[isoCountryCodes.length];
-            for(int count=0; count<isoCountryCodes.length; count+=1)
-            {
-                String countryCode=isoCountryCodes[count];
-                countriesListValues[count]=countryCode;
-            }
-            return countriesListValues;
-        }
-        private String getCountryFromCode(String code)
-        {
-            String[] isoCountryCodes= Locale.getISOCountries();
-            for(int count=0; count<isoCountryCodes.length; count+=1)
-            {
-                String countryCode=isoCountryCodes[count];
-                Locale locale=new Locale("",countryCode);
-                String countryName=locale.getDisplayCountry();
-                if (countryCode.contentEquals(code))
-                    return countryName;
-            }
-            return "unknown";
-        }
-        private String getCodeFromCountry(String country)
-        {
-            String[] isoCountryCodes= Locale.getISOCountries();
-            for(int count=0; count<isoCountryCodes.length; count+=1)
-            {
-                String countryCode=isoCountryCodes[count];
-                Locale locale=new Locale("",countryCode);
-                String countryName=locale.getDisplayCountry();
-                if (countryName.contentEquals(country))
-                    return countryCode;
-            }
-            return "unknown";
-        }
-    }*/
 
-    public class UpdateAccount extends AsyncTask<Void, Void, Boolean>
-    {
-        UpdateAccount()
-        {
-            Log.d("settings","update started...");
-        }
-        @Override
-        protected Boolean doInBackground(Void... params)
-        {
-            //building parameters
-            List<NameValuePair>info=new ArrayList<NameValuePair>();
-            info.add(new BasicNameValuePair("id",Integer.toString(tempBuyerAccount.getId())));
-            info.add(new BasicNameValuePair("password", tempBuyerAccount.getPassword()));
-            info.add(new BasicNameValuePair("username", tempBuyerAccount.getUsername()));
-            info.add(new BasicNameValuePair("country", tempBuyerAccount.getCountry()));
-            info.add(new BasicNameValuePair("location", tempBuyerAccount.getLocation()));
-            //getting all account details by making HTTP request
-            JSONObject jsonObject= jsonParser.makeHttpRequest(url_update_account,"POST",info);
-            try
-            {
-                int success=jsonObject.getInt(TAG_SUCCESS);
-                if(success==1)
-                {
-                    return true;
-                }
-                else
-                {
-                    String message=jsonObject.getString(TAG_MESSAGE);
-                    Log.e(TAG_MESSAGE,""+message);
-                    return false;
-                }
-            }
-            catch (JSONException e)
-            {
-                Log.e("JSON",""+e.getMessage());
-                return false;
-            }
-        }
-        @Override
-        protected void onPostExecute(final Boolean success)
-        {
-            Log.d("settings","finished");
-            if(success)
-            {
-                Log.d("settings", "update done");
-                LoginA.buyerAccount= tempBuyerAccount;
-                settingsChanged=false;
-            }
-            else
-            {
-                Log.e("settings", "error");
-                Toast.makeText(context,"Your Account was not updated",Toast.LENGTH_LONG).show();
-            }
-
-        }
-    }
-   /* public class UpdatePermissions extends AsyncTask<Void, Void, Boolean>
-    {
-        UpdatePermissions()
-        {
-            Log.d("settings permissions","update started...");
-        }
-        @Override
-        protected Boolean doInBackground(Void... params)
-        {
-            //building parameters
-            List<NameValuePair>info=new ArrayList<NameValuePair>();
-            info.add(new BasicNameValuePair("permissions",permissions));
-            JSONObject jsonObject= jsonParser.makeHttpRequest(url_update_permissions,"POST",info);
-            Log.d("PERMISSIONS SEND: ",info.toString());
-            Log.d("PERMISSIONS OBJECT: ",jsonObject.toString());
-            try
-            {
-                int success=jsonObject.getInt(TAG_SUCCESS);
-                if(success==1)
-                {
-                    return true;
-                }
-                else
-                {
-                    String message=jsonObject.getString(TAG_MESSAGE);
-                    Log.e(TAG_MESSAGE,""+message);
-                    return false;
-                }
-            }
-            catch (JSONException e)
-            {
-                Log.e("JSON",""+e.getMessage());
-                return false;
-            }
-        }
-        @Override
-        protected void onPostExecute(final Boolean success)
-        {
-            Log.d("settings permissions","finished");
-            if(success)
-            {
-                Log.d("settings permissions", "update done");
-                permissionsChanged=false;
-            }
-            else
-            {
-                Log.e("settings permissions", "error");
-                Toast.makeText(context,"Permissions Updating error",Toast.LENGTH_LONG).show();
-            }
-
-        }
-    }*/
 
    private String makeName(int id)
    {

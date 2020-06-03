@@ -1,0 +1,49 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+    <com.spikingacacia.spikyletabuyer.BPreferencePic/>
+    <PreferenceCategory app:title="General">
+        <EditTextPreference
+            app:useSimpleSummaryProvider="true"
+            app:enabled="false"
+            app:defaultValue="Leta"
+            app:inputType="text"
+            app:key="email"
+            app:maxLines="1"
+            app:selectAllOnFocus="true"
+            app:singleLine="true"
+            app:title="Email Address" />
+        <EditTextPreference
+            app:useSimpleSummaryProvider="true"
+            app:defaultValue="Leta"
+            app:inputType="textCapWords"
+            app:key="username"
+            app:maxLines="1"
+            app:selectAllOnFocus="true"
+            app:singleLine="true"
+            app:title="Full Names"
+            app:allowDividerAbove="true"/>
+
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="Location">
+        <Preference
+            app:useSimpleSummaryProvider="true"
+            app:title="Change Location"
+            app:key="location"
+            app:allowDividerAbove="true">
+            <intent
+                app:action="android.intent.action.VIEW"
+                app:targetPackage="com.spikingacacia.spikyletabuyer"
+                app:targetClass="com.spikingacacia.spikyletabuyer.BMapsA" />
+        </Preference>
+
+    </PreferenceCategory>
+    <PreferenceScreen
+        app:icon="@drawable/ic_about"
+        app:title="@string/about"
+        app:allowDividerAbove="true">
+        <com.spikingacacia.spikyletabuyer.About/>
+    </PreferenceScreen>
+
+
+</PreferenceScreen>

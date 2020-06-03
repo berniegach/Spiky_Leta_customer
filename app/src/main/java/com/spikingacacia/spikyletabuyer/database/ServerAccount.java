@@ -1,25 +1,25 @@
 package com.spikingacacia.spikyletabuyer.database;
 
-public class BuyerAccount
+public class ServerAccount
 {
     private int id;
     private String email;
     private String password;
     private String username;
-    private String country;
     private String location;
+    private String imageType;
     private String dateadded;
     private String datechanged;
 
-    public BuyerAccount(){}
+    public ServerAccount(){}
 
-    public BuyerAccount(int id, String email, String password, String username, String country, String location,  String dateadded, String datechanged) {
+    public ServerAccount(int id, String email, String password, String username, String location, String imageType, String dateadded, String datechanged) {
         this.id = id;
         this.email = email;
         this.password = password;
         this.username = username;
-        this.country = country;
         this.location = location;
+        this.imageType = imageType;
         this.dateadded = dateadded;
         this.datechanged = datechanged;
     }
@@ -56,13 +56,6 @@ public class BuyerAccount
         this.username = username;
     }
 
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
-    }
 
     public String getLocation() {
         return location;
@@ -72,6 +65,15 @@ public class BuyerAccount
         this.location = location;
     }
 
+    public String getImageType()
+    {
+        return imageType;
+    }
+
+    public void setImageType(String imageType)
+    {
+        this.imageType = imageType;
+    }
     public String getDateadded() {
         return dateadded;
     }

@@ -10,8 +10,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.Manifest;
-import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -26,9 +24,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,12 +34,8 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
 import com.google.android.material.snackbar.Snackbar;
-import com.spikingacacia.spikyletabuyer.R;
-import com.spikingacacia.spikyletabuyer.JSONParser;
-import com.spikingacacia.spikyletabuyer.LoginA;
-import com.spikingacacia.spikyletabuyer.MapsExploreA;
 import com.spikingacacia.spikyletabuyer.barcode.BarcodeCaptureActivity;
-import com.spikingacacia.spikyletabuyer.board.BoardA;
+import com.spikingacacia.spikyletabuyer.main.board.AdvertsActivity;
 import com.spikingacacia.spikyletabuyer.messages.BMMessageListActivity;
 import com.spikingacacia.spikyletabuyer.orders.BOOrdersA;
 import com.spikingacacia.spikyletabuyer.restaurants.SRRestaurantsA;
@@ -61,9 +52,8 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
-import com.google.android.gms.vision.Frame;
+
 import com.google.android.gms.vision.barcode.Barcode;
-import com.google.android.gms.vision.barcode.BarcodeDetector;
 import com.spikingacacia.spikyletabuyer.shop.ShopA;
 
 import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
@@ -141,12 +131,12 @@ implements BMenuF.OnFragmentInteractionListener
         tWho=findViewById(R.id.who);
         try
         {
-            if(LoginA.buyerAccount.getUsername().length()<2 || LoginA.buyerAccount.getUsername().contentEquals("null"))
+            if(LoginA.serverAccount.getUsername().length()<2 || LoginA.serverAccount.getUsername().contentEquals("null"))
             {
                 tWho.setText("Please go to settings and set your name...");
             }
             else
-                tWho.setText(LoginA.buyerAccount.getUsername());
+                tWho.setText(LoginA.serverAccount.getUsername());
         }
         catch (Exception e)
         {
@@ -230,7 +220,7 @@ implements BMenuF.OnFragmentInteractionListener
         else if(id==4)
         {
             //tasty boards
-            Intent intent=new Intent(this, BoardA.class);
+            Intent intent=new Intent(this, AdvertsActivity.class);
             startActivity(intent);
         }
         else if(id==5)

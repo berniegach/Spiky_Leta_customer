@@ -9,4 +9,4 @@
     android:layout_marginLeft="2dp"
     android:layout_marginRight="2dp"
     app:layoutManager="LinearLayoutManager"
-    tools:listitem="@layout/f_adv" />
+    tools:listitem="@layout/fragment_adverts" />

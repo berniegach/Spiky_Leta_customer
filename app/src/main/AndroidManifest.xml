@@ -1,85 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.spikingacacia.spikyletabuyer" >
-
-    <uses-feature
-        android:name="android.hardware.Camera"
-        android:required="false" />
-
-    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
-    <uses-permission android:name="android.permission.READ_PROFILE" />
-    <uses-permission android:name="android.permission.READ_CONTACTS" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.CAMERA" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-    <uses-permission android:name="com.android.vending.BILLING" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    package="com.spikingacacia.spikyletabuyer">
 
     <application
-        android:name=".Initializer"
+        android:name=".AppController"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        android:usesCleartextTraffic="true" >
+        android:usesCleartextTraffic="true">
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings"></activity>
+        <activity
+            android:name=".main.MainActivity"
+            android:label="@string/title_activity_main"></activity>
         <activity
             android:name=".LoginA"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar" >
+            android:theme="@style/splashScreenTheme">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <intent-filter>
-                <action android:name="android.intent.action.VIEW" />
-
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-
-                <data
-                    android:host="www.spikingacacia.com"
-                    android:scheme="https" />
-            </intent-filter>
         </activity>
-        <activity
-            android:name=".board.BoardA"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".orders.BOOrdersA"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".shop.ShopA"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".restaurants.SRRestaurantsA"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".BMenuA"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".messages.BMMessageListActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".barcode.BarcodeCaptureActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".main.board.AdvertsActivity" />
+        <activity android:name=".orders.BOOrdersA" />
+        <activity android:name=".shop.ShopA" />
+        <activity android:name=".restaurants.SRRestaurantsA" />
+        <activity android:name=".BMenuA" />
+        <activity android:name=".messages.BMMessageListActivity" />
+        <activity android:name=".barcode.BarcodeCaptureActivity" />
         <activity
             android:name=".messages.BMMessageDetailActivity"
-            android:parentActivityName=".messages.BMMessageListActivity"
-            android:theme="@style/AppTheme.NoActionBar" >
+            android:parentActivityName=".messages.BMMessageListActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.spikingacacia.spikyletabuyer.messages.BMMessageListActivity" />
         </activity>
         <activity
             android:name=".BSettingsA"
-            android:label="@string/title_activity_settings"
-            android:theme="@style/NonFullscreenSSettings" />
+            android:label="@string/title_activity_settings" />
         <activity
             android:name=".BMapsA"
             android:label="@string/title_activity_maps" />
@@ -101,5 +66,19 @@
             android:name="org.apache.http.legacy"
             android:required="false" />
     </application>
+
+    <uses-feature
+        android:name="android.hardware.Camera"
+        android:required="false" />
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.READ_PROFILE" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="com.android.vending.BILLING" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
 </manifest>

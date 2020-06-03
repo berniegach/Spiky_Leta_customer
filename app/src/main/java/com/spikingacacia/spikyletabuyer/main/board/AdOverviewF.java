@@ -1,4 +1,4 @@
-package com.spikingacacia.spikyletabuyer.board;
+package com.spikingacacia.spikyletabuyer.main.board;
 
 import android.graphics.Bitmap;
 import android.os.AsyncTask;
@@ -33,7 +33,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.ocpsoft.prettytime.PrettyTime;
-import org.w3c.dom.Comment;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -43,7 +42,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
-import static com.spikingacacia.spikyletabuyer.LoginA.buyerAccount;
+import static com.spikingacacia.spikyletabuyer.LoginA.serverAccount;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -81,7 +80,6 @@ public class AdOverviewF extends Fragment
     private String comments;
     private String date;
     private LinearLayout l_comments;
-    private Preferences preferences;
     private static boolean liked=false;
 
     public AdOverviewF()
@@ -110,7 +108,6 @@ public class AdOverviewF extends Fragment
     public void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        preferences=new Preferences(getContext());
         jsonParser=new JSONParser();
         if (getArguments() != null)
         {
@@ -144,11 +141,6 @@ public class AdOverviewF extends Fragment
     {
         // Inflate the layout for this fragment
         View view= inflater.inflate(R.layout.f_ad_overview, container, false);
-        if(!preferences.isDark_theme_enabled())
-        {
-            view.findViewById(R.id.main).setBackgroundColor(getResources().getColor(R.color.secondary_background_light));
-            view.findViewById(R.id.scroll_comments).setBackgroundColor(getResources().getColor(R.color.tertiary_background_light));
-        }
         ((TextView)view.findViewById(R.id.title)).setText(title);
         ((ImageView)view.findViewById(R.id.image)).setImageBitmap(bitmap);
         ((ImageView)view.findViewById(R.id.image_seller)).setImageBitmap(bitmap_seller);
@@ -215,7 +207,7 @@ public class AdOverviewF extends Fragment
             //getting columns list
             List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
             info.add(new BasicNameValuePair("ad_id",ad_id));
-            info.add(new BasicNameValuePair("buyer_id",Integer.toString(buyerAccount.getId())));
+            info.add(new BasicNameValuePair("buyer_id",Integer.toString(serverAccount.getId())));
             info.add(new BasicNameValuePair("which",Integer.toString(which)));
             // making HTTP request
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_update_advert,"POST",info);
@@ -270,7 +262,7 @@ public class AdOverviewF extends Fragment
             //getting columns list
             List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
             info.add(new BasicNameValuePair("ad_id",ad_id));
-            info.add(new BasicNameValuePair("buyer_id",Integer.toString(buyerAccount.getId())));
+            info.add(new BasicNameValuePair("buyer_id",Integer.toString(serverAccount.getId())));
             info.add(new BasicNameValuePair("comment",comment));
             // making HTTP request
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_add_comment,"POST",info);

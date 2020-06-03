@@ -1,78 +1,82 @@
-package com.spikingacacia.spikyletabuyer.board;
+package com.spikingacacia.spikyletabuyer.main.board;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
 
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.NetworkImageView;
+import com.spikingacacia.spikyletabuyer.AppController;
+import com.spikingacacia.spikyletabuyer.LoginA;
 import com.spikingacacia.spikyletabuyer.Preferences;
 import com.spikingacacia.spikyletabuyer.R;
-import com.spikingacacia.spikyletabuyer.board.advF.OnListFragmentInteractionListener;
-import com.spikingacacia.spikyletabuyer.board.AdsC.AdItem;
+import com.spikingacacia.spikyletabuyer.database.Adverts;
+import com.spikingacacia.spikyletabuyer.main.board.AdvertsFragment.OnListFragmentInteractionListener;
+import com.spikingacacia.spikyletabuyer.main.board.AdsC.AdItem;
 
 import org.ocpsoft.prettytime.PrettyTime;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class advRVA extends RecyclerView.Adapter<advRVA.ViewHolder>
+import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
+
+public class AdvertsRVA extends RecyclerView.Adapter<AdvertsRVA.ViewHolder>
 {
 
-    private final List<AdsC.AdItem> mValues;
-    private final advF.OnListFragmentInteractionListener mListener;
-    Preferences preferences;
+    private final List<Adverts> mValues;
+    private final AdvertsFragment.OnListFragmentInteractionListener mListener;
     Context mContext;
+    ImageLoader imageLoader = AppController.getInstance().getImageLoader();
 
 
-    public advRVA(List<AdItem> items, OnListFragmentInteractionListener listener, Context context)
+    public AdvertsRVA(OnListFragmentInteractionListener listener, Context context)
     {
-        mValues = items;
+        mValues = new ArrayList<>();
         mListener = listener;
         mContext=context;
-        preferences=new Preferences(context);
+        if (imageLoader == null)
+            imageLoader = AppController.getInstance().getImageLoader();
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.f_adv, parent, false);
+                .inflate(R.layout.fragment_adverts, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position)
     {
+        String ad_image_url= base_url+"src/ads/";
+        String seller_image_url = base_url+"src/sellers/";
         holder.mItem = mValues.get(position);
-        holder.mTitleView.setText(mValues.get(position).title);
-        holder.mImageView.setImageBitmap(mValues.get(position).bitmap);
-        holder.mImageSellerView.setImageBitmap(mValues.get(position).bitmap_seller);
-        holder.mSellerView.setText(mValues.get(position).seller_name);
-        holder.mViewsView.setText(mValues.get(position).views+" views");
-        holder.mLikesView.setText(mValues.get(position).likes+ " likes");
-        holder.mCommentsView.setText(mValues.get(position).comments +" comments");
+        holder.mTitleView.setText(mValues.get(position).getTitle());
+        holder.mSellerView.setText(mValues.get(position).getSeller_name());
+        holder.mViewsView.setText(mValues.get(position).getViews()+" views");
+        holder.mLikesView.setText(mValues.get(position).getLikes()+ " likes");
+        holder.mCommentsView.setText(mValues.get(position).getComments() +" comments");
         //format the date
         SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:mm");
         PrettyTime p = new PrettyTime();
         try
         {
-            holder.mDateView.setText(p.format(format.parse(mValues.get(position).date)));
+            holder.mDateView.setText(p.format(format.parse(mValues.get(position).getDate())));
         } catch (ParseException e)
         {
             e.printStackTrace();
-        }
-        if(!preferences.isDark_theme_enabled())
-        {
-            holder.mView.setBackgroundColor(mContext.getResources().getColor(R.color.secondary_background_light));
         }
         holder.mView.setOnClickListener(new View.OnClickListener()
         {
@@ -87,6 +91,12 @@ public class advRVA extends RecyclerView.Adapter<advRVA.ViewHolder>
                 }
             }
         });
+        // ad image
+        String url_post_image=ad_image_url+String.valueOf(holder.mItem.getId())+String.valueOf(holder.mItem.getImageType());
+        holder.mImageView.setImageUrl(url_post_image, imageLoader);
+        //seller image
+        String url_seller_image= seller_image_url+String.valueOf(holder.mItem.getSeller_id())+"/pics/prof_pic"+holder.mItem.getSellerImageType();
+        holder.mImageSellerView.setImageUrl(url_seller_image,imageLoader);
     }
 
     @Override
@@ -99,22 +109,22 @@ public class advRVA extends RecyclerView.Adapter<advRVA.ViewHolder>
     {
         public final View mView;
         public final TextView mTitleView;
-        public final ImageView mImageView;
-        public final ImageView mImageSellerView;
+        public final NetworkImageView mImageView;
+        public final NetworkImageView mImageSellerView;
         public final TextView mSellerView;
         public final TextView mViewsView;
         public final TextView mLikesView;
         public final TextView mCommentsView;
         public final TextView mDateView;
-        public AdItem mItem;
+        public Adverts mItem;
 
         public ViewHolder(View view)
         {
             super(view);
             mView = view;
             mTitleView = (TextView) view.findViewById(R.id.title);
-            mImageView = (ImageView) view.findViewById(R.id.image);
-            mImageSellerView = (ImageView) view.findViewById(R.id.image_seller);
+            mImageView =  view.findViewById(R.id.image);
+            mImageSellerView = view.findViewById(R.id.image_seller);
             mSellerView = (TextView) view.findViewById(R.id.seller);
             mViewsView = (TextView) view.findViewById(R.id.views);
             mLikesView = (TextView) view.findViewById(R.id.likes);
@@ -129,27 +139,11 @@ public class advRVA extends RecyclerView.Adapter<advRVA.ViewHolder>
         }
     }
 
-    public void add_ads(int id, String title, Bitmap bitmap, Bitmap bitmap_seller, String seller_name, String content, int views, int likes, int comments, String date)
+    public void listUpdated(List<Adverts> newitems)
     {
-        for(int c=0; c<mValues.size(); c++)
-            if(mValues.get(c).id.contentEquals(String.valueOf(id)))
-                return;
-        AdsC content1=new AdsC();
-        AdItem dummyItem=content1.createItem(String.valueOf(id), title, bitmap, bitmap_seller, seller_name, content, String.valueOf(views), String.valueOf(likes), String.valueOf(comments), date);
-        mValues.add(dummyItem);
-        Collections.sort(mValues, new Comparator<AdItem>()
-        {
-            @Override
-            public int compare(AdItem o1, AdItem o2)
-            {
-                return Integer.parseInt(o2.id)-Integer.parseInt(o1.id);
-            }
-        });
+        mValues.clear();
+        mValues.addAll(newitems);
         notifyDataSetChanged();
-    }
-    public void clearData() {
-        mValues.clear(); // clear list
-        notifyDataSetChanged(); // let your adapter know about the changes and reload view.
     }
 
 

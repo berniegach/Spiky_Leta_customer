@@ -3,7 +3,6 @@ package com.spikingacacia.spikyletabuyer;
 import android.Manifest;
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -33,8 +32,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.spikingacacia.spikyletabuyer.R;
-import com.spikingacacia.spikyletabuyer.LoginA;
 
 import java.io.IOException;
 import java.util.LinkedList;
@@ -83,7 +80,7 @@ public class BMapsA extends FragmentActivity implements
                 {
                     addresses=geocoder.getFromLocation(latMyPos.latitude,latMyPos.longitude,10);
                     BSettingsA.settingsChanged = true;
-                    BSettingsA.tempBuyerAccount.setLocation(String.format("%f,%f,%s",latMyPos.latitude,latMyPos.longitude,addresses.get(0).getLocality()));
+                    BSettingsA.tempServerAccount.setLocation(String.format("%f,%f,%s",latMyPos.latitude,latMyPos.longitude,addresses.get(0).getLocality()));
                     for(int c=0; c<addresses.size(); c+=1)
                         Log.d("loc: ",addresses.get(c).getLocality()+"\n");
                     fab.hide();
@@ -132,7 +129,7 @@ public class BMapsA extends FragmentActivity implements
         }
         ////
         //marker for buyer location
-        String pos=LoginA.buyerAccount.getLocation();
+        String pos=LoginA.serverAccount.getLocation();
         if(pos.contentEquals("null"))
         {
             getCurrentLocation(1);
@@ -143,7 +140,7 @@ public class BMapsA extends FragmentActivity implements
             latMyPos=new LatLng(Double.parseDouble(myPos[0]),Double.parseDouble(myPos[1]));
             myMarker=mMap.addMarker(new MarkerOptions()
                     .position(latMyPos)
-                    .title(LoginA.buyerAccount.getUsername()).draggable(true)
+                    .title(LoginA.serverAccount.getUsername()).draggable(true)
                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
             mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latMyPos,maxZoomLevel));
         }
@@ -195,7 +192,7 @@ public class BMapsA extends FragmentActivity implements
                                     //the position is null and we have no marker therefore we use mylocation
                                     myMarker=mMap.addMarker(new MarkerOptions()
                                             .position(latMyPos)
-                                            .title(LoginA.buyerAccount.getUsername()).draggable(true)
+                                            .title(LoginA.serverAccount.getUsername()).draggable(true)
                                             .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
                                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latMyPos,maxZoomLevel));
                                 }

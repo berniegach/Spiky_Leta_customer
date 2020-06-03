@@ -25,18 +25,24 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceViewHolder;
 
-import net.gotev.uploadservice.Logger;
-import net.gotev.uploadservice.MultipartUploadRequest;
-import net.gotev.uploadservice.ServerResponse;
-import net.gotev.uploadservice.UploadInfo;
-import net.gotev.uploadservice.UploadNotificationConfig;
-import net.gotev.uploadservice.UploadStatusDelegate;
+import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.NetworkImageView;
+import com.android.volley.toolbox.Volley;
+import com.spikingacacia.spikyletabuyer.util.VolleyMultipartRequest;
 
+import java.io.ByteArrayOutputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 import static android.app.Activity.RESULT_OK;
+import static com.spikingacacia.spikyletabuyer.LoginA.serverAccount;
 
-//import androidx.preference.Preference;
 
 
 /**
@@ -46,14 +52,13 @@ public class BPreferencePic extends Preference
 {
     private static final int PERMISSION_REQUEST_INTERNET=2;
     private static String url_upload_profile_pic= LoginA.base_url+"upload_profile_pic_b.php";
-    public static ImageView imageView;
+    public static NetworkImageView imageView;
     public static TextView textView;
     private static Context context;
-    private static JSONParser jsonParser;
     private static String TAG_SUCCESS="success";
     private static String TAG_MESSAGE="message";
     private FragmentManager fragmentManager;
-    private Preferences preferences;
+    private ImageLoader imageLoader = AppController.getInstance().getImageLoader();
 
     public BPreferencePic(Context context)
     {
@@ -61,8 +66,6 @@ public class BPreferencePic extends Preference
         setLayoutResource(R.layout.bsettings_profilepic);
         this.context=context;
         fragmentManager=((AppCompatActivity)context).getFragmentManager();
-        jsonParser=new JSONParser();
-        preferences = new Preferences(context);
     }
 
     public BPreferencePic(Context context, AttributeSet attrs)
@@ -71,8 +74,8 @@ public class BPreferencePic extends Preference
         setLayoutResource(R.layout.bsettings_profilepic);
         this.context=context;
         fragmentManager=((AppCompatActivity)context).getFragmentManager();
-        jsonParser=new JSONParser();
-        preferences = new Preferences(context);
+        if (imageLoader == null)
+            imageLoader = AppController.getInstance().getImageLoader();
     }
     public BPreferencePic(Context context, AttributeSet attrs, int defStyleAttr)
     {
@@ -80,38 +83,44 @@ public class BPreferencePic extends Preference
         setLayoutResource(R.layout.bsettings_profilepic);
         this.context=context;
         fragmentManager=((AppCompatActivity)context).getFragmentManager();
-        jsonParser=new JSONParser();
-        preferences = new Preferences(context);
-    }
+        if (imageLoader == null)
+            imageLoader = AppController.getInstance().getImageLoader();    }
     @Override
     public void onBindViewHolder(PreferenceViewHolder view)
     {
         super.onBindViewHolder(view);
-        imageView=(ImageView)view.findViewById(R.id.imagepic);
+        String image_url= LoginA.base_url+"src/sellers_pics/";
+        imageView=(NetworkImageView)view.findViewById(R.id.imagepic);
         //get the profile pic
-        imageView.setImageBitmap(BSettingsA.profilePic);
-        if(!preferences.isDark_theme_enabled())
-        {
-            view.itemView.setBackgroundColor(context.getResources().getColor(R.color.secondary_background_light));
-        }
+        // thumbnail image
+        String url=image_url+String.valueOf(serverAccount.getId())+String.valueOf(serverAccount.getImageType());
+        imageView.setImageUrl(url, imageLoader);
         view.findViewById(R.id.edit).setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View view)
             {
-
-
                 final FragmentManager fragmentManager=((AppCompatActivity)context).getFragmentManager();
                 Fragment fragment= GetPicture.newInstance();
-                fragmentManager.beginTransaction().add(fragment,"AB").commit();
-                fragmentManager.executePendingTransactions();
-                Intent intent=new Intent();
-                //show only images
-                intent.setType("image/*");
-                intent.putExtra(Intent.EXTRA_MIME_TYPES,new String[]{"image/jpeg"});
-                intent.setAction(Intent.ACTION_GET_CONTENT);
-                fragment.startActivityForResult(Intent.createChooser(intent,"Select profile Image in jpg format"),1);
-                notifyChanged();
+
+                if(ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
+                {
+                    fragmentManager.beginTransaction().add(fragment,"AB").commit();
+                    fragmentManager.executePendingTransactions();
+                    Intent intent=new Intent();
+                    //show only images
+                    intent.setType("image/*");
+                    intent.putExtra(Intent.EXTRA_MIME_TYPES,new String[]{"image/jpeg"});
+                    intent.setAction(Intent.ACTION_GET_CONTENT);
+                    fragment.startActivityForResult(Intent.createChooser(intent,"Select profile Image in jpg format"),1);
+                    notifyChanged();
+                }
+                else
+                {
+                    ActivityCompat.requestPermissions(fragment.getActivity(),new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},PERMISSION_REQUEST_INTERNET);
+                }
+
+
             }
         });
 
@@ -155,8 +164,7 @@ public class BPreferencePic extends Preference
                         Log.d("uploading","1");
                         try
                         {
-                            Logger.setLogLevel(Logger.LogLevel.DEBUG);
-                            uploadPic(path);
+                            uploadBitmap(bitmap);
 
                         }
                         catch (Exception e)
@@ -198,74 +206,56 @@ public class BPreferencePic extends Preference
             }
             return res;
         }
-        private boolean uploadPic(final String location) {
-            boolean ok=true;
-            if(ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
-            {
-                //getting name for the image
-                String name="prof_pic";
-                //getting the actual path of the image
-                // String path=getPath(certUri[index]);
-                String path=location;
-                if (path == null)
-                {
-                    Log.e("upload cert","its null");
-                }
-                else
-                {
-                    //Uploading code
-                    try
+        private void uploadBitmap(final Bitmap bitmap) {
+
+            VolleyMultipartRequest volleyMultipartRequest = new VolleyMultipartRequest(Request.Method.POST, url_upload_profile_pic,
+                    new Response.Listener<NetworkResponse>() {
+                        @Override
+                        public void onResponse(NetworkResponse response)
+                        {
+                            int statusCode = response.statusCode;
+                            //Log.d(TAG,""+statusCode);
+                            serverAccount.setImageType(".png");
+                            SettingsActivity.settingsChanged = true;
+                            Toast.makeText(context, "Profile pic changed", Toast.LENGTH_SHORT).show();
+                        }
+                    },
+                    new Response.ErrorListener()
                     {
-                        String uploadId = UUID.randomUUID().toString();
-                        //Creating a multi part request
-                        new MultipartUploadRequest(getActivity(), uploadId, url_upload_profile_pic)
-                                .addFileToUpload(path, "jpg") //Adding file
-                                .addParameter("name", name) //Adding text parameter to the request
-                                .addParameter("id",String.valueOf(LoginA.buyerAccount.getId()))
-                                .setNotificationConfig(new UploadNotificationConfig())
-                                .setMaxRetries(2)
-                                .setDelegate(new UploadStatusDelegate()
-                                {
-                                    @Override
-                                    public void onProgress(Context context, UploadInfo uploadInfo)
-                                    {
-                                        Log.d("GOTEV",uploadInfo.toString());
-                                    }
+                        @Override
+                        public void onErrorResponse(VolleyError error) {
+                            Toast.makeText(context, error.getMessage(), Toast.LENGTH_LONG).show();
+                            Log.e("GotError",""+error.getMessage());
+                        }
+                    }) {
 
-                                    @Override
-                                    public void onError(Context context, UploadInfo uploadInfo, ServerResponse serverResponse, Exception exception)
-                                    {
-                                        Log.e("GOTEV",uploadInfo.toString()+"\n"+exception.toString()+"\n");
-                                    }
 
-                                    @Override
-                                    public void onCompleted(Context context, UploadInfo uploadInfo, ServerResponse serverResponse)
-                                    {
-                                        //JSONObject result = new JSONObject(serverResponse);
-                                    }
-
-                                    @Override
-                                    public void onCancelled(Context context, UploadInfo uploadInfo)
-                                    {
-                                        Log.d("GOTEV","cancelled"+uploadInfo.toString());
-                                    }
-                                })
-                                .startUpload(); //Starting the upload
-                    }
-                    catch (Exception e)
-                    {
-                        Log.e("image upload",""+e.getMessage());
-                        e.printStackTrace();
-                        ok=false;
-                    }
+                @Override
+                protected Map<String, DataPart> getByteData() {
+                    Map<String, DataPart> params = new HashMap<>();
+                    long imagename = System.currentTimeMillis();
+                    params.put("png", new DataPart(imagename + ".png", getFileDataFromDrawable(bitmap)));
+                    return params;
                 }
-            }
-            else
-            {
-                ActivityCompat.requestPermissions(getActivity(),new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},PERMISSION_REQUEST_INTERNET);
-            }
 
-            return ok;
+
+                @Override
+                protected Map<String, String> getParams() throws AuthFailureError
+                {
+                    Map<String , String >params = new HashMap<>();
+                    params.put("name", "name"); //Adding text parameter to the request
+                    params.put("id",String.valueOf(serverAccount.getId()));
+                    return params;
+                }
+            };
+
+            //adding the request to volley
+            Volley.newRequestQueue(context).add(volleyMultipartRequest);
+        }
+        public byte[] getFileDataFromDrawable(Bitmap bitmap) {
+            ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
+            return byteArrayOutputStream.toByteArray();
         }
     }
 }

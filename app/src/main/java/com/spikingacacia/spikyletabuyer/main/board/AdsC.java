@@ -1,4 +1,4 @@
-package com.spikingacacia.spikyletabuyer.board;
+package com.spikingacacia.spikyletabuyer.main.board;
 
 import android.graphics.Bitmap;
 
