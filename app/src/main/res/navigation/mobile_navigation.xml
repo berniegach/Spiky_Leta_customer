@@ -10,5 +10,10 @@
         android:name="com.spikingacacia.spikyletabuyer.main.board.AdvertsFragment"
         android:label="@string/title_home"
         tools:layout="@layout/fragment_adverts_list" />
+    <fragment
+        android:id="@+id/navigation_order"
+        android:name="com.spikingacacia.spikyletabuyer.main.order.OrderFragment"
+        android:label="Order"
+        tools:layout="@layout/fragment_order" />
 
 </navigation>

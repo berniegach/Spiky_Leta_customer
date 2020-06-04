@@ -35,9 +35,16 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
+import com.spikingacacia.spikyletabuyer.BMenuA;
+import com.spikingacacia.spikyletabuyer.JSONParser;
 import com.spikingacacia.spikyletabuyer.R;
+import com.spikingacacia.spikyletabuyer.SettingsActivity;
+import com.spikingacacia.spikyletabuyer.barcode.BarcodeCaptureActivity;
+import com.spikingacacia.spikyletabuyer.main.order.OrderFragment;
+import com.spikingacacia.spikyletabuyer.util.Mpesa;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -51,25 +58,40 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 
+import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
 import static com.spikingacacia.spikyletabuyer.LoginA.mGoogleSignInClient;
 
 
 public class MainActivity extends AppCompatActivity implements
-        FindStoreFragment.OnListFragmentInteractionListener,
-        ReceiptsFragment.OnListFragmentInteractionListener
+        OrderFragment.OnFragmentInteractionListener
 {
     private static final int PERMISSION_REQUEST_INTERNET=2;
     private FusedLocationProviderClient fusedLocationProviderClient;
-    public static List<Store> storesList;
     private NavController navController;
     private AppBarConfiguration appBarConfiguration;
-    public static LinkedHashMap<Integer, ShoppingList> shoppingListLinkedHashMap;
     private ProgressBar progressBar;
     private View mainFragment;
-    public static List<Orders> ordersList;
-    public static LinkedHashMap<String,Orders> uniqueOrderLinkedHashMap;
-    private List<MpesaRequests> mpesaRequestsList;
     private String TAG="MainA";
+    ActivityResultLauncher<Intent> mGetBarcode = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+            new ActivityResultCallback<ActivityResult>() {
+                @Override
+                public void onActivityResult(ActivityResult result)
+                {
+                    Intent intent = result.getData();
+                    try
+                    {
+                        Barcode barcode = intent.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
+                        barcodeReceived(barcode);
+                    }
+                    catch (NullPointerException excpetion)
+                    {
+                        Log.e(TAG,"no barcode");
+                        // TODO: remove this its only for testing
+                        //onCorrectScan();
+                    }
+
+                }
+            });
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -80,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_home)
+                R.id.navigation_home, R.id.navigation_order)
                 .build();
         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
@@ -98,8 +120,6 @@ public class MainActivity extends AppCompatActivity implements
         mainFragment = findViewById(R.id.nav_host_fragment);
 
         fusedLocationProviderClient= LocationServices.getFusedLocationProviderClient(this);
-        storesList = new ArrayList<>();
-        mpesaRequestsList = new ArrayList<>();
         start_background_tasks();
         final Handler handler=new Handler();
         final Runnable runnable = new Runnable()
@@ -327,6 +347,65 @@ public class MainActivity extends AppCompatActivity implements
         //prevent this activity from flickering as we call the next one
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         startActivity(intent);
+    }
+    /*
+     * implementation of OrderFragment.java
+     * */
+    @Override
+    public void onFindRestaurantMenuClicked(int id)
+    {
+        if(id==1)
+        {
+            //scan the QR code to access the restaurant
+            bar_code();
+        }
+        else if(id==2)
+        {
+            Toast.makeText(getBaseContext(),"Please wait",Toast.LENGTH_SHORT).show();
+            //get the users location
+            getCurrentLocation();
+        }
+    }
+    private void bar_code()
+    {
+
+        // String array for alert dialog multi choice items
+        String[] colors = new String[]{ "Autofocus",   "Flash",   };
+
+        // Boolean array for initial selected items
+        final boolean[] checkedColors = new boolean[]{
+                true, // autofocus
+                true, // flash
+        };
+        new AlertDialog.Builder(BMenuA.this)
+                .setMultiChoiceItems(
+                        colors,
+                        checkedColors,
+                        new DialogInterface.OnMultiChoiceClickListener()
+                        {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which, boolean isChecked)
+                            {
+                                if(which==0)
+                                    autofocus=isChecked;
+                                else
+                                    use_flash=isChecked;
+                            }
+                        }
+                )
+                .setPositiveButton("Proceed", new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which)
+                    {
+                        //scan the QR code to access the restaurant
+                        // launch barcode activity.
+                        start_qr_code_reader();
+                        dialog.dismiss();
+                    }
+                })
+                .create().show();
+
     }
 
     private class NearShopsTask extends AsyncTask<Void, Void, Boolean>

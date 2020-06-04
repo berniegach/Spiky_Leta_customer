@@ -101,21 +101,6 @@ implements BMenuF.OnFragmentInteractionListener
         fusedLocationProviderClient= LocationServices.getFusedLocationProviderClient(this);
         jsonParser=new JSONParser();
         bRestaurantsList=new LinkedList<>();
-        if(!preferences.isDark_theme_enabled())
-        {
-            setTheme(R.style.AppThemeLight);
-            findViewById(R.id.main).setBackgroundColor(getResources().getColor(R.color.main_background_light));
-            findViewById(R.id.sec_main).setBackgroundColor(getResources().getColor(R.color.secondary_background_light));
-            collapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(R.color.text_light));
-            collapsingToolbarLayout.setCollapsedTitleTextColor(getResources().getColor(R.color.text_light));
-            collapsingToolbarLayout.setBackgroundColor(getResources().getColor(R.color.main_background_light));
-            ((TextView)findViewById(R.id.who)).setTextColor(getResources().getColor(R.color.text_light));
-            ((TextView)findViewById(R.id.welcome)).setTextColor(getResources().getColor(R.color.text_light));
-            toolbar.setTitleTextColor(getResources().getColor(R.color.text_light));
-            toolbar.setPopupTheme(R.style.AppThemeLight_PopupOverlayLight);
-            AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.appbar_layout);
-            appBarLayout.getContext().setTheme(R.style.AppThemeLight_AppBarOverlayLight);
-        }
     }
     @Override
     protected void onPostCreate(Bundle savedInstanceState)
@@ -188,17 +173,7 @@ implements BMenuF.OnFragmentInteractionListener
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i)
                         {
-                            if(i==0)
-                            {
-                                //scan the QR code to access the restaurant
-                                bar_code();
-                            }
-                            else if(i==1)
-                            {
-                                Toast.makeText(getBaseContext(),"Please wait",Toast.LENGTH_SHORT).show();
-                                //get the users location
-                               getCurrentLocation();
-                            }
+
                         }
                     }).create().show();
             //Intent intent=new Intent(this, UPProfileA.class);
@@ -579,47 +554,7 @@ implements BMenuF.OnFragmentInteractionListener
         mNotificationManager.notify(( int ) System. currentTimeMillis () ,
                 mBuilder.build());*/
     }
-    private void bar_code()
-    {
 
-        // String array for alert dialog multi choice items
-        String[] colors = new String[]{ "Autofocus",   "Flash",   };
-
-        // Boolean array for initial selected items
-        final boolean[] checkedColors = new boolean[]{
-                true, // autofocus
-                true, // flash
-        };
-        new AlertDialog.Builder(BMenuA.this)
-                .setMultiChoiceItems(
-                        colors,
-                        checkedColors,
-                        new DialogInterface.OnMultiChoiceClickListener()
-                        {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which, boolean isChecked)
-                            {
-                                if(which==0)
-                                    autofocus=isChecked;
-                                else
-                                    use_flash=isChecked;
-                            }
-                        }
-                )
-                .setPositiveButton("Proceed", new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which)
-                    {
-                        //scan the QR code to access the restaurant
-                        // launch barcode activity.
-                        start_qr_code_reader();
-                        dialog.dismiss();
-                    }
-                })
-                .create().show();
-
-    }
     private void start_qr_code_reader()
     {
         // launch barcode activity.

@@ -113,6 +113,7 @@ public class SettingsActivity extends AppCompatActivity
             info.add(new BasicNameValuePair("password", tempServerAccount.getPassword()));
             info.add(new BasicNameValuePair("username", tempServerAccount.getUsername()));
             info.add(new BasicNameValuePair("location", tempServerAccount.getLocation()));
+            info.add(new BasicNameValuePair("image_type", tempServerAccount.getImageType()));
             //getting all account details by making HTTP request
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_update_account,"POST",info);
             try
