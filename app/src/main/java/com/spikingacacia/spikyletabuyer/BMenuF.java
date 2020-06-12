@@ -213,15 +213,7 @@ public class BMenuF extends Fragment {
             }
         };
         thread.start();
-        if(!preferences.isDark_theme_enabled())
-        {
-            view.findViewById(R.id.restaurant).setBackgroundColor(getResources().getColor(R.color.secondary_background_light));
-            view.findViewById(R.id.orders).setBackgroundColor(getResources().getColor(R.color.secondary_background_light));
-            view.findViewById(R.id.explore).setBackgroundColor(getResources().getColor(R.color.secondary_background_light));
-            view.findViewById(R.id.board).setBackgroundColor(getResources().getColor(R.color.secondary_background_light));
-            view.findViewById(R.id.messages).setBackgroundColor(getResources().getColor(R.color.secondary_background_light));
-            view.findViewById(R.id.settings).setBackgroundColor(getResources().getColor(R.color.secondary_background_light));
-        }
+
         return view;
     }
     @Override

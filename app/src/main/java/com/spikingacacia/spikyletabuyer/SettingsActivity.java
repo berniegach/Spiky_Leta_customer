@@ -49,8 +49,24 @@ public class SettingsActivity extends AppCompatActivity
         tempServerAccount =new ServerAccount();
         tempServerAccount =LoginA.serverAccount;
         updateTask=new UpdateAccount();
+        context = getBaseContext();
     }
-
+    @Override
+    protected void onDestroy()
+    {
+        new Thread(new Runnable()
+        {
+            @Override
+            public void run()
+            {
+                if (settingsChanged)
+                {
+                    updateTask.execute((Void)null);
+                }
+            }
+        }).start();
+        super.onDestroy();
+    }
     public static class SettingsFragment extends PreferenceFragmentCompat
     {
         @Override
@@ -60,23 +76,24 @@ public class SettingsActivity extends AppCompatActivity
 
             //username
             EditTextPreference preference_est=findPreference("username");
-            preference_est.setSummary(LoginA.serverAccount.getUsername());
+            preference_est.setText(LoginA.serverAccount.getUsername());
             preference_est.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
             {
                 @Override
                 public boolean onPreferenceChange(Preference preference, Object o)
                 {
+                    EditTextPreference pref = (EditTextPreference) preference;
                     String name = o.toString();
                     tempServerAccount.setUsername(name);
                     settingsChanged=true;
-                    preference.setSummary(name);
+                    pref.setText(name);
                     return false;
                 }
             });
 
             //you cannot change the email
-            Preference preference_est_type=findPreference("email");
-            preference_est_type.setSummary(LoginA.serverAccount.getEmail());
+            EditTextPreference preference_est_type=findPreference("email");
+            preference_est_type.setText(LoginA.serverAccount.getEmail());
 
             //location
             String[] pos=LoginA.serverAccount.getLocation().split(",");

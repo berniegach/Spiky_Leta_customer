@@ -1,6 +1,7 @@
 package com.spikingacacia.spikyletabuyer;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.content.Context;
@@ -89,11 +90,11 @@ public class BPreferencePic extends Preference
     public void onBindViewHolder(PreferenceViewHolder view)
     {
         super.onBindViewHolder(view);
-        String image_url= LoginA.base_url+"src/sellers_pics/";
-        imageView=(NetworkImageView)view.findViewById(R.id.imagepic);
+        String image_url= LoginA.base_url+"src/buyers_pics/";
+        imageView=(NetworkImageView)view.findViewById(R.id.image);
         //get the profile pic
         // thumbnail image
-        String url=image_url+String.valueOf(serverAccount.getId())+String.valueOf(serverAccount.getImageType());
+        String url=image_url+String.valueOf(serverAccount.getId())+'_'+String.valueOf(serverAccount.getImageType());
         imageView.setImageUrl(url, imageLoader);
         view.findViewById(R.id.edit).setOnClickListener(new View.OnClickListener()
         {
@@ -117,7 +118,7 @@ public class BPreferencePic extends Preference
                 }
                 else
                 {
-                    ActivityCompat.requestPermissions(fragment.getActivity(),new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},PERMISSION_REQUEST_INTERNET);
+                    ActivityCompat.requestPermissions((Activity) getContext(),new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},PERMISSION_REQUEST_INTERNET);
                 }
 
 
@@ -214,7 +215,7 @@ public class BPreferencePic extends Preference
                         public void onResponse(NetworkResponse response)
                         {
                             int statusCode = response.statusCode;
-                            //Log.d(TAG,""+statusCode);
+                            Log.d("gdjhsdj",""+statusCode);
                             serverAccount.setImageType(".png");
                             SettingsActivity.settingsChanged = true;
                             Toast.makeText(context, "Profile pic changed", Toast.LENGTH_SHORT).show();

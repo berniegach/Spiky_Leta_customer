@@ -1,5 +1,6 @@
 package com.spikingacacia.spikyletabuyer.main.order;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,7 @@ import androidx.fragment.app.Fragment;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.orders.BOOrderC;
 import com.spikingacacia.spikyletabuyer.orders.BOOrderF;
+import com.spikingacacia.spikyletabuyer.restaurants.SRRestaurantsF;
 
 public class OrderFragment extends Fragment
 {
@@ -40,6 +42,22 @@ public class OrderFragment extends Fragment
         });
 
         return view;
+    }
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof OnFragmentInteractionListener) {
+            mListener = (OnFragmentInteractionListener) context;
+        } else {
+            throw new RuntimeException(context.toString()
+                    + " must implement OnListFragmentInteractionListener");
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mListener = null;
     }
     public interface OnFragmentInteractionListener
     {

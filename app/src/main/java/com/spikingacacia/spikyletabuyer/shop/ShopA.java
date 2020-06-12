@@ -82,16 +82,7 @@ public class ShopA extends AppCompatActivity
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Order");
-        if(!preferences.isDark_theme_enabled())
-        {
-            setTheme(R.style.AppThemeLight_NoActionBarLight);
-            toolbar.setTitleTextColor(getResources().getColor(R.color.text_light));
-            toolbar.setPopupTheme(R.style.AppThemeLight_PopupOverlayLight);
-            AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.appbar_layout);
-            appBarLayout.getContext().setTheme(R.style.AppThemeLight_AppBarOverlayLight);
-            appBarLayout.setBackgroundColor(getResources().getColor(R.color.main_background_light));
-            findViewById(R.id.main).setBackgroundColor(getResources().getColor(R.color.main_background_light));
-        }
+
         /*Fragment fragment= SRRestaurantsF.newInstance(1);
         FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.base,fragment,"restaurants");

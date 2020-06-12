@@ -6,7 +6,6 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context="com.spikingacacia.spikyletabuyer.shop.ShopA"
-    android:background="@color/main_background"
     android:fitsSystemWindows="true"
     android:paddingBottom="32dp">
     <com.google.android.material.appbar.AppBarLayout
@@ -42,12 +41,12 @@
         android:layout_gravity="end|center_vertical"
         android:layout_margin="16dp"
         app:icon="@drawable/ic_shopping_black"
-        android:backgroundTint="@color/button_normal"
+        android:backgroundTint="@android:color/black"
         android:padding="@dimen/text_margin"
         android:text="0"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:textColor="@color/text"
+        android:textColor="@android:color/white"
         />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

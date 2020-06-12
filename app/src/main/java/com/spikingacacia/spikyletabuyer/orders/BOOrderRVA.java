@@ -60,10 +60,7 @@ public class BOOrderRVA extends RecyclerView.Adapter<BOOrderRVA.ViewHolder>
         holder.mTableView.setText("Table "+mValues.get(position).tableNumber);
         holder.mUsernameView.setText(mValues.get(position).restaurantName);
         holder.mDateView.setText(mValues.get(position).dateAdded);
-        if(!preferences.isDark_theme_enabled())
-        {
-            holder.mView.setBackgroundColor(mContext.getResources().getColor(R.color.secondary_background_light));
-        }
+
         holder.mView.setOnClickListener(new View.OnClickListener()
         {
             @Override

@@ -58,10 +58,6 @@ public class BOOrdersF extends Fragment
         View root = inflater.inflate(R.layout.f_booorders, container, false);
         //preference
         preferences=new Preferences(getContext());
-        if(!preferences.isDark_theme_enabled())
-        {
-            root.findViewById(R.id.sec_main).setBackgroundColor(getResources().getColor(R.color.secondary_background_light));
-        }
         ProgressBar progressBar=root.findViewById(R.id.progress);
         LinearLayout l_base=root.findViewById(R.id.orders_base);
         TextView t_date=root.findViewById(R.id.date);

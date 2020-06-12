@@ -1,23 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:id="@+id/topLayout"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:keepScreenOn="true">
 
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/topLayout"
-    android:orientation="vertical"
+
+<com.spikingacacia.spikyletabuyer.barcode.CameraSourcePreview
+    android:id="@+id/preview"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:keepScreenOn="true">
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent">
 
-  <com.spikingacacia.spikyletabuyer.barcode.CameraSourcePreview
-      android:id="@+id/preview"
+  <com.spikingacacia.spikyletabuyer.barcode.GraphicOverlay
+      android:id="@+id/graphicOverlay"
       android:layout_width="match_parent"
-      android:layout_height="match_parent">
+      android:layout_height="match_parent" />
+</com.spikingacacia.spikyletabuyer.barcode.CameraSourcePreview>
 
-    <com.spikingacacia.spikyletabuyer.barcode.GraphicOverlay
-        android:id="@+id/graphicOverlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+<ImageButton
+    android:id="@+id/use_flash"
+    android:layout_width="50dp"
+    android:layout_height="50dp"
+    app:layout_constraintStart_toStartOf="@id/preview"
+    app:layout_constraintTop_toTopOf="@+id/preview"
+    android:background="@android:color/transparent"
+    android:src="@drawable/ic_flash_off"/>
 
-  </com.spikingacacia.spikyletabuyer.barcode.CameraSourcePreview>
+</androidx.constraintlayout.widget.ConstraintLayout>
 
-</LinearLayout>

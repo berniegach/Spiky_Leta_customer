@@ -65,10 +65,7 @@ public class SRRestaurantsRecyclerViewAdapter extends RecyclerView.Adapter<SRRes
         holder.mPositionView.setText(mValues.get(position).position);
         holder.mNamesView.setText(names);
         holder.mDistanceView.setText(String.format("%.0f meters away",mValues.get(position).distance));
-        if(!preferences.isDark_theme_enabled())
-        {
-            holder.mView.setBackgroundColor(mContext.getResources().getColor(R.color.secondary_background_light));
-        }
+
         //get the category photo
         String url= LoginA.base_url+"src/sellers/"+String.format("%s/pics/prof_pic", CommonHelper.makeName(mValues.get(position).id), mValues.get(position).id)+".jpg";
         ImageRequest request=new ImageRequest(

@@ -20,27 +20,16 @@ import com.spikingacacia.spikyletabuyer.R;
  */
 public class BMMessageDetailActivity extends AppCompatActivity
 {
-    Preferences preferences;
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.a_bmmessage_detail);
-        preferences = new Preferences(getBaseContext());
         //toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Messages");
-        if(!preferences.isDark_theme_enabled())
-        {
-            setTheme(R.style.AppThemeLight_NoActionBarLight);
-            toolbar.setTitleTextColor(getResources().getColor(R.color.text_light));
-            toolbar.setPopupTheme(R.style.AppThemeLight_PopupOverlayLight);
-            AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.appbar_layout);
-            appBarLayout.getContext().setTheme(R.style.AppThemeLight_AppBarOverlayLight);
-            appBarLayout.setBackgroundColor(getResources().getColor(R.color.main_background_light));
-            findViewById(R.id.main).setBackgroundColor(getResources().getColor(R.color.main_background_light));
-        }
+
 
         // savedInstanceState is non-null when there is fragment state
         // saved from previous configurations of this activity

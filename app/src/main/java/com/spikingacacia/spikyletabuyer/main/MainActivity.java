@@ -43,7 +43,12 @@ import com.spikingacacia.spikyletabuyer.JSONParser;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.SettingsActivity;
 import com.spikingacacia.spikyletabuyer.barcode.BarcodeCaptureActivity;
+import com.spikingacacia.spikyletabuyer.database.Adverts;
+import com.spikingacacia.spikyletabuyer.database.BRestaurants;
+import com.spikingacacia.spikyletabuyer.main.board.AdvertsFragment;
 import com.spikingacacia.spikyletabuyer.main.order.OrderFragment;
+import com.spikingacacia.spikyletabuyer.restaurants.SRRestaurantsA;
+import com.spikingacacia.spikyletabuyer.shop.ShopA;
 import com.spikingacacia.spikyletabuyer.util.Mpesa;
 
 import org.apache.http.NameValuePair;
@@ -55,15 +60,21 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 
 import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
 import static com.spikingacacia.spikyletabuyer.LoginA.mGoogleSignInClient;
 
 
 public class MainActivity extends AppCompatActivity implements
-        OrderFragment.OnFragmentInteractionListener
+        OrderFragment.OnFragmentInteractionListener, AdvertsFragment.OnListFragmentInteractionListener
 {
     private static final int PERMISSION_REQUEST_INTERNET=2;
     private FusedLocationProviderClient fusedLocationProviderClient;
@@ -72,6 +83,7 @@ public class MainActivity extends AppCompatActivity implements
     private ProgressBar progressBar;
     private View mainFragment;
     private String TAG="MainA";
+    public static  List<BRestaurants>bRestaurantsList;
     ActivityResultLauncher<Intent> mGetBarcode = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             new ActivityResultCallback<ActivityResult>() {
                 @Override
@@ -140,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements
                     while(true)
                     {
                         sleep(60000);
-                        new MpesaGetPayStatus().execute((Void)null);
+                        //new MpesaGetPayStatus().execute((Void)null);
                         handler.post(runnable);
                     }
                 }
@@ -150,7 +162,8 @@ public class MainActivity extends AppCompatActivity implements
                 }
             }
         };
-        thread.start();
+        //thread.start();
+        bRestaurantsList=new LinkedList<>();
     }
 
     @Override
@@ -236,6 +249,10 @@ public class MainActivity extends AppCompatActivity implements
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
+    void barcodeReceived(Barcode barcode)
+    {
+        new RestaurantQRTask(barcode.displayValue).execute((Void)null);
+    }
     private void getCurrentLocation()
     {
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
@@ -259,12 +276,13 @@ public class MainActivity extends AppCompatActivity implements
                                 {
                                     addresses=geocoder.getFromLocation(latitude,longitude,10);
                                     Log.d("LOCATIONS: ", "lat: "+latitude+" long: "+longitude);
-                                    new NearShopsTask(String.valueOf(latitude),String.valueOf(longitude),addresses.get(0).getLocality()).execute((Void)null);
+                                    new RestaurantsTask(String.valueOf(latitude),String.valueOf(longitude),addresses.get(0).getLocality()).execute((Void)null);
                                     for(int c=0; c<addresses.size(); c+=1)
                                         Log.d("loc: ",addresses.get(c).getLocality()+"\n");
                                 }
                                 catch (IOException e)
                                 {
+                                    showProgress(false);
                                     Snackbar.make(getWindow().getDecorView().getRootView(),"Error getting your location.\nPlease try again.", Snackbar.LENGTH_SHORT).show();
                                     Log.e("address",""+e.getMessage());
                                 }
@@ -280,11 +298,11 @@ public class MainActivity extends AppCompatActivity implements
         }
 
     }
-    private void showStores()
+    private void showRestaurants()
     {
-        if(storesList.size()==0)
+        if(bRestaurantsList.size()==0)
         {
-            Snackbar.make(getWindow().getDecorView().getRootView(), "No Stores near you", Snackbar.LENGTH_LONG)
+            Snackbar.make(getWindow().getDecorView().getRootView(), "No restaurants near you.", Snackbar.LENGTH_LONG)
                     .setAction("Retry", new View.OnClickListener()
                     {
                         @Override
@@ -295,44 +313,22 @@ public class MainActivity extends AppCompatActivity implements
                     });
             return;
         }
-        Intent intent=new Intent(MainActivity.this, NearStoresActivity.class);
+        Intent intent=new Intent(this, SRRestaurantsA.class);
         //prevent this activity from flickering as we call the next one
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         startActivity(intent);
     }
-/*
-* implementation of FindStoreFragment.java
-* */
-    @Override
-    public void onUseMyLocationClicked()
-    {
-        //get the users location
-        //show progressbar
-        showProgress(true);
-        getCurrentLocation();
-    }
 
-    @Override
-    public void onEnterLocationClicked()
+    private void run_shop(int id, int radius, int distance, int numberOfTables)
     {
-
-    }
-
-    /*
-     * implementation of ReceiptsFragment.java
-     * */
-    @Override
-    public void onListFragmentInteraction(Orders order, String totalPrice)
-    {
-        //find the orders that have the same date, order number and order status
-        String[] date_pieces=order.getDate_added().split(" ");
-        String unique_name=date_pieces[0]+":"+order.getOrder_number()+":"+order.getOrder_status();
-        Intent intent = new Intent(MainActivity.this, ReceiptActivity.class);
-        intent.putExtra("unique_name",unique_name);
-        intent.putExtra("total_price",totalPrice);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        Intent intent=new Intent(this, ShopA.class);
+        intent.putExtra("seller_id",id);
+        intent.putExtra("order_radius",radius);
+        intent.putExtra("buyer_distance",distance);
+        intent.putExtra("number_of_tables",numberOfTables);
         startActivity(intent);
     }
+
     void showProgress(boolean show)
     {
         progressBar.setVisibility(show? View.VISIBLE : View.GONE);
@@ -357,76 +353,53 @@ public class MainActivity extends AppCompatActivity implements
         if(id==1)
         {
             //scan the QR code to access the restaurant
-            bar_code();
+            //scan the item and remove it from the list of unscanned items
+            Intent intent = new Intent(this, BarcodeCaptureActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            mGetBarcode.launch(intent);
         }
         else if(id==2)
         {
-            Toast.makeText(getBaseContext(),"Please wait",Toast.LENGTH_SHORT).show();
             //get the users location
+            showProgress(true);
             getCurrentLocation();
         }
     }
-    private void bar_code()
+
+    @Override
+    public void onAdClicked(Adverts item)
     {
-
-        // String array for alert dialog multi choice items
-        String[] colors = new String[]{ "Autofocus",   "Flash",   };
-
-        // Boolean array for initial selected items
-        final boolean[] checkedColors = new boolean[]{
-                true, // autofocus
-                true, // flash
-        };
-        new AlertDialog.Builder(BMenuA.this)
-                .setMultiChoiceItems(
-                        colors,
-                        checkedColors,
-                        new DialogInterface.OnMultiChoiceClickListener()
-                        {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which, boolean isChecked)
-                            {
-                                if(which==0)
-                                    autofocus=isChecked;
-                                else
-                                    use_flash=isChecked;
-                            }
-                        }
-                )
-                .setPositiveButton("Proceed", new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which)
-                    {
-                        //scan the QR code to access the restaurant
-                        // launch barcode activity.
-                        start_qr_code_reader();
-                        dialog.dismiss();
-                    }
-                })
-                .create().show();
 
     }
 
-    private class NearShopsTask extends AsyncTask<Void, Void, Boolean>
+
+    private class RestaurantsTask extends AsyncTask<Void, Void, Boolean>
     {
-        private String url_get_stores=base_url+"find_near_stores.php";
+        private String url_get_restaurants=base_url+"get_near_restaurants.php";
         private String TAG_SUCCESS="success";
         private String TAG_MESSAGE="message";
-        private JSONParser jsonParser;
+        //final private String country;
         final private String latitude;
         final private String longitude;
         final private String location;
+        private JSONParser jsonParser;
 
-        public NearShopsTask(String latitude, String longitude, String location)
+        public RestaurantsTask( String latitude, String longitude, String location)
         {
-            Log.d("nearshops","getting longitude: "+longitude+" latitude: "+latitude);
             //this.country=country;
             this.latitude=latitude;
             this.longitude=longitude;
             this.location=location;
-            jsonParser = new JSONParser();
-            storesList.clear();
+            jsonParser=new JSONParser();
+        }
+        @Override
+        protected void onPreExecute()
+        {
+
+            Log.d("CRESTAUNRANTS: ","starting....");
+            if(!bRestaurantsList.isEmpty())
+                bRestaurantsList.clear();
+            super.onPreExecute();
         }
         @Override
         protected Boolean doInBackground(Void... params)
@@ -437,35 +410,33 @@ public class MainActivity extends AppCompatActivity implements
             info.add(new BasicNameValuePair("latitude",latitude));
             info.add(new BasicNameValuePair("longitude",longitude));
             info.add(new BasicNameValuePair("location",location));
+            info.add(new BasicNameValuePair("which","1"));
             // making HTTP request
-            JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_stores,"POST",info);
-            //Log.d("JSONLOCATION", jsonObject.toString());
+            JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_restaurants,"POST",info);
+            Log.d("cTasks",""+jsonObject.toString());
             try
             {
                 JSONArray restArrayList=null;
                 int success=jsonObject.getInt(TAG_SUCCESS);
                 if(success==1)
                 {
-                    restArrayList=jsonObject.getJSONArray("stores");
+                    restArrayList=jsonObject.getJSONArray("restaurants");
                     restArrayList=restArrayList.getJSONArray(0);
-                    if(restArrayList.length()==0)
-                        return false;
                     for(int count=0; count<restArrayList.length(); count+=1)
                     {
                         JSONObject jsonObject_restaurants=restArrayList.getJSONObject(count);
                         int id=jsonObject_restaurants.getInt("id");
-                        String email=jsonObject_restaurants.getString("email");
-                        String names=jsonObject_restaurants.getString("names");
-                        String image_type=jsonObject_restaurants.getString("image_type");
+                        String names=jsonObject_restaurants.getString("username");
                         double distance=jsonObject_restaurants.getDouble("distance");
                         double latitude=jsonObject_restaurants.getDouble("latitude");
                         double longitude=jsonObject_restaurants.getDouble("longitude");
                         String locality=jsonObject_restaurants.getString("locality");
-                        String country_code=jsonObject_restaurants.getString("country_code");
-                        String m_code=jsonObject_restaurants.getString("m_code");
+                        String country=jsonObject_restaurants.getString("country");
+                        int order_radius=jsonObject_restaurants.getInt("order_radius");
+                        int tables = jsonObject_restaurants.getInt("number_of_tables");
 
-                        Store store = new Store(id,email,names,image_type,distance,latitude,longitude,locality,country_code, m_code);
-                        storesList.add(store);
+                        BRestaurants bRestaurants=new BRestaurants(id,names,distance,latitude,longitude,locality,country,order_radius, tables);
+                        bRestaurantsList.add(bRestaurants);
                     }
                     return true;
                 }
@@ -488,16 +459,96 @@ public class MainActivity extends AppCompatActivity implements
             showProgress(false);
             if (successful)
             {
-                showStores();
+                showRestaurants();
             }
             else
             {
-                Toast.makeText(getBaseContext(),"Error getting stores",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getBaseContext(),"Error getting restaurants",Toast.LENGTH_SHORT).show();
             }
         }
     }
+    private class RestaurantQRTask extends AsyncTask<Void, Void, Boolean>
+    {
+        private String url_get_restaurants_qr=base_url+"get_restaurant_from_qr_code.php";
+        private String TAG_SUCCESS="success";
+        private String TAG_MESSAGE="message";
+        private JSONParser jsonParser;
+        //final private String country;
+        final private String email;
+        int id;
+        String username;
+        int online;
+        int deliver;
+        String country;
+        String location;
+        int order_radius;
+        int order_format;
+        int number_of_tables;
 
-    private class UpdateOrderTask extends AsyncTask<Void, Void, Boolean>
+        public RestaurantQRTask( String email)
+        {
+            this.email=email;
+            jsonParser = new JSONParser();
+        }
+        @Override
+        protected Boolean doInBackground(Void... params)
+        {
+            //getting columns list
+            List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
+            //info.add(new BasicNameValuePair("country",country));
+            info.add(new BasicNameValuePair("email",email));
+            // making HTTP request
+            JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_restaurants_qr,"POST",info);
+            Log.d("cTasks",""+jsonObject.toString());
+            try
+            {
+                JSONArray restArrayList=null;
+                int success=jsonObject.getInt(TAG_SUCCESS);
+                if(success==1)
+                {
+                    //seccesful
+                    JSONArray accountArray=jsonObject.getJSONArray("account");
+                    JSONObject accountObject=accountArray.getJSONObject(0);
+
+                    id = accountObject.getInt("id");
+                    username = accountObject.getString("username");
+                    online = accountObject.getInt("online");
+                    deliver = accountObject.getInt("deliver");
+                    country = accountObject.getString("country");
+                    location = accountObject.getString("location");
+                    order_radius = accountObject.getInt("order_radius");
+                    order_format = accountObject.getInt("order_format");
+                    number_of_tables = accountObject.getInt("number_of_tables");
+                    return true;
+                }
+                else
+                {
+                    String message=jsonObject.getString(TAG_MESSAGE);
+                    Log.e(TAG_MESSAGE,""+message);
+                    return false;
+                }
+            }
+            catch (JSONException e)
+            {
+                Log.e("JSON",""+e.getMessage());
+                return false;
+            }
+        }
+        @Override
+        protected void onPostExecute(final Boolean successful)
+        {
+
+            if (successful)
+            {
+                run_shop(id,order_radius,5,number_of_tables);
+            }
+            else
+            {
+                Toast.makeText(getBaseContext(),"Error getting restaurant",Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+   /* private class UpdateOrderTask extends AsyncTask<Void, Void, Boolean>
     {
         private String url_update=base_url+"update_order.php";
         private String TAG_SUCCESS="success";
@@ -705,5 +756,5 @@ public class MainActivity extends AppCompatActivity implements
             }
 
         }
-    }
+    }*/
 }

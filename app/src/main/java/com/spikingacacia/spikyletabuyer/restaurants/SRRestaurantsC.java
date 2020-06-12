@@ -2,6 +2,7 @@ package com.spikingacacia.spikyletabuyer.restaurants;
 
 import com.spikingacacia.spikyletabuyer.BMenuA;
 import com.spikingacacia.spikyletabuyer.database.BRestaurants;
+import com.spikingacacia.spikyletabuyer.main.MainActivity;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,7 +27,7 @@ public class SRRestaurantsC
     public SRRestaurantsC()
     {
         int pos=1;
-        Iterator<BRestaurants> iterator= BMenuA.bRestaurantsList.iterator();
+        Iterator<BRestaurants> iterator= MainActivity.bRestaurantsList.iterator();
         while(iterator.hasNext())
         {
             BRestaurants bRestaurants = iterator.next();

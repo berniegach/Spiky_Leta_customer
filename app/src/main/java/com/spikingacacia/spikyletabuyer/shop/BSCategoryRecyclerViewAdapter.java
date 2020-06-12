@@ -78,10 +78,7 @@ public class BSCategoryRecyclerViewAdapter extends RecyclerView.Adapter<BSCatego
         holder.mPositionView.setText(mValues.get(position).position);
         holder.mCategoryView.setText(cat);
         holder.mDescriptionView.setText(des);
-        if(!preferences.isDark_theme_enabled())
-        {
-            holder.mView.setBackgroundColor(mContext.getResources().getColor(R.color.secondary_background_light));
-        }
+
         //get the category photo
         String url= LoginA.base_url+"src/sellers/"+String.format("%s/pics/c_%d", CommonHelper.makeName(sellerId), mValues.get(position).id)+".jpg";
         ImageRequest request=new ImageRequest(

@@ -34,6 +34,7 @@ import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -78,6 +79,8 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
     // helper objects for detecting taps and pinches.
     private ScaleGestureDetector scaleGestureDetector;
     private GestureDetector gestureDetector;
+    boolean autoFocus = true;
+    boolean useFlash = false;
 
     /**
      * Initializes the UI and creates the detector pipeline.
@@ -89,10 +92,6 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
 
         mPreview = (CameraSourcePreview) findViewById(R.id.preview);
         mGraphicOverlay = (GraphicOverlay<BarcodeGraphic>) findViewById(R.id.graphicOverlay);
-
-        // read parameters from the intent used to launch the activity.
-        boolean autoFocus = getIntent().getBooleanExtra(AutoFocus, false);
-        boolean useFlash = getIntent().getBooleanExtra(UseFlash, false);
 
         // Check for the camera permission before accessing the camera.  If the
         // permission is not granted yet, request permission.
@@ -109,6 +108,19 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
         Snackbar.make(mGraphicOverlay, "Tap to capture. Pinch/Stretch to zoom",
                 Snackbar.LENGTH_LONG)
                 .show();
+        findViewById(R.id.use_flash).setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                useFlash =! useFlash;
+                mCameraSource.setFlashMode(useFlash ? Camera.Parameters.FLASH_MODE_TORCH : Camera.Parameters.FLASH_MODE_OFF);
+                if(useFlash)
+                    ((ImageButton)v).setImageResource(R.drawable.ic_flash_on);
+                else
+                    ((ImageButton)v).setImageResource(R.drawable.ic_flash_off);
+            }
+        });
     }
 
     /**
@@ -240,6 +252,14 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
      * Releases the resources associated with the camera source, the associated detectors, and the
      * rest of the processing pipeline.
      */
+    @Override
+    public void onBackPressed()
+    {
+        super.onBackPressed();
+        Intent data = new Intent();
+        data.putExtra(BarcodeObject, "0");
+        setResult(CommonStatusCodes.SUCCESS, data);
+    }
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -431,6 +451,9 @@ public final class BarcodeCaptureActivity extends AppCompatActivity implements B
 
     @Override
     public void onBarcodeDetected(Barcode barcode) {
-        //do something with barcode data returned
+        Intent data = new Intent();
+        data.putExtra(BarcodeObject, barcode);
+        setResult(CommonStatusCodes.SUCCESS, data);
+        finish();
     }
 }

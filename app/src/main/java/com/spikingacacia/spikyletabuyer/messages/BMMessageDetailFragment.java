@@ -62,10 +62,6 @@ public class BMMessageDetailFragment extends Fragment
                              Bundle savedInstanceState)
     {
         View rootView = inflater.inflate(R.layout.bmmessage_detail, container, false);
-        if(!preferences.isDark_theme_enabled())
-        {
-            rootView.findViewById(R.id.main).setBackgroundColor(getResources().getColor(R.color.secondary_background_light));
-        }
         // Show the dummy content as text in a TextView.
         if (content != null)
         {

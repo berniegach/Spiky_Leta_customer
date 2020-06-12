@@ -64,6 +64,7 @@ public class LoginA extends AppCompatActivity implements View.OnClickListener
         setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.a_login);
+        setTitle("Login");
 
         // Set the dimensions of the sign-in button.
         SignInButton signInButton = findViewById(R.id.sign_in_button);
@@ -190,9 +191,10 @@ public class LoginA extends AppCompatActivity implements View.OnClickListener
 
                     serverAccount.setId(accountObject.getInt("id"));
                     serverAccount.setEmail(accountObject.getString("email"));
-                    serverAccount.setPassword(accountObject.getString("password"));
+                    serverAccount.setPassword("");
                     serverAccount.setUsername(accountObject.getString("username"));
                     serverAccount.setLocation(accountObject.getString("location"));
+                    serverAccount.setImageType(accountObject.getString("image_type"));
                     serverAccount.setDateadded(accountObject.getString("dateadded"));
                     serverAccount.setDatechanged(accountObject.getString("datechanged"));
                     return true;
@@ -200,7 +202,7 @@ public class LoginA extends AppCompatActivity implements View.OnClickListener
                 else
                 {
                     String message=jsonObject.getString(TAG_MESSAGE);
-                    Log.e(TAG_MESSAGE,""+message);
+                    Log.e(TAG_MESSAGE+TAG,""+message);
                     return false;
                 }
             }

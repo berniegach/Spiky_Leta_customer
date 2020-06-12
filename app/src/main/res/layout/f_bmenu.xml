@@ -16,7 +16,6 @@
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:layout_marginTop="2dp"
-        android:background="@color/secondary_background"
         android:orientation="horizontal">
 
         <ImageView
@@ -25,7 +24,7 @@
             android:layout_gravity="center_vertical"
             android:layout_marginStart="20dp"
             android:scaleType="fitCenter"
-            app:srcCompat="@drawable/ic_restaurant" />
+            android:src="@drawable/ic_restaurant" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -41,7 +40,6 @@
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:layout_marginTop="2dp"
-        android:background="@color/secondary_background"
         android:orientation="horizontal">
 
         <ImageView
@@ -50,7 +48,7 @@
             android:layout_gravity="center_vertical"
             android:layout_marginStart="20dp"
             android:scaleType="fitCenter"
-            app:srcCompat="@drawable/ic_orders" />
+            android:src="@drawable/ic_orders" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -73,7 +71,7 @@
                 android:background="@drawable/circle"
                 android:gravity="center"
                 android:text="0"
-                android:textColor="@color/text"
+                android:textColor="@android:color/black"
                 android:textSize="14sp" />
         </LinearLayout>
 
@@ -83,7 +81,6 @@
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:layout_marginTop="2dp"
-        android:background="@color/secondary_background"
         android:orientation="horizontal">
 
         <ImageView
@@ -92,7 +89,7 @@
             android:layout_gravity="center_vertical"
             android:layout_marginStart="20dp"
             android:scaleType="fitCenter"
-            app:srcCompat="@drawable/ic_explore" />
+            android:src="@drawable/ic_explore" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -108,7 +105,6 @@
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:layout_marginTop="2dp"
-        android:background="@color/secondary_background"
         android:orientation="horizontal">
 
         <ImageView
@@ -117,7 +113,7 @@
             android:layout_gravity="center_vertical"
             android:layout_marginStart="20dp"
             android:scaleType="fitCenter"
-            app:srcCompat="@drawable/ic_cake" />
+            android:src="@drawable/ic_cake" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -135,7 +131,6 @@
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:layout_marginTop="2dp"
-        android:background="@color/secondary_background"
         android:orientation="horizontal">
 
         <ImageView
@@ -144,7 +139,7 @@
             android:layout_gravity="center_vertical"
             android:layout_marginStart="20dp"
             android:scaleType="fitCenter"
-            app:srcCompat="@drawable/ic_messages" />
+            android:src="@drawable/ic_messages" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -167,7 +162,7 @@
                 android:background="@drawable/circle"
                 android:gravity="center"
                 android:text="0"
-                android:textColor="@color/text"
+                android:textColor="@android:color/black"
                 android:textSize="14sp" />
         </LinearLayout>
 
@@ -178,7 +173,6 @@
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:layout_marginTop="2dp"
-        android:background="@color/secondary_background"
         android:orientation="horizontal">
 
         <ImageView
@@ -187,7 +181,7 @@
             android:layout_gravity="center_vertical"
             android:layout_marginStart="20dp"
             android:scaleType="fitCenter"
-            app:srcCompat="@drawable/ic_settings" />
+            android:src="@drawable/ic_settings" />
 
         <TextView
             android:layout_width="wrap_content"

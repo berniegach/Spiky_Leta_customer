@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.appbar.AppBarLayout;
 import com.spikingacacia.spikyletabuyer.Preferences;
 import com.spikingacacia.spikyletabuyer.R;
+import com.spikingacacia.spikyletabuyer.database.Adverts;
 
 
 import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
@@ -35,16 +36,7 @@ public class AdvertsActivity extends AppCompatActivity implements AdvertsFragmen
         getSupportActionBar().setTitle("Tasty Board");
         //preference
         preferences=new Preferences(getBaseContext());
-        if(!preferences.isDark_theme_enabled())
-        {
-            setTheme(R.style.AppThemeLight);
-            toolbar.setTitleTextColor(getResources().getColor(R.color.text_light));
-            toolbar.setPopupTheme(R.style.AppThemeLight_PopupOverlayLight);
-            AppBarLayout appBarLayout = (AppBarLayout) findViewById(R.id.appbar_layout);
-            appBarLayout.getContext().setTheme(R.style.AppThemeLight_AppBarOverlayLight);
-            appBarLayout.setBackgroundColor(getResources().getColor(R.color.main_background_light));
-            findViewById(R.id.main).setBackgroundColor(getResources().getColor(R.color.main_background_light));
-        }
+
 
         Fragment fragment= AdvertsFragment.newInstance(1);
         FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
@@ -53,13 +45,12 @@ public class AdvertsActivity extends AppCompatActivity implements AdvertsFragmen
     }
 
     @Override
-    public void onAdClicked(AdsC.AdItem item)
+    public void onAdClicked(Adverts item)
     {
-        Fragment fragment=AdOverviewF.newInstance(item.id,item.title, item.bitmap, item.bitmap_seller, item.seller_name,item.content, item.views,item.likes,item.comments,item.date);
+        /*Fragment fragment=AdOverviewF.newInstance(item.id,item.title, item.bitmap, item.bitmap_seller, item.seller_name,item.content, item.views,item.likes,item.comments,item.date);
         FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.base,fragment,"overview");
         transaction.addToBackStack(null);
-        transaction.commit();
+        transaction.commit();*/
     }
-
 }

@@ -225,12 +225,6 @@ public class BOOverviewF extends Fragment
                     mListener.onChoiceClicked(5, orderFormat);
             }
         });
-        if(!preferences.isDark_theme_enabled())
-        {
-            view.findViewById(R.id.sec_main).setBackgroundColor(getResources().getColor(R.color.secondary_background_light));
-            lCurrent.setBackgroundColor(getResources().getColor(R.color.tertiary_background_light));
-            lFinished.setBackgroundColor(getResources().getColor(R.color.tertiary_background_light));
-        }
         return view;
     }
 
