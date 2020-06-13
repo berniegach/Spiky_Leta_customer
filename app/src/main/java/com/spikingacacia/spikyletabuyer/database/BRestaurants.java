@@ -8,12 +8,12 @@ public class BRestaurants
     private double latitude;
     private double longitude;
     private String locality;
-    private String country;
     private int radius;
     private int numberOfTables;
+    private String image_type;
 
 
-    public BRestaurants(int id, String names, double distance, double latitude, double longitude, String locality, String country, int radius, int numberOfTables)
+    public BRestaurants(int id, String names, double distance, double latitude, double longitude, String locality, int radius, int numberOfTables, String image_type)
     {
         this.id = id;
         this.names = names;
@@ -21,9 +21,9 @@ public class BRestaurants
         this.latitude = latitude;
         this.longitude = longitude;
         this.locality = locality;
-        this.country = country;
         this.radius=radius;
         this.numberOfTables=numberOfTables;
+        this.image_type = image_type;
     }
 
     public int getId()
@@ -85,16 +85,6 @@ public class BRestaurants
         this.locality = locality;
     }
 
-    public String getCountry()
-    {
-        return country;
-    }
-
-    public void setCountry(String country)
-    {
-        this.country = country;
-    }
-
     public int getRadius()
     {
         return radius;
@@ -112,6 +102,15 @@ public class BRestaurants
     public void setNumberOfTables(int numberOfTables)
     {
         this.numberOfTables = numberOfTables;
+    }
+    public String getImage_type()
+    {
+        return image_type;
+    }
+
+    public void setImage_type(String image_type)
+    {
+        this.image_type = image_type;
     }
 
 }

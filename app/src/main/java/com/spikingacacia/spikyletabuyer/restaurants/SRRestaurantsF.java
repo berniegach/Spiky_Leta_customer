@@ -17,6 +17,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.spikingacacia.spikyletabuyer.R;
+import com.spikingacacia.spikyletabuyer.database.BRestaurants;
+import com.spikingacacia.spikyletabuyer.main.MainActivity;
+
+import java.util.Iterator;
+import java.util.List;
 
 
 /**
@@ -66,10 +71,7 @@ public class SRRestaurantsF extends Fragment {
             Context context = view.getContext();
             recyclerView = (RecyclerView) view;
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            recyclerView.addItemDecoration(new DividerItemDecoration(getContext(),DividerItemDecoration.VERTICAL));
-            //recyclerView.addItemDecoration(new DividerItemDecoration(getContext(),DividerItemDecoration.HORIZONTAL));
-            SRRestaurantsC content=new SRRestaurantsC();
-            recyclerView.setAdapter(new SRRestaurantsRecyclerViewAdapter(content.ITEMS, mListener,getContext()));
+            recyclerView.setAdapter(new SRRestaurantsRecyclerViewAdapter( mListener,getContext()));
         }
         return view;
     }
@@ -120,18 +122,7 @@ public class SRRestaurantsF extends Fragment {
         mListener = null;
     }
 
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p/>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
     public interface OnListFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onItemClicked(SRRestaurantsC.RestaurantItem item);
+        void onItemClicked(BRestaurants item);
     }
 }

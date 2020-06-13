@@ -626,15 +626,6 @@ public class BSettingsA extends AppCompatActivity
 
 
     }
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    public static class AboutPreferenceFragment extends PreferenceFragmentCompat
-    {
-        @Override
-        public void onCreatePreferences(Bundle savedInstanceState, String rootKey)
-        {
-            setPreferencesFromResource(R.xml.pref_about, rootKey);
-        }
-    }
 
 
 

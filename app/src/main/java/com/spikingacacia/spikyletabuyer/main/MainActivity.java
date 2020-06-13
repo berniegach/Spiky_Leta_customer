@@ -431,11 +431,11 @@ public class MainActivity extends AppCompatActivity implements
                         double latitude=jsonObject_restaurants.getDouble("latitude");
                         double longitude=jsonObject_restaurants.getDouble("longitude");
                         String locality=jsonObject_restaurants.getString("locality");
-                        String country=jsonObject_restaurants.getString("country");
                         int order_radius=jsonObject_restaurants.getInt("order_radius");
                         int tables = jsonObject_restaurants.getInt("number_of_tables");
+                        String image_type=jsonObject_restaurants.getString("image_type");
 
-                        BRestaurants bRestaurants=new BRestaurants(id,names,distance,latitude,longitude,locality,country,order_radius, tables);
+                        BRestaurants bRestaurants=new BRestaurants(id,names,distance,latitude,longitude,locality,order_radius, tables, image_type);
                         bRestaurantsList.add(bRestaurants);
                     }
                     return true;

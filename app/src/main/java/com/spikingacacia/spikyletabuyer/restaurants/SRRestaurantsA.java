@@ -11,23 +11,18 @@ import android.os.Bundle;
 import com.google.android.material.appbar.AppBarLayout;
 import com.spikingacacia.spikyletabuyer.Preferences;
 import com.spikingacacia.spikyletabuyer.R;
+import com.spikingacacia.spikyletabuyer.database.BRestaurants;
 import com.spikingacacia.spikyletabuyer.shop.ShopA;
 
 public class SRRestaurantsA extends AppCompatActivity
     implements SRRestaurantsF.OnListFragmentInteractionListener
 {
-    Preferences preferences;
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.a_srrestaurants);
-        //preference
-        preferences=new Preferences(getBaseContext());
-        //toolbar
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Restaurants");
+        setTitle("Restaurants");
         Fragment fragment= SRRestaurantsF.newInstance(1);
         FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.base,fragment,"restaurants");
@@ -37,13 +32,13 @@ public class SRRestaurantsA extends AppCompatActivity
      * implementation of SRRestaurants.java
      * */
     @Override
-    public void onItemClicked(SRRestaurantsC.RestaurantItem item)
+    public void onItemClicked(BRestaurants item)
     {
         Intent intent=new Intent(this, ShopA.class);
-         intent.putExtra("seller_id",item.id);
-         intent.putExtra("order_radius",item.radius);
-         intent.putExtra("buyer_distance",item.distance);
-        intent.putExtra("number_of_tables",item.numberOfTables);
+         intent.putExtra("seller_id",item.getId());
+         intent.putExtra("order_radius",item.getRadius());
+         intent.putExtra("buyer_distance",item.getDistance());
+        intent.putExtra("number_of_tables",item.getNumberOfTables());
         startActivity(intent);
     }
 }

@@ -21,24 +21,19 @@
 
     </PreferenceCategory>
 
-    <PreferenceCategory app:title="Location">
-        <Preference
-            app:useSimpleSummaryProvider="true"
-            app:title="Change Location"
-            app:key="location">
+    <!--<PreferenceCategory app:title="Location">
+        <PreferenceScreen app:title="Current Location">
             <intent
                 app:action="android.intent.action.VIEW"
-                app:targetPackage="com.spikingacacia.spikyletabuyer"
-                app:targetClass="com.spikingacacia.spikyletabuyer.BMapsA"/>
-        </Preference>
-
-    </PreferenceCategory>
+                android:targetPackage="com.spikingacacia.spikyletabuyer"
+                android:targetClass="com.spikingacacia.spikyletabuyer.BMapsA"/>
+        </PreferenceScreen>
+    </PreferenceCategory>-->
     <Preference
-        app:icon="@drawable/ic_about"
-        app:title="@string/about"
-        app:allowDividerAbove="true">
-        <com.spikingacacia.spikyletabuyer.About/>
-    </Preference >
+        android:fragment="com.spikingacacia.spikyletabuyer.SettingsActivity$AboutPreferenceFragment"
+        android:icon="@drawable/ic_help"
+        android:title="@string/about"
+        app:allowDividerAbove="true"/>
 
 
 </PreferenceScreen>

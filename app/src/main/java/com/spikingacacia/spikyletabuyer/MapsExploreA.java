@@ -208,15 +208,20 @@ public class MapsExploreA extends FragmentActivity implements
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        if (requestCode != LOCATION_PERMISSION_REQUEST_CODE) {
+                                           @NonNull int[] grantResults)
+    {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode != LOCATION_PERMISSION_REQUEST_CODE)
+        {
             return;
         }
 
-        if (isPermissionGranted(permissions, grantResults,  Manifest.permission.ACCESS_FINE_LOCATION)) {
+        if (isPermissionGranted(permissions, grantResults, Manifest.permission.ACCESS_FINE_LOCATION))
+        {
             // Enable the my location layer if the permission has been granted.
             enableMyLocation();
-        } else {
+        } else
+        {
             // Display the missing permission error dialog when the fragments resume.
             mPermissionDenied = true;
         }
@@ -378,11 +383,12 @@ public class MapsExploreA extends FragmentActivity implements
                         double latitude=jsonObject_restaurants.getDouble("latitude");
                         double longitude=jsonObject_restaurants.getDouble("longitude");
                         String locality=jsonObject_restaurants.getString("locality");
-                        String country=jsonObject_restaurants.getString("country");
                         int order_radius=jsonObject_restaurants.getInt("order_radius");
                         int number_of_tables=jsonObject_restaurants.getInt("number_of_tables");
+                        String image_type=jsonObject_restaurants.getString("image_type");
 
-                        BRestaurants bRestaurants=new BRestaurants(id,names,distance,latitude,longitude,locality,country, order_radius, number_of_tables);
+
+                        BRestaurants bRestaurants=new BRestaurants(id,names,distance,latitude,longitude,locality, order_radius, number_of_tables, image_type);
                         bRestaurantsList.add(bRestaurants);
                     }
                     return true;

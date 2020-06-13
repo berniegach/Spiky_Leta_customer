@@ -1,13 +1,16 @@
 package com.spikingacacia.spikyletabuyer;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.EditTextPreference;
@@ -97,8 +100,8 @@ public class SettingsActivity extends AppCompatActivity
 
             //location
             String[] pos=LoginA.serverAccount.getLocation().split(",");
-            final Preference pref_location=findPreference("location");
-            pref_location.setSummary(pos.length==3?pos[2]:"Please set your location");
+            //final Preference pref_location=findPreference("location");
+            //pref_location.setSummary(pos.length==3?pos[2]:"Please set your location");
         }
     }
     @Override
@@ -109,6 +112,16 @@ public class SettingsActivity extends AppCompatActivity
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public static class AboutPreferenceFragment extends PreferenceFragmentCompat
+    {
+
+        @Override
+        public void onCreatePreferences(Bundle savedInstanceState, String rootKey)
+        {
+            setPreferencesFromResource(R.xml.pref_about, rootKey);
+        }
     }
     public class UpdateAccount extends AsyncTask<Void, Void, Boolean>
     {

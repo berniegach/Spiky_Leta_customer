@@ -1,7 +1,7 @@
 package com.spikingacacia.spikyletabuyer.main.board;
 
 import android.content.Context;
-import android.graphics.Bitmap;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,20 +13,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.spikingacacia.spikyletabuyer.AppController;
-import com.spikingacacia.spikyletabuyer.LoginA;
-import com.spikingacacia.spikyletabuyer.Preferences;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.database.Adverts;
 import com.spikingacacia.spikyletabuyer.main.board.AdvertsFragment.OnListFragmentInteractionListener;
-import com.spikingacacia.spikyletabuyer.main.board.AdsC.AdItem;
 
 import org.ocpsoft.prettytime.PrettyTime;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
@@ -61,7 +56,7 @@ public class AdvertsRVA extends RecyclerView.Adapter<AdvertsRVA.ViewHolder>
     public void onBindViewHolder(final ViewHolder holder, int position)
     {
         String ad_image_url= base_url+"src/ads/";
-        String seller_image_url = base_url+"src/sellers/";
+        String seller_image_url = base_url+"src/sellers_pics/";
         holder.mItem = mValues.get(position);
         holder.mTitleView.setText(mValues.get(position).getTitle());
         holder.mSellerView.setText(mValues.get(position).getSeller_name());
@@ -95,7 +90,7 @@ public class AdvertsRVA extends RecyclerView.Adapter<AdvertsRVA.ViewHolder>
         String url_post_image=ad_image_url+String.valueOf(holder.mItem.getId())+String.valueOf(holder.mItem.getImageType());
         holder.mImageView.setImageUrl(url_post_image, imageLoader);
         //seller image
-        String url_seller_image= seller_image_url+String.valueOf(holder.mItem.getSeller_id())+"/pics/prof_pic"+holder.mItem.getSellerImageType();
+        String url_seller_image= seller_image_url+String.valueOf(holder.mItem.getSeller_id())+'_'+holder.mItem.getSellerImageType();
         holder.mImageSellerView.setImageUrl(url_seller_image,imageLoader);
     }
 

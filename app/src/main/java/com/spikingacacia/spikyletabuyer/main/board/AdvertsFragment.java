@@ -1,7 +1,6 @@
 package com.spikingacacia.spikyletabuyer.main.board;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,19 +8,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.ImageRequest;
-import com.android.volley.toolbox.Volley;
 import com.spikingacacia.spikyletabuyer.JSONParser;
-import com.spikingacacia.spikyletabuyer.LoginA;
 import com.spikingacacia.spikyletabuyer.R;
 
 
@@ -35,7 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.spikingacacia.spikyletabuyer.database.Adverts;
-import com.spikingacacia.spikyletabuyer.main.board.AdsC.AdItem;
 
 import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
 
@@ -50,6 +41,7 @@ public class AdvertsFragment extends Fragment
     private OnListFragmentInteractionListener mListener;
     private  RecyclerView recyclerView;
     private AdvertsRVA my_advertsRVA;
+    private String TAG = "AdvertsF";
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -100,7 +92,6 @@ public class AdvertsFragment extends Fragment
             recyclerView.addItemDecoration(new DividerItemDecoration(getContext(),DividerItemDecoration.VERTICAL));
              my_advertsRVA =new AdvertsRVA( mListener, getContext());
             recyclerView.setAdapter(my_advertsRVA);
-            new AdsTask().execute((Void)null);
         }
         return view;
     }
@@ -127,6 +118,12 @@ public class AdvertsFragment extends Fragment
         mListener = null;
     }
 
+    @Override
+    public void onResume()
+    {
+        super.onResume();
+        new AdsTask().execute((Void)null);
+    }
 
     public interface OnListFragmentInteractionListener
     {
@@ -154,7 +151,7 @@ public class AdvertsFragment extends Fragment
             info.add(new BasicNameValuePair("seller_id",""));
             // making HTTP request
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_ads,"POST",info);
-            // Log.d("",""+jsonObject.toString());
+            Log.d(TAG,""+jsonObject.toString());
             try
             {
                 JSONArray array=null;
@@ -202,6 +199,7 @@ public class AdvertsFragment extends Fragment
 
             if (successful)
             {
+                Log.d(TAG,"siccesds");
                 my_advertsRVA.listUpdated(list);
             }
             else

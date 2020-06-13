@@ -25,10 +25,5 @@
         android:icon="@drawable/ic_account"
         android:title="@string/pref_header_account"
         app:allowDividerAbove="true"/>
-    <Preference
-        android:fragment="com.spikingacacia.spikyletabuyer.BSettingsA$AboutPreferenceFragment"
-        android:icon="@drawable/ic_about"
-        android:title="@string/about"
-        app:allowDividerAbove="true"/>
 
 </PreferenceScreen>

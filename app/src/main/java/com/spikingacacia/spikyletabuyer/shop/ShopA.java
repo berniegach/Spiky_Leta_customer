@@ -78,10 +78,7 @@ public class ShopA extends AppCompatActivity
         sellerOrderRadius=getIntent().getIntExtra("order_radius",2);
         buyerDistance=getIntent().getDoubleExtra("buyer_distance",0);
         numberOfTables=getIntent().getIntExtra("number_of_tables",10);
-        //toolbar
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-        getSupportActionBar().setTitle("Order");
+        setTitle("Menu");
 
         /*Fragment fragment= SRRestaurantsF.newInstance(1);
         FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
@@ -127,7 +124,7 @@ public class ShopA extends AppCompatActivity
     public void onBackPressed()
     {
         super.onBackPressed();
-        if(whichFragment==2)
+        /*if(whichFragment==2)
             getSupportActionBar().setTitle("Order");
         else
         {
@@ -138,7 +135,7 @@ public class ShopA extends AppCompatActivity
                 fab.show();
                 fab.setText(String.valueOf(cartCount));
             }
-        }
+        }*/
 
     }
     /**
