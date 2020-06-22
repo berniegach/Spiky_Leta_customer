@@ -3,6 +3,7 @@ package com.spikingacacia.spikyletabuyer.database;
 public class BRestaurants
 {
     private int id;
+    private String email;
     private String names;
     private double distance;
     private double latitude;
@@ -13,9 +14,10 @@ public class BRestaurants
     private String image_type;
 
 
-    public BRestaurants(int id, String names, double distance, double latitude, double longitude, String locality, int radius, int numberOfTables, String image_type)
+    public BRestaurants(int id, String email, String names, double distance, double latitude, double longitude, String locality, int radius, int numberOfTables, String image_type)
     {
         this.id = id;
+        this.email = email;
         this.names = names;
         this.distance = distance;
         this.latitude = latitude;
@@ -34,6 +36,15 @@ public class BRestaurants
     public void setId(int id)
     {
         this.id = id;
+    }
+    public String getEmail()
+    {
+        return email;
+    }
+
+    public void setEmail(String email)
+    {
+        this.email = email;
     }
 
     public String getNames()

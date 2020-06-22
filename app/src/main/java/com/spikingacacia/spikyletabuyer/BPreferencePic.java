@@ -54,10 +54,7 @@ public class BPreferencePic extends Preference
     private static final int PERMISSION_REQUEST_INTERNET=2;
     private static String url_upload_profile_pic= LoginA.base_url+"upload_profile_pic_b.php";
     public static NetworkImageView imageView;
-    public static TextView textView;
     private static Context context;
-    private static String TAG_SUCCESS="success";
-    private static String TAG_MESSAGE="message";
     private FragmentManager fragmentManager;
     private ImageLoader imageLoader = AppController.getInstance().getImageLoader();
 
@@ -67,6 +64,8 @@ public class BPreferencePic extends Preference
         setLayoutResource(R.layout.bsettings_profilepic);
         this.context=context;
         fragmentManager=((AppCompatActivity)context).getFragmentManager();
+        if (imageLoader == null)
+            imageLoader = AppController.getInstance().getImageLoader();
     }
 
     public BPreferencePic(Context context, AttributeSet attrs)

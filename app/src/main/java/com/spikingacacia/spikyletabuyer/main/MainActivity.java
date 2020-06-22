@@ -319,10 +319,10 @@ public class MainActivity extends AppCompatActivity implements
         startActivity(intent);
     }
 
-    private void run_shop(int id, int radius, int distance, int numberOfTables)
+    private void run_shop(String email, int radius, int distance, int numberOfTables)
     {
         Intent intent=new Intent(this, ShopA.class);
-        intent.putExtra("seller_id",id);
+        intent.putExtra("seller_email",email);
         intent.putExtra("order_radius",radius);
         intent.putExtra("buyer_distance",distance);
         intent.putExtra("number_of_tables",numberOfTables);
@@ -426,6 +426,7 @@ public class MainActivity extends AppCompatActivity implements
                     {
                         JSONObject jsonObject_restaurants=restArrayList.getJSONObject(count);
                         int id=jsonObject_restaurants.getInt("id");
+                        String email = jsonObject_restaurants.getString("email");
                         String names=jsonObject_restaurants.getString("username");
                         double distance=jsonObject_restaurants.getDouble("distance");
                         double latitude=jsonObject_restaurants.getDouble("latitude");
@@ -435,7 +436,7 @@ public class MainActivity extends AppCompatActivity implements
                         int tables = jsonObject_restaurants.getInt("number_of_tables");
                         String image_type=jsonObject_restaurants.getString("image_type");
 
-                        BRestaurants bRestaurants=new BRestaurants(id,names,distance,latitude,longitude,locality,order_radius, tables, image_type);
+                        BRestaurants bRestaurants=new BRestaurants(id, email, names,distance,latitude,longitude,locality,order_radius, tables, image_type);
                         bRestaurantsList.add(bRestaurants);
                     }
                     return true;
@@ -475,7 +476,7 @@ public class MainActivity extends AppCompatActivity implements
         private JSONParser jsonParser;
         //final private String country;
         final private String email;
-        int id;
+        String seller_email;
         String username;
         int online;
         int deliver;
@@ -510,7 +511,7 @@ public class MainActivity extends AppCompatActivity implements
                     JSONArray accountArray=jsonObject.getJSONArray("account");
                     JSONObject accountObject=accountArray.getJSONObject(0);
 
-                    id = accountObject.getInt("id");
+                    seller_email = accountObject.getString("seller_email");
                     username = accountObject.getString("username");
                     online = accountObject.getInt("online");
                     deliver = accountObject.getInt("deliver");
@@ -540,7 +541,7 @@ public class MainActivity extends AppCompatActivity implements
 
             if (successful)
             {
-                run_shop(id,order_radius,5,number_of_tables);
+                run_shop(seller_email,order_radius,5,number_of_tables);
             }
             else
             {

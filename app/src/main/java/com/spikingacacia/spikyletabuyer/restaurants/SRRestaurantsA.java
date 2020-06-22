@@ -35,7 +35,7 @@ public class SRRestaurantsA extends AppCompatActivity
     public void onItemClicked(BRestaurants item)
     {
         Intent intent=new Intent(this, ShopA.class);
-         intent.putExtra("seller_id",item.getId());
+         intent.putExtra("seller_email",item.getEmail());
          intent.putExtra("order_radius",item.getRadius());
          intent.putExtra("buyer_distance",item.getDistance());
         intent.putExtra("number_of_tables",item.getNumberOfTables());

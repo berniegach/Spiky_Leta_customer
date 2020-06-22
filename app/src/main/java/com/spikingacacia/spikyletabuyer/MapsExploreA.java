@@ -378,6 +378,7 @@ public class MapsExploreA extends FragmentActivity implements
                     {
                         JSONObject jsonObject_restaurants=restArrayList.getJSONObject(count);
                         int id=jsonObject_restaurants.getInt("id");
+                        String email = jsonObject_restaurants.getString("email");
                         String names=jsonObject_restaurants.getString("username");
                         double distance=jsonObject_restaurants.getDouble("distance");
                         double latitude=jsonObject_restaurants.getDouble("latitude");
@@ -388,7 +389,7 @@ public class MapsExploreA extends FragmentActivity implements
                         String image_type=jsonObject_restaurants.getString("image_type");
 
 
-                        BRestaurants bRestaurants=new BRestaurants(id,names,distance,latitude,longitude,locality, order_radius, number_of_tables, image_type);
+                        BRestaurants bRestaurants=new BRestaurants(id,email,names,distance,latitude,longitude,locality, order_radius, number_of_tables, image_type);
                         bRestaurantsList.add(bRestaurants);
                     }
                     return true;
