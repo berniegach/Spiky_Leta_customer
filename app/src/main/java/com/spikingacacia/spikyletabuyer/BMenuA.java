@@ -3,60 +3,25 @@ package com.spikingacacia.spikyletabuyer;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.graphics.Typeface;
-import android.location.Address;
-import android.location.Geocoder;
-import android.location.Location;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.google.android.gms.common.api.CommonStatusCodes;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
-import com.google.android.material.snackbar.Snackbar;
-import com.spikingacacia.spikyletabuyer.barcode.BarcodeCaptureActivity;
 import com.spikingacacia.spikyletabuyer.main.board.AdvertsActivity;
-import com.spikingacacia.spikyletabuyer.messages.BMMessageListActivity;
-import com.spikingacacia.spikyletabuyer.orders.BOOrdersA;
-import com.spikingacacia.spikyletabuyer.restaurants.SRRestaurantsA;
-import com.spikingacacia.spikyletabuyer.database.BRestaurants;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Locale;
-
-import com.google.android.gms.vision.barcode.Barcode;
-import com.spikingacacia.spikyletabuyer.shop.ShopA;
-
-import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
+import com.spikingacacia.spikyletabuyer.orders.OrdersActivity;
 
 public class BMenuA extends AppCompatActivity
 implements BMenuF.OnFragmentInteractionListener
@@ -177,7 +142,7 @@ implements BMenuF.OnFragmentInteractionListener
         else if(id==2)
         {
             //orders
-            Intent intent=new Intent(this, BOOrdersA.class);
+            Intent intent=new Intent(this, OrdersActivity.class);
             startActivity(intent);
         }
         else if(id==3)
@@ -194,9 +159,7 @@ implements BMenuF.OnFragmentInteractionListener
         }
         else if(id==5)
         {
-            //notifications
-            Intent intent=new Intent(this, BMMessageListActivity.class);
-            startActivity(intent);
+
         }
         else if(id==6)
         {

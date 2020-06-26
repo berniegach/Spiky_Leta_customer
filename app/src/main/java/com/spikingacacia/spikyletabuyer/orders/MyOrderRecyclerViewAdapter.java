@@ -1,19 +1,27 @@
 package com.spikingacacia.spikyletabuyer.orders;
 
-import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.spikingacacia.spikyletabuyer.Preferences;
+import com.android.volley.toolbox.ImageLoader;
+import com.android.volley.toolbox.NetworkImageView;
+import com.spikingacacia.spikyletabuyer.AppController;
+import com.spikingacacia.spikyletabuyer.LoginA;
 import com.spikingacacia.spikyletabuyer.R;
-import com.spikingacacia.spikyletabuyer.orders.BOOrderC.OrderItem;
-import com.spikingacacia.spikyletabuyer.orders.BOOrderF.OnListFragmentInteractionListener;
+import com.spikingacacia.spikyletabuyer.database.Orders;
+import com.spikingacacia.spikyletabuyer.main.orders_list.OrdersFragment.OnListFragmentInteractionListener;
 
+import org.ocpsoft.prettytime.PrettyTime;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -21,45 +29,51 @@ import java.util.List;
  * specified {@link OnListFragmentInteractionListener}.
  * TODO: Replace the implementation with code for your data type.
  */
-public class BOOrderRVA extends RecyclerView.Adapter<BOOrderRVA.ViewHolder>
+public class MyOrderRecyclerViewAdapter extends RecyclerView.Adapter<MyOrderRecyclerViewAdapter.ViewHolder>
 {
 
-    private final List<OrderItem> mValues;
-    private List<OrderItem> itemsCopy;
+    private List<Orders> mValues;
+    private List<Orders> itemsCopy;
     private final OnListFragmentInteractionListener mListener;
-    private Context mContext;
-    private  int mWhichOrder;
-    Preferences preferences;
+    private ImageLoader imageLoader = AppController.getInstance().getImageLoader();
 
-    public BOOrderRVA(List<OrderItem> items, OnListFragmentInteractionListener listener, Context context, int whichOrder)
+    public MyOrderRecyclerViewAdapter( OnListFragmentInteractionListener listener)
     {
-        mValues = items;
+        mValues = new LinkedList<>();
         mListener = listener;
         itemsCopy=new ArrayList<>();
-        itemsCopy.addAll(items);
-        mContext=context;
-        mWhichOrder=whichOrder;
-        //preference
-        preferences=new Preferences(context);
+        if (imageLoader == null)
+            imageLoader = AppController.getInstance().getImageLoader();
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.f_boorder, parent, false);
+                .inflate(R.layout.fragment_orders, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position)
     {
+        String image_url= LoginA.base_url+"src/sellers_pics/";
         holder.mItem = mValues.get(position);
-        holder.mPositionView.setText(mValues.get(position).position);
-        holder.mOrderView.setText("Order "+mValues.get(position).orderNumber);
-        holder.mTableView.setText("Table "+mValues.get(position).tableNumber);
-        holder.mUsernameView.setText(mValues.get(position).restaurantName);
-        holder.mDateView.setText(mValues.get(position).dateAdded);
+        holder.mOrderView.setText("Order "+mValues.get(position).getOrderNumber());
+        holder.mTableView.setText("Table "+mValues.get(position).getTableNumber());
+        holder.mUsernameView.setText(mValues.get(position).getSellerNames());
+        //format the date
+        SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+        PrettyTime p = new PrettyTime();
+        try
+        {
+            holder.mDateView.setText(p.format(format.parse(mValues.get(position).getDateAdded())));
+        } catch (ParseException e)
+        {
+            e.printStackTrace();
+        }
+        if(mValues.get(position).getOrderStatus()==5)
+            holder.mTimeImage.setVisibility(View.GONE);
 
         holder.mView.setOnClickListener(new View.OnClickListener()
         {
@@ -70,10 +84,12 @@ public class BOOrderRVA extends RecyclerView.Adapter<BOOrderRVA.ViewHolder>
                 {
                     // Notify the active callbacks interface (the activity, if the
                     // fragment is attached to one) that an item has been selected.
-                    mListener.onListFragmentInteraction(holder.mItem);
+                    mListener.onOrderClicked(holder.mItem);
                 }
             }
         });
+        String url=image_url+String.valueOf(mValues.get(position).getSellerId())+'_'+String.valueOf(mValues.get(position).getSellerImageType());
+        holder.image.setImageUrl(url, imageLoader);
     }
 
     @Override
@@ -89,9 +105,9 @@ public class BOOrderRVA extends RecyclerView.Adapter<BOOrderRVA.ViewHolder>
         else
         {
             text=text.toLowerCase();
-            for(OrderItem orderItem:itemsCopy)
+            for(Orders orderItem:itemsCopy)
             {
-                if(orderItem.restaurantName.toLowerCase().contains(text))
+                if(orderItem.getSellerNames().toLowerCase().contains(text))
                     mValues.add(orderItem);
             }
         }
@@ -101,22 +117,24 @@ public class BOOrderRVA extends RecyclerView.Adapter<BOOrderRVA.ViewHolder>
     public class ViewHolder extends RecyclerView.ViewHolder
     {
         public final View mView;
-        public final TextView mPositionView;
+        public final NetworkImageView image;
         public final TextView mOrderView;
         public final TextView mTableView;
         public final TextView mUsernameView;
         public final TextView mDateView;
-        public OrderItem mItem;
+        public final ImageView mTimeImage;
+        public Orders mItem;
 
         public ViewHolder(View view)
         {
             super(view);
             mView = view;
-            mPositionView = (TextView) view.findViewById(R.id.position);
+            image = view.findViewById(R.id.image);
             mOrderView = (TextView) view.findViewById(R.id.order_number);
             mTableView = (TextView) view.findViewById(R.id.table_number);
             mUsernameView = (TextView) view.findViewById(R.id.username);
             mDateView = (TextView) view.findViewById(R.id.date);
+            mTimeImage = view.findViewById(R.id.time);
         }
 
         @Override
@@ -124,5 +142,12 @@ public class BOOrderRVA extends RecyclerView.Adapter<BOOrderRVA.ViewHolder>
         {
             return super.toString() + " '" + mUsernameView.getText() + "'";
         }
+    }
+    public void listUpdated(List<Orders> newitems)
+    {
+        mValues.clear();
+        mValues.addAll(newitems);
+        itemsCopy.addAll(newitems);
+        notifyDataSetChanged();
     }
 }

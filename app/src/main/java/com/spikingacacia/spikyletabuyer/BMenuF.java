@@ -16,8 +16,8 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.spikingacacia.spikyletabuyer.database.BMessages;
-import com.spikingacacia.spikyletabuyer.database.BOrders;
+import com.spikingacacia.spikyletabuyer.database.Messages;
+import com.spikingacacia.spikyletabuyer.database.Orders;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -202,7 +202,6 @@ public class BMenuF extends Fragment {
                     {
                         sleep(2000);
                         refreshOrders();
-                        refreshMessages();
                         handler.post(runnable);
                     }
                 }
@@ -284,10 +283,10 @@ public class BMenuF extends Fragment {
         Iterator iterator= bOrdersList.entrySet().iterator();
         while (iterator.hasNext())
         {
-            LinkedHashMap.Entry<Integer, BOrders>set=(LinkedHashMap.Entry<Integer, BOrders>) iterator.next();
-            BOrders bOrders=set.getValue();
-            int order_number=bOrders.getOrderNumber();
-            String date_added=bOrders.getDateAdded();
+            LinkedHashMap.Entry<Integer, Orders>set=(LinkedHashMap.Entry<Integer, Orders>) iterator.next();
+            Orders orders =set.getValue();
+            int order_number= orders.getOrderNumber();
+            String date_added= orders.getDateAdded();
             String[] date_pieces=new String[]{};
             date_pieces=date_added.split(" ");
             String unique_name=date_pieces[0]+":"+order_number;
@@ -307,7 +306,7 @@ public class BMenuF extends Fragment {
      **/
     private void refreshOrders()
     {
-        LinkedHashMap<Integer,BOrders>tempOrdersLHM=new LinkedHashMap<>();
+        LinkedHashMap<Integer, Orders>tempOrdersLHM=new LinkedHashMap<>();
         //getting columns list
         List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
         info.add(new BasicNameValuePair("userid",Integer.toString(serverAccount.getId())));
@@ -338,52 +337,12 @@ public class BMenuF extends Fragment {
                     String waiter_names=jsonObjectNotis.getString("waiter_names");
 
 
-                    BOrders bOrders=new BOrders(id,item_id,order_number,orderstatus,item,selling_price, order_format,table_number,restaurant, waiter_names,dateadded);
-                    tempOrdersLHM.put(id,bOrders);
-                    //bOrdersList.put(id,bOrders);
+                    //Orders orders =new Orders(id,item_id,order_number,orderstatus,item,selling_price, order_format,table_number,restaurant, waiter_names,dateadded);
+                    //tempOrdersLHM.put(id, orders);
+                    //bOrdersList.put(id,orders);
                 }
                 bOrdersList=tempOrdersLHM;
                 //return true;
-            }
-            else
-            {
-                String message=jsonObject.getString(TAG_MESSAGE);
-                Log.e(TAG_MESSAGE,""+message);
-            }
-        }
-        catch (JSONException e)
-        {
-            Log.e("JSON",""+e.getMessage());
-        }
-    }
-    private void refreshMessages()
-    {
-        LinkedHashMap<String,BMessages>tempMessagesLHM=new LinkedHashMap<>();
-        //getting columns list
-        List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
-        info.add(new BasicNameValuePair("id",Integer.toString(serverAccount.getId())));
-        // making HTTP request
-        JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_b_notifications,"POST",info);
-       // Log.d("bNotis",""+jsonObject.toString());
-        try
-        {
-            JSONArray notisArrayList=null;
-            int success=jsonObject.getInt(TAG_SUCCESS);
-            if(success==1)
-            {
-                notisArrayList=jsonObject.getJSONArray("notis");
-                for(int count=0; count<notisArrayList.length(); count+=1)
-                {
-                    JSONObject jsonObjectNotis=notisArrayList.getJSONObject(count);
-                    int id=jsonObjectNotis.getInt("id");
-                    int classes=jsonObjectNotis.getInt("classes");
-                    String message=jsonObjectNotis.getString("messages");
-                    String date=jsonObjectNotis.getString("dateadded");
-
-                    BMessages oneBMessage=new BMessages(id,classes,message,date);
-                    tempMessagesLHM.put(String.valueOf(id),oneBMessage);
-                }
-                bMessagesList=tempMessagesLHM;
             }
             else
             {

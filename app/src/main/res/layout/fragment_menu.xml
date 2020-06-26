@@ -11,28 +11,29 @@
 
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-
-        <com.android.volley.toolbox.NetworkImageView
-            android:id="@+id/image"
-            android:layout_width="300dp"
-            android:layout_height="150dp"
-            android:layout_margin="5dp"
-            android:src="@drawable/ic_baseline_image"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
         <TextView
-            android:alpha="0.4"
             android:id="@+id/item"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp"
+            android:layout_margin="10dp"
             android:text="item"
             android:textStyle="bold"
             android:textSize="18sp"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+        <com.android.volley.toolbox.NetworkImageView
+            android:id="@+id/image"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginTop="10dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_baseline_image"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/item" />
+
+
         <TextView
             android:alpha="0.0"
             android:id="@+id/description"
@@ -56,7 +57,7 @@
             android:id="@+id/add"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:src="@drawable/ic_baseline_add"
+            android:src="@drawable/ic_baseline_add_circle"
             android:backgroundTint="@android:color/transparent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

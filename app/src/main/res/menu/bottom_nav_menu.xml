@@ -8,7 +8,16 @@
     <item
         android:id="@+id/navigation_order"
         android:icon="@drawable/ic_restaurant"
-        android:title="Order"/>
+        android:title="Menu"/>
+    <item
+        android:id="@+id/navigation_orders"
+        android:icon="@drawable/ic_baseline_list"
+        android:title="orders" />
+
+    <item
+        android:id="@+id/navigation_messages"
+        android:icon="@drawable/ic_messages"
+        android:title="Messages" />
 
 
 

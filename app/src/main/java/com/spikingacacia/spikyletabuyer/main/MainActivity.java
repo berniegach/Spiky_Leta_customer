@@ -38,18 +38,19 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
-import com.spikingacacia.spikyletabuyer.BMenuA;
 import com.spikingacacia.spikyletabuyer.JSONParser;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.SettingsActivity;
 import com.spikingacacia.spikyletabuyer.barcode.BarcodeCaptureActivity;
 import com.spikingacacia.spikyletabuyer.database.Adverts;
 import com.spikingacacia.spikyletabuyer.database.BRestaurants;
+import com.spikingacacia.spikyletabuyer.database.Orders;
 import com.spikingacacia.spikyletabuyer.main.board.AdvertsFragment;
-import com.spikingacacia.spikyletabuyer.main.order.OrderFragment;
+import com.spikingacacia.spikyletabuyer.main.order.OrderSearchFragment;
+import com.spikingacacia.spikyletabuyer.main.orders_list.OrdersFragment;
+import com.spikingacacia.spikyletabuyer.orders.OrdersActivity;
 import com.spikingacacia.spikyletabuyer.restaurants.SRRestaurantsA;
 import com.spikingacacia.spikyletabuyer.shop.ShopA;
-import com.spikingacacia.spikyletabuyer.util.Mpesa;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -59,7 +60,6 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -74,7 +74,8 @@ import static com.spikingacacia.spikyletabuyer.LoginA.mGoogleSignInClient;
 
 
 public class MainActivity extends AppCompatActivity implements
-        OrderFragment.OnFragmentInteractionListener, AdvertsFragment.OnListFragmentInteractionListener
+        OrderSearchFragment.OnFragmentInteractionListener, AdvertsFragment.OnListFragmentInteractionListener,
+         OrdersFragment.OnListFragmentInteractionListener
 {
     private static final int PERMISSION_REQUEST_INTERNET=2;
     private FusedLocationProviderClient fusedLocationProviderClient;
@@ -114,7 +115,7 @@ public class MainActivity extends AppCompatActivity implements
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_home, R.id.navigation_order)
+                R.id.navigation_home, R.id.navigation_order, R.id.navigation_orders, R.id.navigation_messages)
                 .build();
         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
@@ -345,7 +346,7 @@ public class MainActivity extends AppCompatActivity implements
         startActivity(intent);
     }
     /*
-     * implementation of OrderFragment.java
+     * implementation of OrderSearchFragment.java
      * */
     @Override
     public void onFindRestaurantMenuClicked(int id)
@@ -370,6 +371,24 @@ public class MainActivity extends AppCompatActivity implements
     public void onAdClicked(Adverts item)
     {
 
+    }
+
+/*
+implementation of OrdersFragment.java
+ */
+    @Override
+    public void onOrderClicked(Orders item)
+    {
+        String date_added=item.getDateAdded();
+        String[] date_pieces=date_added.split(" ");
+        String unique_name=date_pieces[0]+":"+item.getOrderNumber();
+        Intent intent = new Intent(this, OrdersActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        intent.putExtra("unique_order_name",unique_name);
+        intent.putExtra("order_format",item.getOrderFormat());
+        intent.putExtra("order_status",item.getOrderStatus());
+        intent.putExtra("seller_names",item.getSellerNames());
+        startActivity(intent);
     }
 
 

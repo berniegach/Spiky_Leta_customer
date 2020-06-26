@@ -12,8 +12,18 @@
         tools:layout="@layout/fragment_adverts_list" />
     <fragment
         android:id="@+id/navigation_order"
-        android:name="com.spikingacacia.spikyletabuyer.main.order.OrderFragment"
+        android:name="com.spikingacacia.spikyletabuyer.main.order.OrderSearchFragment"
+        android:label="Menu"
+        tools:layout="@layout/fragment_order_search" />
+    <fragment
+        android:id="@+id/navigation_orders"
+        android:name="com.spikingacacia.spikyletabuyer.main.orders_list.OrdersFragment"
         android:label="Order"
-        tools:layout="@layout/fragment_order" />
+        tools:layout="@layout/fragment_orders_list" />
+    <fragment
+        android:id="@+id/navigation_messages"
+        android:name="com.spikingacacia.spikyletabuyer.main.messages.MessagesFragment"
+        android:label="Order"
+        tools:layout="@layout/fragment_messages_list" />
 
 </navigation>

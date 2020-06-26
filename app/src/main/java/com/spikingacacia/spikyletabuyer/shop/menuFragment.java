@@ -112,7 +112,7 @@ public class menuFragment extends Fragment
         }
         mymenuRecyclerViewAdapter = new MymenuRecyclerViewAdapter(mListener, getContext(), getChildFragmentManager());
         recyclerViewMenu.setAdapter(mymenuRecyclerViewAdapter);
-        recyclerViewMenu.addItemDecoration(new SpacesItemDecoration(16));
+        recyclerViewMenu.addItemDecoration(new SpacesItemDecoration(20));
         return view;
     }
     @Override

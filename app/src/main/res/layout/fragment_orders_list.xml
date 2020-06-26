@@ -5,8 +5,6 @@
     android:name="com.spikingacacia.leta.ui.buyer.orders.BOOrderF"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginLeft="2dp"
-    android:layout_marginRight="2dp"
     app:layoutManager="LinearLayoutManager"
-    tools:context="com.spikingacacia.spikyletabuyer.orders.BOOrderF"
-    tools:listitem="@layout/f_boorder" />
+    tools:context="com.spikingacacia.spikyletabuyer.main.orders_list.OrdersFragment"
+    tools:listitem="@layout/fragment_orders" />

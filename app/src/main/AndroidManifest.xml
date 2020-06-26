@@ -30,21 +30,13 @@
             </intent-filter>
         </activity>
         <activity android:name=".main.board.AdvertsActivity" />
-        <activity android:name=".orders.BOOrdersA" />
+        <activity android:name=".orders.OrdersActivity" />
         <activity android:name=".shop.ShopA" />
         <activity android:name=".restaurants.SRRestaurantsA" />
         <activity android:name=".BMenuA" />
-        <activity android:name=".messages.BMMessageListActivity" />
         <activity
             android:name=".barcode.BarcodeCaptureActivity"
             android:theme="@style/AppTheme.NoActionBar"/>
-        <activity
-            android:name=".messages.BMMessageDetailActivity"
-            android:parentActivityName=".messages.BMMessageListActivity">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.spikingacacia.spikyletabuyer.messages.BMMessageListActivity" />
-        </activity>
         <activity
             android:name=".BSettingsA"
             android:label="@string/title_activity_settings" />

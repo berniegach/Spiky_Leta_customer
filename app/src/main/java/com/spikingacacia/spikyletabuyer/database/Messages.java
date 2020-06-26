@@ -1,19 +1,18 @@
 package com.spikingacacia.spikyletabuyer.database;
 
-public class BMessages
+public class Messages
 {
     private int id;
-    private int classes;
+    private int persona;
+    private int status;
     private String message;
     private String dateAdded;
-    public BMessages()
-    {
-    }
 
-    public BMessages(int id, int classes, String message, String dateAdded)
+    public Messages(int id, int persona, int status, String message, String dateAdded)
     {
         this.id = id;
-        this.classes = classes;
+        this.persona = persona;
+        this.status = status;
         this.message = message;
         this.dateAdded = dateAdded;
     }
@@ -28,14 +27,24 @@ public class BMessages
         this.id = id;
     }
 
-    public int getClasses()
+    public int getPersona()
     {
-        return classes;
+        return persona;
     }
 
-    public void setClasses(int classes)
+    public void setPersona(int persona)
     {
-        this.classes = classes;
+        this.persona = persona;
+    }
+
+    public int getStatus()
+    {
+        return status;
+    }
+
+    public void setStatus(int status)
+    {
+        this.status = status;
     }
 
     public String getMessage()
@@ -57,4 +66,9 @@ public class BMessages
     {
         this.dateAdded = dateAdded;
     }
+
+
+
+
+
 }

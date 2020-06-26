@@ -18,8 +18,8 @@ import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.spikingacacia.spikyletabuyer.database.BMessages;
-import com.spikingacacia.spikyletabuyer.database.BOrders;
+import com.spikingacacia.spikyletabuyer.database.Messages;
+import com.spikingacacia.spikyletabuyer.database.Orders;
 import com.spikingacacia.spikyletabuyer.database.ServerAccount;
 import com.spikingacacia.spikyletabuyer.main.MainActivity;
 
@@ -50,8 +50,8 @@ public class LoginA extends AppCompatActivity implements View.OnClickListener
     private static int bFinalProgress=2;
     //buyers
     public static ServerAccount serverAccount;
-    public static LinkedHashMap<String, BMessages> bMessagesList;
-    public static LinkedHashMap<Integer, BOrders>bOrdersList;
+    public static LinkedHashMap<String, Messages> bMessagesList;
+    public static LinkedHashMap<Integer, Orders>bOrdersList;
     public static int who;
     Preferences preferences;
     public static GoogleSignInClient mGoogleSignInClient;
@@ -314,193 +314,8 @@ public class LoginA extends AppCompatActivity implements View.OnClickListener
 
     }
 
-    /**
-     * Following code will get the buyers notifications
-     * The returned infos are id,  classes, messages, dateadded.
-     * Arguments are:
-     * id==boss id.
-     * Returns are:
-     * success==1 successful get
-     * success==0 for id argument missing
-     **/
-    private class BMessagesTask extends AsyncTask<Void, Void, Boolean>
-    {
-        private String url_get_b_notifications = base_url + "get_buyer_notifications.php";
-        private String TAG_SUCCESS="success";
-        private String TAG_MESSAGE="message";
-        private JSONParser jsonParser;
 
-        @Override
-        protected void onPreExecute()
-        {
-            Log.d("BNOTIFICATIONS: ","starting....");
-            super.onPreExecute();
-            jsonParser = new JSONParser();
-        }
-        @Override
-        protected Boolean doInBackground(Void... params)
-        {
-            //getting columns list
-            List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
-            info.add(new BasicNameValuePair("id",Integer.toString(serverAccount.getId())));
 
-            JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_b_notifications,"POST",info);
-            Log.d("bNotis",""+jsonObject.toString());
-            try
-            {
-                JSONArray notisArrayList=null;
-                int success=jsonObject.getInt(TAG_SUCCESS);
-                if(success==1)
-                {
-                    notisArrayList=jsonObject.getJSONArray("notis");
-                    for(int count=0; count<notisArrayList.length(); count+=1)
-                    {
-                        JSONObject jsonObjectNotis=notisArrayList.getJSONObject(count);
-                        int id=jsonObjectNotis.getInt("id");
-                        int classes=jsonObjectNotis.getInt("classes");
-                        String message=jsonObjectNotis.getString("messages");
-                        String date=jsonObjectNotis.getString("dateadded");
-                        BMessages oneBMessage=new BMessages(id,classes,message,date);
-                        bMessagesList.put(String.valueOf(id),oneBMessage);
-                    }
-                    return true;
-                }
-                else
-                {
-                    String message=jsonObject.getString(TAG_MESSAGE);
-                    Log.e(TAG_MESSAGE,""+message);
-                    return false;
-                }
-            }
-            catch (JSONException e)
-            {
-                Log.e("JSON",""+e.getMessage());
-                return false;
-            }
-        }
-        @Override
-        protected void onPostExecute(final Boolean successful) {
-            Log.d("BNOTIFICATIONS: ","finished...."+"progress: "+String.valueOf(loginProgress));
-            loginProgress+=1;
-            if(who==0)
-            {
-                if (loginProgress == sFinalProgress)
-                    stopService(intentLoginProgress);
-            }
-            else
-            {
-                if (loginProgress == bFinalProgress)
-                    stopService(intentLoginProgress);
-            }
-
-            if (successful)
-            {
-
-            }
-            else
-            {
-
-            }
-        }
-    }
-    /**
-     * Following code will get the buyers orders
-     * The returned infos are id, itemId, orderNumber, orderStatus, orderName, price, dateAdded,
-     * * Arguments are:
-     * id==boss id.
-     * Returns are:
-     * success==1 successful get
-     * success==0 for id argument missing
-     **/
-    private class BOrdersTask extends AsyncTask<Void, Void, Boolean>
-    {
-        private String url_get_b_orders = base_url + "get_buyer_orders.php";
-        private String TAG_SUCCESS="success";
-        private String TAG_MESSAGE="message";
-        private JSONParser jsonParser;
-        @Override
-        protected void onPreExecute()
-        {
-            jsonParser = new JSONParser();
-            Log.d("BORDERS: ","starting....");
-            if(!bOrdersList.isEmpty())bOrdersList.clear();
-            super.onPreExecute();
-        }
-        @Override
-        protected Boolean doInBackground(Void... params)
-        {
-            //getting columns list
-            List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
-            info.add(new BasicNameValuePair("userid",Integer.toString(serverAccount.getId())));
-            // making HTTP request
-            JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_b_orders,"POST",info);
-            Log.d("sItems",""+jsonObject.toString());
-            try
-            {
-                JSONArray itemsArrayList=null;
-                int success=jsonObject.getInt(TAG_SUCCESS);
-                if(success==1)
-                {
-                    itemsArrayList=jsonObject.getJSONArray("items");
-                    for(int count=0; count<itemsArrayList.length(); count+=1)
-                    {
-                        JSONObject jsonObjectNotis=itemsArrayList.getJSONObject(count);
-                        int id=jsonObjectNotis.getInt("id");
-                        int item_id=jsonObjectNotis.getInt("itemid");
-                        int order_number=jsonObjectNotis.getInt("ordernumber");
-                        int orderstatus=jsonObjectNotis.getInt("orderstatus");
-                        int table_number=jsonObjectNotis.getInt("table_number");
-                        String dateadded=jsonObjectNotis.getString("dateadded");
-                        String datechanged=jsonObjectNotis.getString("datechanged");
-                        String item=jsonObjectNotis.getString("item");
-                        double selling_price=jsonObjectNotis.getDouble("sellingprice");
-                        int order_format=jsonObjectNotis.getInt("order_format");
-                        String restaurant=jsonObjectNotis.getString("restaurant_name");
-                        String waiter_names=jsonObjectNotis.getString("waiter_names");
-
-                        BOrders bOrders=new BOrders(id,item_id,order_number,orderstatus,item,selling_price, order_format,table_number,restaurant,waiter_names,dateadded);
-                        bOrdersList.put(id,bOrders);
-                    }
-                    return true;
-                }
-                else
-                {
-                    String message=jsonObject.getString(TAG_MESSAGE);
-                    Log.e(TAG_MESSAGE,""+message);
-                    return false;
-                }
-            }
-            catch (JSONException e)
-            {
-                Log.e("JSON",""+e.getMessage());
-                return false;
-            }
-        }
-        @Override
-        protected void onPostExecute(final Boolean successful) {
-            Log.d("BORDERS: ","finished...."+"progress: "+String.valueOf(loginProgress));
-            loginProgress+=1;
-            if(who==0)
-            {
-                if (loginProgress == sFinalProgress)
-                    stopService(intentLoginProgress);
-            }
-            else
-            {
-                if (loginProgress == bFinalProgress)
-                    stopService(intentLoginProgress);
-            }
-
-            if (successful)
-            {
-
-            }
-            else
-            {
-
-            }
-        }
-    }
 
 
 

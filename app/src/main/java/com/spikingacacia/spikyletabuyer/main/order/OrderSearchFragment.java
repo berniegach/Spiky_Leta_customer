@@ -11,17 +11,14 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 
 import com.spikingacacia.spikyletabuyer.R;
-import com.spikingacacia.spikyletabuyer.orders.BOOrderC;
-import com.spikingacacia.spikyletabuyer.orders.BOOrderF;
-import com.spikingacacia.spikyletabuyer.restaurants.SRRestaurantsF;
 
-public class OrderFragment extends Fragment
+public class OrderSearchFragment extends Fragment
 {
     private OnFragmentInteractionListener mListener;
 
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        View view = inflater.inflate(R.layout.fragment_order, container, false);
+        View view = inflater.inflate(R.layout.fragment_order_search, container, false);
         Button scan = view.findViewById(R.id.scan);
         Button use_my_location = view.findViewById(R.id.use_my_location);
         scan.setOnClickListener(new View.OnClickListener()
