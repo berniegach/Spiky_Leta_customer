@@ -16,6 +16,11 @@
         android:label="Menu"
         tools:layout="@layout/fragment_order_search" />
     <fragment
+        android:id="@+id/navigation_explore"
+        android:name="com.spikingacacia.spikyletabuyer.main.map.MapsFragment"
+        android:label="Explore"
+        tools:layout="@layout/fragment_maps" />
+    <fragment
         android:id="@+id/navigation_orders"
         android:name="com.spikingacacia.spikyletabuyer.main.orders_list.OrdersFragment"
         android:label="Order"

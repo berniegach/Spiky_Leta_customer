@@ -43,7 +43,7 @@ import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.SettingsActivity;
 import com.spikingacacia.spikyletabuyer.barcode.BarcodeCaptureActivity;
 import com.spikingacacia.spikyletabuyer.database.Adverts;
-import com.spikingacacia.spikyletabuyer.database.BRestaurants;
+import com.spikingacacia.spikyletabuyer.database.Restaurants;
 import com.spikingacacia.spikyletabuyer.database.Orders;
 import com.spikingacacia.spikyletabuyer.main.board.AdvertsFragment;
 import com.spikingacacia.spikyletabuyer.main.order.OrderSearchFragment;
@@ -84,7 +84,8 @@ public class MainActivity extends AppCompatActivity implements
     private ProgressBar progressBar;
     private View mainFragment;
     private String TAG="MainA";
-    public static  List<BRestaurants>bRestaurantsList;
+    public static  List<Restaurants> restaurantsList;
+    private static boolean useQrCode = false;
     ActivityResultLauncher<Intent> mGetBarcode = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             new ActivityResultCallback<ActivityResult>() {
                 @Override
@@ -164,7 +165,7 @@ public class MainActivity extends AppCompatActivity implements
             }
         };
         //thread.start();
-        bRestaurantsList=new LinkedList<>();
+        restaurantsList =new LinkedList<>();
     }
 
     @Override
@@ -243,7 +244,7 @@ public class MainActivity extends AppCompatActivity implements
     {
         if (requestCode == PERMISSION_REQUEST_INTERNET && resultCode == RESULT_OK )
         {
-            getCurrentLocation();
+            getCurrentLocation(null);
         }
         else
         {
@@ -252,9 +253,10 @@ public class MainActivity extends AppCompatActivity implements
     }
     void barcodeReceived(Barcode barcode)
     {
-        new RestaurantQRTask(barcode.displayValue).execute((Void)null);
+        showProgress(true);
+        getCurrentLocation(barcode);
     }
-    private void getCurrentLocation()
+    private void getCurrentLocation(final Barcode barcode)
     {
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
         {
@@ -277,7 +279,10 @@ public class MainActivity extends AppCompatActivity implements
                                 {
                                     addresses=geocoder.getFromLocation(latitude,longitude,10);
                                     Log.d("LOCATIONS: ", "lat: "+latitude+" long: "+longitude);
-                                    new RestaurantsTask(String.valueOf(latitude),String.valueOf(longitude),addresses.get(0).getLocality()).execute((Void)null);
+                                    if(useQrCode)
+                                        new RestaurantQRTask(String.valueOf(latitude),String.valueOf(longitude),addresses.get(0).getLocality(),barcode.displayValue).execute((Void)null);
+                                    else
+                                        new RestaurantsTask(String.valueOf(latitude),String.valueOf(longitude),addresses.get(0).getLocality()).execute((Void)null);
                                     for(int c=0; c<addresses.size(); c+=1)
                                         Log.d("loc: ",addresses.get(c).getLocality()+"\n");
                                 }
@@ -301,7 +306,7 @@ public class MainActivity extends AppCompatActivity implements
     }
     private void showRestaurants()
     {
-        if(bRestaurantsList.size()==0)
+        if(restaurantsList.size()==0)
         {
             Snackbar.make(getWindow().getDecorView().getRootView(), "No restaurants near you.", Snackbar.LENGTH_LONG)
                     .setAction("Retry", new View.OnClickListener()
@@ -309,7 +314,7 @@ public class MainActivity extends AppCompatActivity implements
                         @Override
                         public void onClick(View v)
                         {
-                            getCurrentLocation();
+                            getCurrentLocation(null);
                         }
                     });
             return;
@@ -358,12 +363,13 @@ public class MainActivity extends AppCompatActivity implements
             Intent intent = new Intent(this, BarcodeCaptureActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
             mGetBarcode.launch(intent);
+            useQrCode = true;
         }
         else if(id==2)
         {
             //get the users location
             showProgress(true);
-            getCurrentLocation();
+            getCurrentLocation(null);
         }
     }
 
@@ -416,8 +422,8 @@ implementation of OrdersFragment.java
         {
 
             Log.d("CRESTAUNRANTS: ","starting....");
-            if(!bRestaurantsList.isEmpty())
-                bRestaurantsList.clear();
+            if(!restaurantsList.isEmpty())
+                restaurantsList.clear();
             super.onPreExecute();
         }
         @Override
@@ -454,9 +460,10 @@ implementation of OrdersFragment.java
                         int order_radius=jsonObject_restaurants.getInt("order_radius");
                         int tables = jsonObject_restaurants.getInt("number_of_tables");
                         String image_type=jsonObject_restaurants.getString("image_type");
+                        int table_number = jsonObject_restaurants.getInt("table_number");
 
-                        BRestaurants bRestaurants=new BRestaurants(id, email, names,distance,latitude,longitude,locality,order_radius, tables, image_type);
-                        bRestaurantsList.add(bRestaurants);
+                        Restaurants restaurants =new Restaurants(id, email, names,distance,latitude,longitude,locality,order_radius, tables, image_type, table_number);
+                        restaurantsList.add(restaurants);
                     }
                     return true;
                 }
@@ -494,21 +501,21 @@ implementation of OrdersFragment.java
         private String TAG_MESSAGE="message";
         private JSONParser jsonParser;
         //final private String country;
-        final private String email;
-        String seller_email;
-        String username;
-        int online;
-        int deliver;
-        String country;
-        String location;
-        int order_radius;
-        int order_format;
-        int number_of_tables;
+        final private String latitude;
+        final private String longitude;
+        final private String location;
+        final private String barcode;
 
-        public RestaurantQRTask( String email)
+
+        public RestaurantQRTask( String latitude, String longitude, String location, String barcode)
         {
-            this.email=email;
-            jsonParser = new JSONParser();
+            this.latitude=latitude;
+            this.longitude=longitude;
+            this.location=location;
+            this.barcode = barcode;
+            jsonParser=new JSONParser();
+            if(!restaurantsList.isEmpty())
+                restaurantsList.clear();
         }
         @Override
         protected Boolean doInBackground(Void... params)
@@ -516,239 +523,44 @@ implementation of OrdersFragment.java
             //getting columns list
             List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
             //info.add(new BasicNameValuePair("country",country));
-            info.add(new BasicNameValuePair("email",email));
+            info.add(new BasicNameValuePair("latitude",latitude));
+            info.add(new BasicNameValuePair("longitude",longitude));
+            info.add(new BasicNameValuePair("location",location));
+            info.add(new BasicNameValuePair("which","1"));
             // making HTTP request
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_restaurants_qr,"POST",info);
-            Log.d("cTasks",""+jsonObject.toString());
             try
             {
                 JSONArray restArrayList=null;
                 int success=jsonObject.getInt(TAG_SUCCESS);
                 if(success==1)
                 {
-                    //seccesful
-                    JSONArray accountArray=jsonObject.getJSONArray("account");
-                    JSONObject accountObject=accountArray.getJSONObject(0);
-
-                    seller_email = accountObject.getString("seller_email");
-                    username = accountObject.getString("username");
-                    online = accountObject.getInt("online");
-                    deliver = accountObject.getInt("deliver");
-                    country = accountObject.getString("country");
-                    location = accountObject.getString("location");
-                    order_radius = accountObject.getInt("order_radius");
-                    order_format = accountObject.getInt("order_format");
-                    number_of_tables = accountObject.getInt("number_of_tables");
-                    return true;
-                }
-                else
-                {
-                    String message=jsonObject.getString(TAG_MESSAGE);
-                    Log.e(TAG_MESSAGE,""+message);
-                    return false;
-                }
-            }
-            catch (JSONException e)
-            {
-                Log.e("JSON",""+e.getMessage());
-                return false;
-            }
-        }
-        @Override
-        protected void onPostExecute(final Boolean successful)
-        {
-
-            if (successful)
-            {
-                run_shop(seller_email,order_radius,5,number_of_tables);
-            }
-            else
-            {
-                Toast.makeText(getBaseContext(),"Error getting restaurant",Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-   /* private class UpdateOrderTask extends AsyncTask<Void, Void, Boolean>
-    {
-        private String url_update=base_url+"update_order.php";
-        private String TAG_SUCCESS="success";
-        private String TAG_MESSAGE="message";
-        private JSONParser jsonParser;
-        final private String orderNumber;
-        private final String dateAdded;
-        private final String orderStatus;
-        private final String storeEmail;
-
-        public  UpdateOrderTask(String storeEmail, String orderNumber, String dateAdded, String orderStatus)
-        {
-            this.storeEmail = storeEmail;
-            this.orderNumber = orderNumber;
-            this.dateAdded = dateAdded;
-            this.orderStatus = orderStatus; // order status for unpaid order is -1, delete is 0 and for a succesful order is 1
-            jsonParser = new JSONParser();
-        }
-        @Override
-        protected Boolean doInBackground(Void... params)
-        {
-            //getting columns list
-            List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
-            info.add(new BasicNameValuePair("store_email",storeEmail));
-            info.add(new BasicNameValuePair("user_email",account.getEmail()));
-            info.add(new BasicNameValuePair("assistant_email", "null"));
-            info.add(new BasicNameValuePair("order_number",orderNumber));
-            info.add(new BasicNameValuePair("status",orderStatus));
-            info.add(new BasicNameValuePair("date_added",dateAdded));
-
-            // making HTTP request
-            JSONObject jsonObject= jsonParser.makeHttpRequest(url_update,"POST",info);
-            try
-            {
-                int success=jsonObject.getInt(TAG_SUCCESS);
-                if(success==1)
-                {
-                    return true;
-                }
-                else
-                {
-                    String message=jsonObject.getString(TAG_MESSAGE);
-                    Log.e(TAG_MESSAGE,""+message);
-                    return false;
-                }
-            }
-            catch (JSONException e)
-            {
-                Log.e("JSON",""+e.getMessage());
-                return false;
-            }
-        }
-        @Override
-        protected void onPostExecute(final Boolean successful)
-        {
-            if (successful )
-            {
-            }
-            else
-            {
-                //Snackbar.make(fab,"Order was not successful.\nPlease try again.",Snackbar.LENGTH_LONG).show();
-            }
-        }
-    }
-    private class MpesaCheckPayStatus extends AsyncTask<Void, Void, Boolean>
-    {
-        String businessShortCode;
-        String password;
-        String timestamp;
-        String checkoutRequestID;
-        private String orderNumber;
-        private String dateAdded;
-        private String storeEmail;
-        private boolean orderPaymentCancelled;
-        public MpesaCheckPayStatus(String storeEmail,String businessShortCode, String password, String timestamp, String checkoutRequestID, String orderNumber, String dateAdded)
-        {
-            this.businessShortCode = businessShortCode;
-            this.password = password;
-            this.timestamp = timestamp;
-            this.checkoutRequestID = checkoutRequestID;
-            this.orderNumber = orderNumber;
-            this.dateAdded = dateAdded;
-            this.storeEmail = storeEmail;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... voids)
-        {
-            try
-            {
-                JSONObject jsonObject = Mpesa.STKPushTransactionStatus(businessShortCode,password,timestamp,checkoutRequestID);
-
-                Log.d(TAG,"JSON"+jsonObject.toString());
-                String  ResponseCode = jsonObject.getString("ResponseCode");
-                if(ResponseCode.contentEquals("0"))
-                {
-                    String ResponseDescription = jsonObject.getString("ResponseDescription");
-                    String MerchantRequestID = jsonObject.getString("MerchantRequestID");
-                    String ResultCode = jsonObject.getString("ResultCode");
-                    String ResultDesc = jsonObject.getString("ResultDesc");
-                    if(ResultCode.contentEquals("1032"))
-                        return false;// the result was cancelled by the user
-                    else if(ResultCode.contentEquals("1037"))
-                        return false;// DS timeout
-                    else if(ResultCode.contentEquals("0"))
-                        return true; // paid
-
-                    return false;
-                }
-            }
-            catch (IOException | JSONException e)
-            {
-                Log.e(TAG," "+e.getMessage());
-                e.printStackTrace();
-                return false;
-            }
-
-            return false;
-        }
-        @Override
-        protected void onPostExecute(final Boolean successful)
-        {
-
-            if (successful)
-            {
-                //check the status
-                new UpdateOrderTask(storeEmail,orderNumber, dateAdded,"-1").execute((Void)null);
-            }
-
-        }
-    }
-    private class MpesaGetPayStatus extends AsyncTask<Void, Void, Boolean>
-    {
-        private String url_get_status=base_url+"get_m_requests.php";
-        private String TAG_SUCCESS="success";
-        private String TAG_MESSAGE="message";
-        private JSONParser jsonParser;
-        public MpesaGetPayStatus()
-        {
-            jsonParser = new JSONParser();
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... voids)
-        {
-            //getting columns list
-            List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
-            info.add(new BasicNameValuePair("user_email",account.getEmail()));
-
-            // making HTTP request
-            JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_status,"POST",info);
-            try
-            {
-                int success=jsonObject.getInt(TAG_SUCCESS);
-                JSONArray jsonArray=null;
-                if(success==1)
-                {
-                    jsonArray = jsonObject.getJSONArray("items");
-                    //Log.d(TAG,jsonArray.toString());
-                    for (int count = 0; count < jsonArray.length(); count += 1)
+                    restArrayList=jsonObject.getJSONArray("restaurants");
+                    restArrayList=restArrayList.getJSONArray(0);
+                    for(int count=0; count<restArrayList.length(); count+=1)
                     {
-                        JSONObject jsonObjectItems = jsonArray.getJSONObject(count);
-                        int id = jsonObjectItems.getInt("id");
-                        String store_email = jsonObjectItems.getString("store_email");
-                        String order_number = jsonObjectItems.getString("order_number");
-                        String date_added = jsonObjectItems.getString("date_added");
-                        String business_shortcode = jsonObjectItems.getString("business_shortcode");
-                        String password = jsonObjectItems.getString("password");
-                        String timestamp = jsonObjectItems.getString("timestamp");
-                        String chequeout_request_id = jsonObjectItems.getString("chequeout_request_id");
+                        JSONObject jsonObject_restaurants=restArrayList.getJSONObject(count);
+                        int id=jsonObject_restaurants.getInt("id");
+                        String email = jsonObject_restaurants.getString("email");
+                        String names=jsonObject_restaurants.getString("username");
+                        double distance=jsonObject_restaurants.getDouble("distance");
+                        double latitude=jsonObject_restaurants.getDouble("latitude");
+                        double longitude=jsonObject_restaurants.getDouble("longitude");
+                        String locality=jsonObject_restaurants.getString("locality");
+                        int order_radius=jsonObject_restaurants.getInt("order_radius");
+                        int tables = jsonObject_restaurants.getInt("number_of_tables");
+                        String image_type=jsonObject_restaurants.getString("image_type");
+                        int table_number = jsonObject_restaurants.getInt("table_number");
 
-                        MpesaRequests mpesaRequests = new MpesaRequests(id,store_email,order_number,date_added,business_shortcode,password,timestamp,chequeout_request_id);
-                        mpesaRequestsList.add(mpesaRequests);
+                        Restaurants restaurants =new Restaurants(id, email, names,distance,latitude,longitude,locality,order_radius, tables, image_type, table_number);
+                        restaurantsList.add(restaurants);
                     }
                     return true;
                 }
                 else
                 {
                     String message=jsonObject.getString(TAG_MESSAGE);
-                    //Log.e(TAG_MESSAGE,""+message);
+                    Log.e(TAG_MESSAGE,""+message);
                     return false;
                 }
             }
@@ -762,19 +574,16 @@ implementation of OrdersFragment.java
         protected void onPostExecute(final Boolean successful)
         {
 
+            showProgress(false);
+            useQrCode = false;
             if (successful)
             {
-                //we have the mpesa ststaus now
-                //proceed to check the mpesa status
-                for(int c=0; c<mpesaRequestsList.size(); c++)
-                {
-                    MpesaRequests mpesaRequests = mpesaRequestsList.get(c);
-                    new MpesaCheckPayStatus(mpesaRequests.getStore_email(),mpesaRequests.getBusiness_shortcode(),mpesaRequests.getPassword(),mpesaRequests.getTimestamp(),
-                            mpesaRequests.getChequeout_request_id(), mpesaRequests.getOrder_number(), mpesaRequests.getDate_added()).execute((Void)null);
-                }
-
+                showRestaurants();
             }
-
+            else
+            {
+                Toast.makeText(getBaseContext(),"Error getting restaurants",Toast.LENGTH_SHORT).show();
+            }
         }
-    }*/
+    }
 }

@@ -1,6 +1,6 @@
 package com.spikingacacia.spikyletabuyer.database;
 
-public class BRestaurants
+public class Restaurants
 {
     private int id;
     private String email;
@@ -12,9 +12,10 @@ public class BRestaurants
     private int radius;
     private int numberOfTables;
     private String image_type;
+    private int tableNumber;
 
 
-    public BRestaurants(int id, String email, String names, double distance, double latitude, double longitude, String locality, int radius, int numberOfTables, String image_type)
+    public Restaurants(int id, String email, String names, double distance, double latitude, double longitude, String locality, int radius, int numberOfTables, String image_type, int tableNumber)
     {
         this.id = id;
         this.email = email;
@@ -26,6 +27,7 @@ public class BRestaurants
         this.radius=radius;
         this.numberOfTables=numberOfTables;
         this.image_type = image_type;
+        this.tableNumber = tableNumber;
     }
 
     public int getId()
@@ -122,6 +124,15 @@ public class BRestaurants
     public void setImage_type(String image_type)
     {
         this.image_type = image_type;
+    }
+    public int getTableNumber()
+    {
+        return tableNumber;
+    }
+
+    public void setTableNumber(int tableNumber)
+    {
+        this.tableNumber = tableNumber;
     }
 
 }

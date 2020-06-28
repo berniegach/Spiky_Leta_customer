@@ -1,9 +1,16 @@
-package com.spikingacacia.spikyletabuyer;
+package com.spikingacacia.spikyletabuyer.main.map;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
 
 import android.Manifest;
 import android.app.Dialog;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -11,27 +18,25 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.FragmentActivity;
-
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.spikingacacia.spikyletabuyer.JSONParser;
+import com.spikingacacia.spikyletabuyer.MapsExploreA;
+import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.database.Restaurants;
 
 import org.apache.http.NameValuePair;
@@ -49,116 +54,128 @@ import java.util.Locale;
 
 import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
 
-public class MapsExploreA extends FragmentActivity implements
-        OnMapReadyCallback,
-        GoogleMap.OnMyLocationButtonClickListener,
-        GoogleMap.OnMyLocationClickListener,
-            ActivityCompat.OnRequestPermissionsResultCallback
+public class MapsFragment extends Fragment implements  ActivityCompat.OnRequestPermissionsResultCallback
 {
     private static final int PERMISSION_REQUEST_INTERNET=2;
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private boolean mPermissionDenied = false;
     private GoogleMap mMap;
-    private LatLng latMyPos;
-    private FusedLocationProviderClient mFusedLocationClient ;
     private float maxZoomLevel;
-    private int who;
-    private String location;
-    private String TAG="MapsA";
-    private Marker myMarker;
-    private View mapView;
-    private String url_get_restaurants=base_url+"get_near_restaurants.php";
-    private String TAG_SUCCESS="success";
-    private String TAG_MESSAGE="message";
-    private JSONParser jsonParser;
+    private FusedLocationProviderClient mFusedLocationClient ;
     public static  List<Restaurants> restaurantsList;
+    private View mapView;
+    private OnMapReadyCallback callback = new OnMapReadyCallback()
+    {
+
+        /**
+         * Manipulates the map once available.
+         * This callback is triggered when the map is ready to be used.
+         * This is where we can add markers or lines, add listeners or move the camera.
+         * In this case, we just add a marker near Sydney, Australia.
+         * If Google Play services is not installed on the device, the user will be prompted to
+         * install it inside the SupportMapFragment. This method will only be triggered once the
+         * user has installed Google Play services and returned to the app.
+         */
+        @Override
+        public void onMapReady(GoogleMap googleMap)
+        {
+            mMap = googleMap;
+            maxZoomLevel=googleMap.getMaxZoomLevel();
+            if(maxZoomLevel>=15)
+                maxZoomLevel=15;
+            Log.d("loc",String.format("min: %f, max: %f",googleMap.getMinZoomLevel(),googleMap.getMaxZoomLevel()));
+            ////
+            mMap.setOnMyLocationButtonClickListener(new GoogleMap.OnMyLocationButtonClickListener()
+            {
+                @Override
+                public boolean onMyLocationButtonClick()
+                {
+                    Toast.makeText(getContext(), "Using my Location", Toast.LENGTH_SHORT).show();
+                    // Return false so that we don't consume the event and the default behavior still occurs
+                    // (the camera animates to the user's current position).
+                    return false;
+                }
+            });
+           // mMap.setOnMyLocationClickListener(thi);
+            enableMyLocation();
+            //set the mylocation button position
+            if(mapView!=null && mapView.findViewById(Integer.parseInt("1"))!=null)
+            {
+                //get the button view
+                View locationButton=((View)mapView.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
+                //place it on bottom right
+                RelativeLayout.LayoutParams layoutParams=(RelativeLayout.LayoutParams)locationButton.getLayoutParams();
+                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP,RelativeLayout.TRUE);
+                layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM,0);
+                layoutParams.setMargins(50,100,0,0);
+            }
+            getCurrentLocation();
+        }
+    };
+
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState)
+    {
+        View view= inflater.inflate(R.layout.fragment_maps, container, false);
+        mFusedLocationClient= LocationServices.getFusedLocationProviderClient(getActivity());
+        return view;
+    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState)
     {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.a_maps_explore);
-        //get intent
-        Intent intent=getIntent();
-        who=intent.getIntExtra("who",0);
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-        mFusedLocationClient= LocationServices.getFusedLocationProviderClient(this);
+        super.onViewCreated(view, savedInstanceState);
+        SupportMapFragment mapFragment =    (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
+        if (mapFragment != null)
+        {
+            mapFragment.getMapAsync(callback);
+        }
         mapView=mapFragment.getView();
-        jsonParser=new JSONParser();
         restaurantsList =new LinkedList<>();
     }
-
-
-    /**
-     * Manipulates the map once available.
-     * This callback is triggered when the map is ready to be used.
-     * This is where we can add markers or lines, add listeners or move the camera. In this case,
-     * we just add a marker near Sydney, Australia.
-     * If Google Play services is not installed on the device, the user will be prompted to install
-     * it inside the SupportMapFragment. This method will only be triggered once the user has
-     * installed Google Play services and returned to the app.
-     */
     @Override
-    public void onMapReady(GoogleMap googleMap)
-    {
-        mMap = googleMap;
-        maxZoomLevel=googleMap.getMaxZoomLevel();
-        if(maxZoomLevel>=15)
-            maxZoomLevel=15;
-        Log.d("loc",String.format("min: %f, max: %f",googleMap.getMinZoomLevel(),googleMap.getMaxZoomLevel()));
-        ////
-        mMap.setOnMyLocationButtonClickListener(this);
-        mMap.setOnMyLocationClickListener(this);
-        enableMyLocation();
-        //set the mylocation button position
-        if(mapView!=null && mapView.findViewById(Integer.parseInt("1"))!=null)
-        {
-            //get the button view
-            View locationButton=((View)mapView.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
-            //place it on bottom right
-            RelativeLayout.LayoutParams layoutParams=(RelativeLayout.LayoutParams)locationButton.getLayoutParams();
-            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP,RelativeLayout.TRUE);
-            layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM,0);
-            layoutParams.setMargins(50,100,0,0);
+    public void onResume() {
+        super.onResume();
+        if (mPermissionDenied) {
+            // Permission was not granted, display error dialog.
+            showMissingPermissionError();
+            mPermissionDenied = false;
         }
-        getCurrentLocation();
     }
-
     private void getCurrentLocation()
     {
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+        if(ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
         {
             //get the users location
             mFusedLocationClient.getLastLocation()
-                    .addOnSuccessListener(this, new OnSuccessListener<Location>()
+                    .addOnSuccessListener( new OnSuccessListener<Location>()
                     {
                         @Override
                         public void onSuccess(Location location)
                         {
                             //Get last known location. In some rare situations this can be null
-                            if(location!=null)
+                            if (location != null)
                             {
                                 //Get last known location. In some rare situations this can be null
-                                if(location!=null)
+                                if (location != null)
                                 {
-                                    double latitude=location.getLatitude();
-                                    double longitude=location.getLongitude();
+                                    double latitude = location.getLatitude();
+                                    double longitude = location.getLongitude();
                                     //get addresses
-                                    Geocoder geocoder=new Geocoder(MapsExploreA.this, Locale.getDefault());
+                                    Geocoder geocoder = new Geocoder(getContext(), Locale.getDefault());
                                     List<Address> addresses;
                                     try
                                     {
-                                        addresses=geocoder.getFromLocation(latitude,longitude,10);
-                                        new RestaurantsTask(String.valueOf(latitude),String.valueOf(longitude),addresses.get(0).getLocality()).execute((Void)null);
-                                        for(int c=0; c<addresses.size(); c+=1)
-                                            Log.d("loc: ",addresses.get(c).getLocality()+"\n");
-                                    }
-                                    catch (IOException e)
+                                        addresses = geocoder.getFromLocation(latitude, longitude, 10);
+                                        new RestaurantsTask(String.valueOf(latitude), String.valueOf(longitude), addresses.get(0).getLocality()).execute((Void) null);
+                                        for (int c = 0; c < addresses.size(); c += 1)
+                                            Log.d("loc: ", addresses.get(c).getLocality() + "\n");
+                                    } catch (IOException e)
                                     {
-                                        Log.e("address",""+e.getMessage());
+                                        Log.e("address", "" + e.getMessage());
                                     }
                                 }
 
@@ -170,42 +187,23 @@ public class MapsExploreA extends FragmentActivity implements
         //request the permission
         else
         {
-            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},PERMISSION_REQUEST_INTERNET);
+            ActivityCompat.requestPermissions(getActivity(),new String[]{Manifest.permission.ACCESS_FINE_LOCATION},PERMISSION_REQUEST_INTERNET);
         }
     }
-
-
-
-
     /**
      * Enables the My Location layer if the fine location permission has been granted.
      */
     private void enableMyLocation() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)       != PackageManager.PERMISSION_GRANTED)
+        if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION)       != PackageManager.PERMISSION_GRANTED)
         {
             // Permission to access the location is missing.
-            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},PERMISSION_REQUEST_INTERNET);
+            ActivityCompat.requestPermissions(getActivity(),new String[]{Manifest.permission.ACCESS_FINE_LOCATION},PERMISSION_REQUEST_INTERNET);
         }
         else if (mMap != null) {
             // Access to the location has been granted to the app.
             mMap.setMyLocationEnabled(true);
         }
     }
-
-    @Override
-    public boolean onMyLocationButtonClick() {
-        Toast.makeText(this, "Using my Location", Toast.LENGTH_SHORT).show();
-        // Return false so that we don't consume the event and the default behavior still occurs
-        // (the camera animates to the user's current position).
-        return false;
-    }
-
-    @Override
-    public void onMyLocationClick(@NonNull Location location)
-    {
-        //
-    }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
                                            @NonNull int[] grantResults)
@@ -226,23 +224,12 @@ public class MapsExploreA extends FragmentActivity implements
             mPermissionDenied = true;
         }
     }
-
-    @Override
-    protected void onResumeFragments() {
-        super.onResumeFragments();
-        if (mPermissionDenied) {
-            // Permission was not granted, display error dialog.
-            showMissingPermissionError();
-            mPermissionDenied = false;
-        }
-    }
-
     /**
      * Displays a dialog with error message explaining that the location permission is missing.
      */
     private void showMissingPermissionError() {
         PermissionDeniedDialog
-                .newInstance(true).show(getSupportFragmentManager(), "dialog");
+                .newInstance(true).show(getFragmentManager(), "dialog");
     }
     /**
      * Checks if the result contains a {@link PackageManager#PERMISSION_GRANTED} result for a
@@ -272,11 +259,11 @@ public class MapsExploreA extends FragmentActivity implements
          * Creates a new instance of this dialog and optionally finishes the calling Activity
          * when the 'Ok' button is clicked.
          */
-        public static PermissionDeniedDialog newInstance(boolean finishActivity) {
+        public static MapsExploreA.PermissionDeniedDialog newInstance(boolean finishActivity) {
             Bundle arguments = new Bundle();
             arguments.putBoolean(ARGUMENT_FINISH_ACTIVITY, finishActivity);
 
-            PermissionDeniedDialog dialog = new PermissionDeniedDialog();
+            MapsExploreA.PermissionDeniedDialog dialog = new MapsExploreA.PermissionDeniedDialog();
             dialog.setArguments(arguments);
             return dialog;
         }
@@ -332,10 +319,14 @@ public class MapsExploreA extends FragmentActivity implements
      **/
     private class RestaurantsTask extends AsyncTask<Void, Void, Boolean>
     {
+        private String url_get_restaurants=base_url+"get_near_restaurants.php";
+        private String TAG_SUCCESS="success";
+        private String TAG_MESSAGE="message";
         //final private String country;
         final private String latitude;
         final private String longitude;
         final private String location;
+        private JSONParser jsonParser;
 
         public RestaurantsTask( String latitude, String longitude, String location)
         {
@@ -343,6 +334,7 @@ public class MapsExploreA extends FragmentActivity implements
             this.latitude=latitude;
             this.longitude=longitude;
             this.location=location;
+            jsonParser = new JSONParser();
         }
         @Override
         protected void onPreExecute()
@@ -418,10 +410,8 @@ public class MapsExploreA extends FragmentActivity implements
             }
             else
             {
-                Toast.makeText(getBaseContext(),"Error getting restaurants",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(),"Error getting restaurants",Toast.LENGTH_SHORT).show();
             }
         }
     }
-
-
 }

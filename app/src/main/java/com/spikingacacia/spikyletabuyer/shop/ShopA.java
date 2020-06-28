@@ -56,6 +56,7 @@ public class ShopA extends AppCompatActivity
     private int sellerOrderRadius=2;
     private double buyerDistance=0;
     private int numberOfTables=10;
+    private int tableNumber;
     private int backgroundTasksProgress=0;
     private final int finalProgressCount=3;
     int whichFragment=1;
@@ -82,6 +83,7 @@ public class ShopA extends AppCompatActivity
         sellerOrderRadius=getIntent().getIntExtra("order_radius",2);
         buyerDistance=getIntent().getDoubleExtra("buyer_distance",0);
         numberOfTables=getIntent().getIntExtra("number_of_tables",10);
+        tableNumber=getIntent().getIntExtra("table_number",-1);
         setTitle("Menu");
 
         Fragment fragment= menuFragment.newInstance();
@@ -218,30 +220,35 @@ public class ShopA extends AppCompatActivity
             return;
         }
         Log.d("distance:",buyerDistance+":"+sellerOrderRadius);
-        final NumberPicker numberPicker=new NumberPicker(getBaseContext());
-        numberPicker.setMinValue(1);
-        numberPicker.setMaxValue(numberOfTables);
-        new androidx.appcompat.app.AlertDialog.Builder(ShopA.this)
-                .setTitle("Table Number?")
-                .setView(numberPicker)
-                .setNegativeButton("Cancel", new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which)
+        if(tableNumber==-1)
+        {
+            final NumberPicker numberPicker=new NumberPicker(getBaseContext());
+            numberPicker.setMinValue(1);
+            numberPicker.setMaxValue(numberOfTables);
+            new androidx.appcompat.app.AlertDialog.Builder(ShopA.this)
+                    .setTitle("Table Number?")
+                    .setView(numberPicker)
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener()
                     {
-                        dialog.dismiss();
-                    }
-                })
-                .setPositiveButton("Proceed", new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which)
+                        @Override
+                        public void onClick(DialogInterface dialog, int which)
+                        {
+                            dialog.dismiss();
+                        }
+                    })
+                    .setPositiveButton("Proceed", new DialogInterface.OnClickListener()
                     {
-                        int tableNumber=numberPicker.getValue();
-                        new OrderTask(tableNumber).execute((Void)null);
-                    }
-                })
-                .create().show();
+                        @Override
+                        public void onClick(DialogInterface dialog, int which)
+                        {
+                            int tableNumber=numberPicker.getValue();
+                            new OrderTask(tableNumber).execute((Void)null);
+                        }
+                    })
+                    .create().show();
+        }
+        else
+            new OrderTask(tableNumber).execute((Void)null);
 
     }
 

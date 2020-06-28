@@ -12,16 +12,11 @@ import android.view.ViewGroup;
 import androidx.appcompat.widget.SearchView;
 import androidx.core.view.MenuItemCompat;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.spikingacacia.spikyletabuyer.R;
-import com.spikingacacia.spikyletabuyer.database.BRestaurants;
-import com.spikingacacia.spikyletabuyer.main.MainActivity;
-
-import java.util.Iterator;
-import java.util.List;
+import com.spikingacacia.spikyletabuyer.database.Restaurants;
 
 
 /**
@@ -123,6 +118,6 @@ public class SRRestaurantsF extends Fragment {
     }
 
     public interface OnListFragmentInteractionListener {
-        void onItemClicked(BRestaurants item);
+        void onItemClicked(Restaurants item);
     }
 }

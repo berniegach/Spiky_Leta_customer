@@ -10,6 +10,10 @@
         android:icon="@drawable/ic_restaurant"
         android:title="Menu"/>
     <item
+        android:id="@+id/navigation_explore"
+        android:icon="@drawable/ic_explore"
+        android:title="Explore"/>
+    <item
         android:id="@+id/navigation_orders"
         android:icon="@drawable/ic_baseline_list"
         android:title="orders" />

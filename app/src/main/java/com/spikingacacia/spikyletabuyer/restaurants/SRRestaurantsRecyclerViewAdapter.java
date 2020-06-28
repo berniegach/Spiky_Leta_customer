@@ -12,9 +12,8 @@ import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.spikingacacia.spikyletabuyer.AppController;
 import com.spikingacacia.spikyletabuyer.R;
-import com.spikingacacia.spikyletabuyer.CommonHelper;
 import com.spikingacacia.spikyletabuyer.LoginA;
-import com.spikingacacia.spikyletabuyer.database.BRestaurants;
+import com.spikingacacia.spikyletabuyer.database.Restaurants;
 import com.spikingacacia.spikyletabuyer.main.MainActivity;
 import com.spikingacacia.spikyletabuyer.restaurants.SRRestaurantsF.OnListFragmentInteractionListener;
 
@@ -23,17 +22,17 @@ import java.util.List;
 
 public class SRRestaurantsRecyclerViewAdapter extends RecyclerView.Adapter<SRRestaurantsRecyclerViewAdapter.ViewHolder>
 {
-    private final List<BRestaurants> mValues;
+    private final List<Restaurants> mValues;
     private final OnListFragmentInteractionListener mListener;
-    private List<BRestaurants>itemsCopy;
+    private List<Restaurants>itemsCopy;
     private final Context mContext;
     ImageLoader imageLoader = AppController.getInstance().getImageLoader();
 
     public SRRestaurantsRecyclerViewAdapter( OnListFragmentInteractionListener listener, Context context) {
         mValues = new ArrayList<>();
         itemsCopy=new ArrayList<>();
-        mValues.addAll(MainActivity.bRestaurantsList);
-        itemsCopy.addAll(MainActivity.bRestaurantsList);
+        mValues.addAll(MainActivity.restaurantsList);
+        itemsCopy.addAll(MainActivity.restaurantsList);
         mListener = listener;
         mContext=context;
         if (imageLoader == null)
@@ -86,7 +85,7 @@ public class SRRestaurantsRecyclerViewAdapter extends RecyclerView.Adapter<SRRes
         else
         {
             text=text.toLowerCase();
-            for(BRestaurants item:itemsCopy)
+            for(Restaurants item:itemsCopy)
             {
                 if(item.getNames().toLowerCase().contains(text))
                     mValues.add(item);
@@ -101,7 +100,7 @@ public class SRRestaurantsRecyclerViewAdapter extends RecyclerView.Adapter<SRRes
         public final NetworkImageView mImageView;
         public final TextView mNamesView;
         public final TextView mDistanceView;
-        public BRestaurants mItem;
+        public Restaurants mItem;
 
         public ViewHolder(View view) {
             super(view);
