@@ -527,6 +527,7 @@ implementation of OrdersFragment.java
             info.add(new BasicNameValuePair("longitude",longitude));
             info.add(new BasicNameValuePair("location",location));
             info.add(new BasicNameValuePair("which","1"));
+            info.add(new BasicNameValuePair("url_code",barcode));
             // making HTTP request
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_restaurants_qr,"POST",info);
             try

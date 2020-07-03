@@ -301,6 +301,7 @@ public class ShopA extends AppCompatActivity
         private String TAG_MESSAGE = "message";
         private String TAG_SUCCESS = "success";
         private String itemsIds="";
+        private String itemPrices="";
         private int tableNumber=0;
 
 
@@ -331,6 +332,7 @@ public class ShopA extends AppCompatActivity
             info.add(new BasicNameValuePair("seller_email",sellerEmail));
             info.add(new BasicNameValuePair("user_email",serverAccount.getEmail()));
             info.add(new BasicNameValuePair("items_ids",itemsIds));
+            info.add(new BasicNameValuePair("items_prices",itemPrices));
             info.add(new BasicNameValuePair("table_number",String.valueOf(tableNumber)));
             // making HTTP request
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_place_order,"POST",info);
@@ -392,18 +394,18 @@ public class ShopA extends AppCompatActivity
                 //String priceString = inv.getPrices();
                 //final String[] prices = priceString.split(":");
                 //String[] sizes = inv.getSizes().split(":");
-                //String  price =  prices[pos].contentEquals("null")?"0":prices[pos];
+                String  price =  String.valueOf(inv.getSellingPrice());//prices[pos].contentEquals("null")?"0":prices[pos];
                 //String size = sizes[pos];
                 for(int c=0; c<quantity; c++)
                 {
                     if (!itemsIds.contentEquals(""))
                     {
                         itemsIds += ",";
-                        //itemPrices += ",";
+                        itemPrices += ",";
                         //itemSizes += ",";
                     }
                     itemsIds += String.valueOf(inv.getId());
-                    //itemPrices += price;
+                    itemPrices += price;
                     //itemSizes += size;
                 }
             }

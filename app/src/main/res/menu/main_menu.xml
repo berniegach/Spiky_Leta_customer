@@ -3,13 +3,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/action_settings"
-        android:icon="@drawable/ic_settings_w"
-        app:showAsAction="always"
-        android:title="Settings" />
-    <item
         android:id="@+id/action_sign_out"
         android:title="Sign out"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/action_settings"
+        android:icon="@drawable/ic_settings_w"
+        app:showAsAction="never"
+        android:title="Settings" />
 
 </menu>

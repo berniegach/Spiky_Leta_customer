@@ -2,6 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:visible="false"
         android:id="@+id/navigation_home"
         android:icon="@drawable/ic_home_black_24dp"
         android:title="@string/title_home"/>
@@ -10,6 +11,7 @@
         android:icon="@drawable/ic_restaurant"
         android:title="Menu"/>
     <item
+        android:visible="false"
         android:id="@+id/navigation_explore"
         android:icon="@drawable/ic_explore"
         android:title="Explore"/>
