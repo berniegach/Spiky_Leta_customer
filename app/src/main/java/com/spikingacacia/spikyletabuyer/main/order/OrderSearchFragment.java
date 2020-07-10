@@ -21,6 +21,7 @@ public class OrderSearchFragment extends Fragment
         View view = inflater.inflate(R.layout.fragment_order_search, container, false);
         Button scan = view.findViewById(R.id.scan);
         Button use_my_location = view.findViewById(R.id.use_my_location);
+        Button explore = view.findViewById(R.id.explore);
         scan.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -35,6 +36,14 @@ public class OrderSearchFragment extends Fragment
             public void onClick(View v)
             {
                 mListener.onFindRestaurantMenuClicked(2);
+            }
+        });
+        explore.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                mListener.onFindRestaurantMenuClicked(3);
             }
         });
 

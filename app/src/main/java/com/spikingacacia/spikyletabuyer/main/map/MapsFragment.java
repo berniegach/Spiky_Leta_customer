@@ -26,7 +26,6 @@ import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
@@ -35,7 +34,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.spikingacacia.spikyletabuyer.JSONParser;
-import com.spikingacacia.spikyletabuyer.MapsExploreA;
+import com.spikingacacia.spikyletabuyer.explore.MapsExploreActivity;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.database.Restaurants;
 
@@ -259,11 +258,11 @@ public class MapsFragment extends Fragment implements  ActivityCompat.OnRequestP
          * Creates a new instance of this dialog and optionally finishes the calling Activity
          * when the 'Ok' button is clicked.
          */
-        public static MapsExploreA.PermissionDeniedDialog newInstance(boolean finishActivity) {
+        public static MapsExploreActivity.PermissionDeniedDialog newInstance(boolean finishActivity) {
             Bundle arguments = new Bundle();
             arguments.putBoolean(ARGUMENT_FINISH_ACTIVITY, finishActivity);
 
-            MapsExploreA.PermissionDeniedDialog dialog = new MapsExploreA.PermissionDeniedDialog();
+            MapsExploreActivity.PermissionDeniedDialog dialog = new MapsExploreActivity.PermissionDeniedDialog();
             dialog.setArguments(arguments);
             return dialog;
         }

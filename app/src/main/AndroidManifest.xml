@@ -2,11 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.spikingacacia.spikyletabuyer">
 
-    <!--
-         The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
-         Google Maps Android API v2, but you must specify either coarse or fine
-         location permissions for the "MyLocation" functionality.
-    -->
     <application
         android:name=".AppController"
         android:allowBackup="true"
@@ -16,7 +11,6 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -59,8 +53,26 @@
             android:name=".BMapsA"
             android:label="@string/title_activity_maps" />
         <activity
-            android:name=".MapsExploreA"
-            android:label="@string/title_activity_maps" />
+            android:name=".explore.MapsExploreActivity"
+            android:label="@string/title_activity_maps">
+            <!-- enable the search dialog to send searches to SearchableActivity -->
+            <meta-data
+                android:name="android.app.default_searchable"
+                android:value="com.spikingacacia.spikyletabuyer.explore.SearchableActivity" />
+        </activity>
+        <activity android:name="com.spikingacacia.spikyletabuyer.explore.SearchableActivity"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH" />
+            </intent-filter>
+            <meta-data android:name="android.app.searchable"
+                android:resource="@xml/searchable"/>
+        </activity>
+        <provider
+            android:name="com.spikingacacia.spikyletabuyer.explore.MySuggestionProvider"
+            android:authorities="com.spikingacacia.MySuggestionProvider" />
+
+
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
@@ -68,6 +80,7 @@
         <meta-data
             android:name="com.google.android.gms.vision.DEPENDENCIES"
             android:value="barcode" />
+
         <!--
        This is required if the app targets api level 28(android 9.0) or above and uses the google maps sdk
        for android 16.0.0 or below (or if the app uses the apache http legacy library)
@@ -80,7 +93,6 @@
     <uses-feature
         android:name="android.hardware.Camera"
         android:required="false" />
-
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
     <uses-permission android:name="android.permission.READ_PROFILE" />

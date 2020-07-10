@@ -91,4 +91,7 @@
     <string name="attachment_summary_on">Automatically download attachments for incoming emails
     </string>
     <string name="attachment_summary_off">Only download attachments when manually requested</string>
+    <string name="restaurants">Restaurants</string>
+    <string name="spiky_hotel">Spiky hotel</string>
+    <string name="find_restaurant">Find Restaurant</string>
 </resources>

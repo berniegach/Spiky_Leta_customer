@@ -39,6 +39,7 @@ import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.spikingacacia.spikyletabuyer.JSONParser;
+import com.spikingacacia.spikyletabuyer.explore.MapsExploreActivity;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.SettingsActivity;
 import com.spikingacacia.spikyletabuyer.barcode.BarcodeCaptureActivity;
@@ -370,6 +371,12 @@ public class MainActivity extends AppCompatActivity implements
             //get the users location
             showProgress(true);
             getCurrentLocation(null);
+        }
+        else if( id == 3)
+        {
+            Intent intent = new Intent(this, MapsExploreActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            startActivity(intent);
         }
     }
 

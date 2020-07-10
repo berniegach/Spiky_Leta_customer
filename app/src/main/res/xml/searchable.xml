@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<searchable xmlns:android="http://schemas.android.com/apk/res/android"
+    android:label="@string/restaurants"
+    android:hint="@string/find_restaurant"
+    android:searchSuggestAuthority="com.spikingacacia.MySuggestionProvider"
+    android:searchSuggestPath="restaurants"
+    android:searchSuggestIntentAction="android.intent.action.VIEW">
+
+</searchable>

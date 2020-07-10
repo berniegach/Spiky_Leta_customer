@@ -1,7 +1,10 @@
-package com.spikingacacia.spikyletabuyer;
+package com.spikingacacia.spikyletabuyer.explore;
 
 import android.Manifest;
 import android.app.Dialog;
+import android.app.SearchManager;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -11,28 +14,39 @@ import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.FragmentActivity;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.spikingacacia.spikyletabuyer.JSONParser;
+import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.database.Restaurants;
+import com.spikingacacia.spikyletabuyer.shop.ShopA;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -49,7 +63,7 @@ import java.util.Locale;
 
 import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
 
-public class MapsExploreA extends FragmentActivity implements
+public class MapsExploreActivity extends AppCompatActivity implements
         OnMapReadyCallback,
         GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMyLocationClickListener,
@@ -77,7 +91,10 @@ public class MapsExploreA extends FragmentActivity implements
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.a_maps_explore);
+        setContentView(R.layout.activity_maps_explore);
+        setTitle("Explore");
+
+        setDefaultKeyMode(DEFAULT_KEYS_SEARCH_LOCAL);
         //get intent
         Intent intent=getIntent();
         who=intent.getIntExtra("who",0);
@@ -108,23 +125,122 @@ public class MapsExploreA extends FragmentActivity implements
         maxZoomLevel=googleMap.getMaxZoomLevel();
         if(maxZoomLevel>=15)
             maxZoomLevel=15;
-        Log.d("loc",String.format("min: %f, max: %f",googleMap.getMinZoomLevel(),googleMap.getMaxZoomLevel()));
+        //Log.d("loc",String.format("min: %f, max: %f",googleMap.getMinZoomLevel(),googleMap.getMaxZoomLevel()));
         ////
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMyLocationClickListener(this);
+
         enableMyLocation();
         //set the mylocation button position
         if(mapView!=null && mapView.findViewById(Integer.parseInt("1"))!=null)
         {
             //get the button view
             View locationButton=((View)mapView.findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
+
             //place it on bottom right
             RelativeLayout.LayoutParams layoutParams=(RelativeLayout.LayoutParams)locationButton.getLayoutParams();
             layoutParams.addRule(RelativeLayout.ALIGN_PARENT_TOP,RelativeLayout.TRUE);
             layoutParams.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM,0);
             layoutParams.setMargins(50,100,0,0);
         }
-        getCurrentLocation();
+        mMap.setOnInfoWindowClickListener(new GoogleMap.OnInfoWindowClickListener()
+        {
+            @Override
+            public void onInfoWindowClick(Marker marker)
+            {
+                final double latitude=  marker.getPosition().latitude;
+                final double longitude= marker.getPosition().longitude;
+                final String title = marker.getTitle();
+                for(int c=0; c<restaurantsList.size(); c++)
+                {
+                    Restaurants restaurants = MapsExploreActivity.restaurantsList.get(c);
+                    if(latitude==restaurants.getLatitude() && longitude == restaurants.getLongitude() && title.contentEquals(restaurants.getNames()))
+                        gotoRestaurant(restaurants);
+
+                }
+            }
+        });
+
+    }
+
+    /**
+     * Dispatch onResume() to fragments.  Note that for better inter-operation
+     * with older versions of the platform, at the point of this call the
+     * fragments attached to the activity are <em>not</em> resumed.
+     */
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+        Thread thread=new Thread()
+        {
+            @Override
+            public void run()
+            {
+                getCurrentLocation();
+            }
+        };
+        thread.start();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.explore_menu, menu);
+
+        // Get the SearchView and set the searchable configuration
+        /*SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        // Assumes current activity is the searchable activity
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(new ComponentName(getBaseContext(),SearchableActivity.class)));*/
+
+        //searchView.setIconifiedByDefault(false); // Do not iconify the widget; expand it by default
+       /* searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener()
+        {
+            @Override
+            public boolean onQueryTextSubmit(String query)
+            {
+
+                startActivity(new Intent(MapsExploreActivity.this, SearchableActivity.class)
+                        .putExtra(SearchManager.QUERY, query));
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText)
+            {
+                return false;
+            }
+        });*/
+        return true;
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        switch (id) {
+            case R.id.search_m:
+                //start search dialog
+                super.onSearchRequested();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+
+        //noinspection SimplifiableIfStatement
+        /*if (id == R.id.action_search)
+        {
+            super.onSearchRequested();
+            return true;
+        }*/
+
+
+
+        //return super.onOptionsItemSelected(item);
     }
 
     private void getCurrentLocation()
@@ -144,10 +260,24 @@ public class MapsExploreA extends FragmentActivity implements
                                 //Get last known location. In some rare situations this can be null
                                 if(location!=null)
                                 {
-                                    double latitude=location.getLatitude();
-                                    double longitude=location.getLongitude();
+                                    final double latitude=location.getLatitude();
+                                    final double longitude=location.getLongitude();
+                                    runOnUiThread(new Runnable()
+                                    {
+                                        @Override
+                                        public void run()
+                                        {
+                                            CameraPosition cameraPosition = new CameraPosition.Builder()
+                                                    .target(new LatLng(latitude, longitude))      // Sets the center of the map to location user
+                                                    .zoom(17)                   // Sets the zoom
+                                                    //.bearing(90)                // Sets the orientation of the camera to east
+                                                    .tilt(40)                   // Sets the tilt of the camera to 30 degrees
+                                                    .build();                   // Creates a CameraPosition from the builder
+                                            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                                        }
+                                    });
                                     //get addresses
-                                    Geocoder geocoder=new Geocoder(MapsExploreA.this, Locale.getDefault());
+                                    Geocoder geocoder=new Geocoder(MapsExploreActivity.this, Locale.getDefault());
                                     List<Address> addresses;
                                     try
                                     {
@@ -301,6 +431,17 @@ public class MapsExploreA extends FragmentActivity implements
             }
         }
     }
+    public void gotoRestaurant(Restaurants item)
+    {
+        Intent intent=new Intent(this, ShopA.class);
+        intent.putExtra("which",2);
+        intent.putExtra("seller_email",item.getEmail());
+        intent.putExtra("order_radius",item.getRadius());
+        intent.putExtra("buyer_distance",item.getDistance());
+        intent.putExtra("number_of_tables",item.getNumberOfTables());
+        intent.putExtra("table_number",item.getTableNumber());
+        startActivity(intent);
+    }
     private void showRestaurants()
     {
         //add markers
@@ -309,14 +450,23 @@ public class MapsExploreA extends FragmentActivity implements
         {
             Restaurants restaurants = iterator.next();
             int id= restaurants.getId();
-            String names= restaurants.getNames();
+            final String names= restaurants.getNames();
             double distance= restaurants.getDistance();
-            double latitude= restaurants.getLatitude();
-            double longitude= restaurants.getLongitude();
-            mMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(latitude,longitude))
-                    .title(names)
-                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+            final double latitude= restaurants.getLatitude();
+            final double longitude= restaurants.getLongitude();
+            //boolean visible_online = restaurants.get
+            runOnUiThread(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    mMap.addMarker(new MarkerOptions()
+                            .position(new LatLng(latitude,longitude))
+                            .title(names)
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+
+                }
+            });
         }
     }
     /**
@@ -422,6 +572,7 @@ public class MapsExploreA extends FragmentActivity implements
             }
         }
     }
+
 
 
 }

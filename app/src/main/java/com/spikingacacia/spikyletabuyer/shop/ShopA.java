@@ -57,6 +57,7 @@ public class ShopA extends AppCompatActivity
     private double buyerDistance=0;
     private int numberOfTables=10;
     private int tableNumber;
+    public static int which; // which can either be 1 for normal ordering in a restaurant or 2 for pre ordering
     private int backgroundTasksProgress=0;
     private final int finalProgressCount=3;
     int whichFragment=1;
@@ -79,12 +80,16 @@ public class ShopA extends AppCompatActivity
         setContentView(R.layout.a_shop);
         //preference
         preferences=new Preferences(getBaseContext());
+        which = getIntent().getIntExtra("which",1);
         sellerEmail =getIntent().getStringExtra("seller_email");
         sellerOrderRadius=getIntent().getIntExtra("order_radius",2);
         buyerDistance=getIntent().getDoubleExtra("buyer_distance",0);
         numberOfTables=getIntent().getIntExtra("number_of_tables",10);
         tableNumber=getIntent().getIntExtra("table_number",-1);
-        setTitle("Menu");
+        if(which == 1)
+            setTitle("Menu");
+        else if(which == 2)
+            setTitle("Menu - Pre order");
 
         Fragment fragment= menuFragment.newInstance();
         FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
@@ -96,21 +101,6 @@ public class ShopA extends AppCompatActivity
             @Override
             public void onClick(View v)
             {
-                /*if (items.size()==0)
-                {
-                    Snackbar.make(fab,"Cart is empty",Snackbar.LENGTH_SHORT).show();
-                    return;
-                }
-                whichFragment=4;
-                String title="cart";
-                getSupportActionBar().setTitle(title);
-                //Fragment fragment=BSOrderFragment.newInstance("","");
-                Fragment fragment=CartFragment.newInstance(1);
-                FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.base,fragment,title);
-                transaction.addToBackStack(title);
-                transaction.commit();
-                fab.hide();*/
                 cartClicked();
             }
         });

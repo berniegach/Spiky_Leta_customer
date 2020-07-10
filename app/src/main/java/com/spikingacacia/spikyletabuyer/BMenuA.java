@@ -20,6 +20,7 @@ import android.widget.TextView;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.material.appbar.CollapsingToolbarLayout;
+import com.spikingacacia.spikyletabuyer.explore.MapsExploreActivity;
 import com.spikingacacia.spikyletabuyer.main.board.AdvertsActivity;
 import com.spikingacacia.spikyletabuyer.orders.OrdersActivity;
 
@@ -148,7 +149,7 @@ implements BMenuF.OnFragmentInteractionListener
         else if(id==3)
         {
             //explore
-            Intent intent=new Intent(this, MapsExploreA.class);
+            Intent intent=new Intent(this, MapsExploreActivity.class);
             startActivity(intent);
         }
         else if(id==4)
