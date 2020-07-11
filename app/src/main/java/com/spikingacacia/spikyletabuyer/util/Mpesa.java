@@ -32,8 +32,8 @@ import okhttp3.Response;
 public class Mpesa
 {
     private static String TAG ="Mpesa_utils";
-    private static String appKey = "9nEhsjlyfi3j6MPGWV4KAUylGbC4taEr";
-    private static String appSecret = "YIv19xbrCFog4Kb8";
+    private static String appKey = "858k13Aj5t0TcmbvFGeGEj9gAeh1AJdC";
+    private static String appSecret = "AiTMXerYWa093iF6";
     private static String accessToken;
     public Mpesa(){
     }

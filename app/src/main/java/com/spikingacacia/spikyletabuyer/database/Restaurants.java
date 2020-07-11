@@ -13,9 +13,11 @@ public class Restaurants
     private int numberOfTables;
     private String image_type;
     private int tableNumber;
+    private String mCode;
 
 
-    public Restaurants(int id, String email, String names, double distance, double latitude, double longitude, String locality, int radius, int numberOfTables, String image_type, int tableNumber)
+
+    public Restaurants(int id, String email, String names, double distance, double latitude, double longitude, String locality, int radius, int numberOfTables, String image_type, int tableNumber,  String mCode)
     {
         this.id = id;
         this.email = email;
@@ -28,6 +30,7 @@ public class Restaurants
         this.numberOfTables=numberOfTables;
         this.image_type = image_type;
         this.tableNumber = tableNumber;
+        this.mCode = mCode;
     }
 
     public int getId()
@@ -134,5 +137,13 @@ public class Restaurants
     {
         this.tableNumber = tableNumber;
     }
+    public String getmCode()
+    {
+        return mCode;
+    }
 
+    public void setmCode(String mCode)
+    {
+        this.mCode = mCode;
+    }
 }

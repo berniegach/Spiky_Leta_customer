@@ -433,6 +433,9 @@ public class MapsExploreActivity extends AppCompatActivity implements
     }
     public void gotoRestaurant(Restaurants item)
     {
+        boolean has_payment = true;
+        if( item.getmCode().contentEquals("") ||  item.getmCode().contentEquals("null") || item.getmCode().contentEquals("NULL"))
+            has_payment = false;
         Intent intent=new Intent(this, ShopA.class);
         intent.putExtra("which",2);
         intent.putExtra("seller_email",item.getEmail());
@@ -440,6 +443,8 @@ public class MapsExploreActivity extends AppCompatActivity implements
         intent.putExtra("buyer_distance",item.getDistance());
         intent.putExtra("number_of_tables",item.getNumberOfTables());
         intent.putExtra("table_number",item.getTableNumber());
+        intent.putExtra("has_payment", has_payment);
+        intent.putExtra("m_code", has_payment ? item.getmCode() : "");
         startActivity(intent);
     }
     private void showRestaurants()
@@ -538,9 +543,10 @@ public class MapsExploreActivity extends AppCompatActivity implements
                         int number_of_tables=jsonObject_restaurants.getInt("number_of_tables");
                         String image_type=jsonObject_restaurants.getString("image_type");
                         int table_number = jsonObject_restaurants.getInt("table_number");
+                        String m_code = jsonObject_restaurants.getString("m_code");
 
 
-                        Restaurants restaurants =new Restaurants(id,email,names,distance,latitude,longitude,locality, order_radius, number_of_tables, image_type, table_number);
+                        Restaurants restaurants =new Restaurants(id,email,names,distance,latitude,longitude,locality, order_radius, number_of_tables, image_type, table_number, m_code);
                         restaurantsList.add(restaurants);
                     }
                     return true;

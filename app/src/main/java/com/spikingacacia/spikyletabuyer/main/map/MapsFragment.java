@@ -379,9 +379,10 @@ public class MapsFragment extends Fragment implements  ActivityCompat.OnRequestP
                         int number_of_tables=jsonObject_restaurants.getInt("number_of_tables");
                         String image_type=jsonObject_restaurants.getString("image_type");
                         int table_number = jsonObject_restaurants.getInt("table_number");
+                        String m_code = jsonObject_restaurants.getString("m_code");
 
 
-                        Restaurants restaurants =new Restaurants(id,email,names,distance,latitude,longitude,locality, order_radius, number_of_tables, image_type, table_number);
+                        Restaurants restaurants =new Restaurants(id,email,names,distance,latitude,longitude,locality, order_radius, number_of_tables, image_type, table_number, m_code);
                         restaurantsList.add(restaurants);
                     }
                     return true;

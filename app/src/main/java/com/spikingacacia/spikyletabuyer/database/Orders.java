@@ -17,8 +17,11 @@ public class Orders
     private String waiterNames;
     private int orderFormat;
     public int tableNumber;
+    private int preOrder;
+    private String collectTime;
 
-    public Orders(int id, String waiterEmail, int itemId, int orderNumber, int orderStatus, String dateAdded, String dateChanged, String item, double price, int sellerId, String sellerImageType, String sellerNames, String waiterNames, int orderFormat, int tableNumber)
+    public Orders(int id, String waiterEmail, int itemId, int orderNumber, int orderStatus, String dateAdded, String dateChanged, String item, double price, int sellerId, String sellerImageType,
+                  String sellerNames, String waiterNames, int orderFormat, int tableNumber, int preOrder, String collectTime)
     {
         this.id = id;
         this.waiterEmail = waiterEmail;
@@ -35,6 +38,8 @@ public class Orders
         this.waiterNames = waiterNames;
         this.orderFormat = orderFormat;
         this.tableNumber = tableNumber;
+        this.preOrder = preOrder;
+        this.collectTime = collectTime;
     }
 
     public int getId()
@@ -186,8 +191,25 @@ public class Orders
         this.tableNumber = tableNumber;
     }
 
+    public int getPreOrder()
+    {
+        return preOrder;
+    }
 
+    public void setPreOrder(int preOrder)
+    {
+        this.preOrder = preOrder;
+    }
 
+    public String getCollectTime()
+    {
+        return collectTime;
+    }
+
+    public void setCollectTime(String collectTime)
+    {
+        this.collectTime = collectTime;
+    }
 
 
 }

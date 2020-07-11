@@ -39,6 +39,7 @@ import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.spikingacacia.spikyletabuyer.JSONParser;
+import com.spikingacacia.spikyletabuyer.database.MpesaRequests;
 import com.spikingacacia.spikyletabuyer.explore.MapsExploreActivity;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.SettingsActivity;
@@ -51,7 +52,7 @@ import com.spikingacacia.spikyletabuyer.main.order.OrderSearchFragment;
 import com.spikingacacia.spikyletabuyer.main.orders_list.OrdersFragment;
 import com.spikingacacia.spikyletabuyer.orders.OrdersActivity;
 import com.spikingacacia.spikyletabuyer.restaurants.SRRestaurantsA;
-import com.spikingacacia.spikyletabuyer.shop.ShopA;
+import com.spikingacacia.spikyletabuyer.util.Mpesa;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -72,6 +73,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 
 import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
 import static com.spikingacacia.spikyletabuyer.LoginA.mGoogleSignInClient;
+import static com.spikingacacia.spikyletabuyer.LoginA.serverAccount;
 
 
 public class MainActivity extends AppCompatActivity implements
@@ -87,6 +89,8 @@ public class MainActivity extends AppCompatActivity implements
     private String TAG="MainA";
     public static  List<Restaurants> restaurantsList;
     private static boolean useQrCode = false;
+    private List<MpesaRequests> mpesaRequestsList;
+    private Thread thread;
     ActivityResultLauncher<Intent> mGetBarcode = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             new ActivityResultCallback<ActivityResult>() {
                 @Override
@@ -145,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements
                 //if something changed so something
             }
         };
-        Thread thread=new Thread()
+        thread=new Thread()
         {
             @Override
             public void run()
@@ -154,9 +158,9 @@ public class MainActivity extends AppCompatActivity implements
                 {
                     while(true)
                     {
-                        sleep(60000);
-                        //new MpesaGetPayStatus().execute((Void)null);
+                        new MpesaGetPayStatus().execute((Void)null);
                         handler.post(runnable);
+                        sleep(60000);
                     }
                 }
                 catch (InterruptedException e)
@@ -165,8 +169,9 @@ public class MainActivity extends AppCompatActivity implements
                 }
             }
         };
-        //thread.start();
+        getCurrentLocation();
         restaurantsList =new LinkedList<>();
+        mpesaRequestsList = new ArrayList<>();
     }
 
     @Override
@@ -305,6 +310,49 @@ public class MainActivity extends AppCompatActivity implements
         }
 
     }
+    private void getCurrentLocation()
+    {
+        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+        {
+            //get the users location
+            fusedLocationProviderClient.getLastLocation()
+                    .addOnSuccessListener(this, new OnSuccessListener<Location>()
+                    {
+                        @Override
+                        public void onSuccess(Location location)
+                        {
+                            //Get last known location. In some rare situations this can be null
+                            if(location!=null)
+                            {
+                                double latitude=location.getLatitude();
+                                double longitude=location.getLongitude();
+                                //get addresses
+                                Geocoder geocoder=new Geocoder(MainActivity.this, Locale.getDefault());
+                                List<Address> addresses;
+                                try
+                                {
+                                    addresses=geocoder.getFromLocation(latitude,longitude,10);
+                                    if(addresses.get(0).getCountryCode().contentEquals("KE"))
+                                        thread.start();
+                                }
+                                catch (IOException e)
+                                {
+                                    showProgress(false);
+                                    Snackbar.make(getWindow().getDecorView().getRootView(),"Error getting your location.\nPlease try again.", Snackbar.LENGTH_SHORT).show();
+                                    Log.e("address",""+e.getMessage());
+                                }
+                            }
+
+                        }
+                    });
+        }
+        //request the permission
+        else
+        {
+            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},PERMISSION_REQUEST_INTERNET);
+        }
+
+    }
     private void showRestaurants()
     {
         if(restaurantsList.size()==0)
@@ -326,15 +374,7 @@ public class MainActivity extends AppCompatActivity implements
         startActivity(intent);
     }
 
-    private void run_shop(String email, int radius, int distance, int numberOfTables)
-    {
-        Intent intent=new Intent(this, ShopA.class);
-        intent.putExtra("seller_email",email);
-        intent.putExtra("order_radius",radius);
-        intent.putExtra("buyer_distance",distance);
-        intent.putExtra("number_of_tables",numberOfTables);
-        startActivity(intent);
-    }
+
 
     void showProgress(boolean show)
     {
@@ -400,6 +440,7 @@ implementation of OrdersFragment.java
         intent.putExtra("unique_order_name",unique_name);
         intent.putExtra("order_format",item.getOrderFormat());
         intent.putExtra("order_status",item.getOrderStatus());
+        intent.putExtra("pre_order", item.getPreOrder());
         intent.putExtra("seller_names",item.getSellerNames());
         startActivity(intent);
     }
@@ -468,8 +509,9 @@ implementation of OrdersFragment.java
                         int tables = jsonObject_restaurants.getInt("number_of_tables");
                         String image_type=jsonObject_restaurants.getString("image_type");
                         int table_number = jsonObject_restaurants.getInt("table_number");
+                        String m_code = jsonObject_restaurants.getString("m_code");
 
-                        Restaurants restaurants =new Restaurants(id, email, names,distance,latitude,longitude,locality,order_radius, tables, image_type, table_number);
+                        Restaurants restaurants =new Restaurants(id, email, names,distance,latitude,longitude,locality,order_radius, tables, image_type, table_number, m_code);
                         restaurantsList.add(restaurants);
                     }
                     return true;
@@ -559,8 +601,9 @@ implementation of OrdersFragment.java
                         int tables = jsonObject_restaurants.getInt("number_of_tables");
                         String image_type=jsonObject_restaurants.getString("image_type");
                         int table_number = jsonObject_restaurants.getInt("table_number");
+                        String m_code = jsonObject_restaurants.getString("m_code");
 
-                        Restaurants restaurants =new Restaurants(id, email, names,distance,latitude,longitude,locality,order_radius, tables, image_type, table_number);
+                        Restaurants restaurants =new Restaurants(id, email, names,distance,latitude,longitude,locality,order_radius, tables, image_type, table_number, m_code);
                         restaurantsList.add(restaurants);
                     }
                     return true;
@@ -591,6 +634,217 @@ implementation of OrdersFragment.java
             else
             {
                 Toast.makeText(getBaseContext(),"Error getting restaurants",Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+    private class MpesaGetPayStatus extends AsyncTask<Void, Void, Boolean>
+    {
+        private String url_get_status=base_url+"get_m_requests.php";
+        private String TAG_SUCCESS="success";
+        private String TAG_MESSAGE="message";
+        private JSONParser jsonParser;
+        public MpesaGetPayStatus()
+        {
+            jsonParser = new JSONParser();
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids)
+        {
+            //getting columns list
+            List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
+            info.add(new BasicNameValuePair("user_email",serverAccount.getEmail()));
+
+            // making HTTP request
+            JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_status,"POST",info);
+            try
+            {
+                int success=jsonObject.getInt(TAG_SUCCESS);
+                JSONArray jsonArray=null;
+                if(success==1)
+                {
+                    jsonArray = jsonObject.getJSONArray("items");
+                    //Log.d(TAG,jsonArray.toString());
+                    for (int count = 0; count < jsonArray.length(); count += 1)
+                    {
+                        JSONObject jsonObjectItems = jsonArray.getJSONObject(count);
+                        int id = jsonObjectItems.getInt("id");
+                        String seller_email = jsonObjectItems.getString("seller_email");
+                        String order_number = jsonObjectItems.getString("order_number");
+                        String date_added = jsonObjectItems.getString("date_added");
+                        String business_shortcode = jsonObjectItems.getString("business_shortcode");
+                        String password = jsonObjectItems.getString("password");
+                        String timestamp = jsonObjectItems.getString("timestamp");
+                        String chequeout_request_id = jsonObjectItems.getString("chequeout_request_id");
+
+                        MpesaRequests mpesaRequests = new MpesaRequests(id,seller_email,order_number,date_added,business_shortcode,password,timestamp,chequeout_request_id);
+                        mpesaRequestsList.add(mpesaRequests);
+                    }
+                    return true;
+                }
+                else
+                {
+                    String message=jsonObject.getString(TAG_MESSAGE);
+                    Log.e(TAG_MESSAGE,""+message);
+                    return false;
+                }
+            }
+            catch (JSONException e)
+            {
+                Log.e("JSON",""+e.getMessage());
+                return false;
+            }
+        }
+        @Override
+        protected void onPostExecute(final Boolean successful)
+        {
+
+            if (successful)
+            {
+                //we have the mpesa ststaus now
+                //proceed to check the mpesa status
+                for(int c=0; c<mpesaRequestsList.size(); c++)
+                {
+                    MpesaRequests mpesaRequests = mpesaRequestsList.get(c);
+                    new MpesaCheckPayStatus(mpesaRequests.getSeller_email(),mpesaRequests.getBusiness_shortcode(),mpesaRequests.getPassword(),mpesaRequests.getTimestamp(),
+                            mpesaRequests.getChequeout_request_id(), mpesaRequests.getOrder_number(), mpesaRequests.getDate_added()).execute((Void)null);
+                }
+
+            }
+
+        }
+    }
+    private class MpesaCheckPayStatus extends AsyncTask<Void, Void, Boolean>
+    {
+        String businessShortCode;
+        String password;
+        String timestamp;
+        String checkoutRequestID;
+        private String orderNumber;
+        private String dateAdded;
+        private String storeEmail;
+        private boolean orderPaymentCancelled;
+        public MpesaCheckPayStatus(String storeEmail,String businessShortCode, String password, String timestamp, String checkoutRequestID, String orderNumber, String dateAdded)
+        {
+            this.businessShortCode = businessShortCode;
+            this.password = password;
+            this.timestamp = timestamp;
+            this.checkoutRequestID = checkoutRequestID;
+            this.orderNumber = orderNumber;
+            this.dateAdded = dateAdded;
+            this.storeEmail = storeEmail;
+        }
+
+        @Override
+        protected Boolean doInBackground(Void... voids)
+        {
+            try
+            {
+                JSONObject jsonObject = Mpesa.STKPushTransactionStatus(businessShortCode,password,timestamp,checkoutRequestID);
+
+                Log.d(TAG,"JSON"+jsonObject.toString());
+                String  ResponseCode = jsonObject.getString("ResponseCode");
+                if(ResponseCode.contentEquals("0"))
+                {
+                    String ResponseDescription = jsonObject.getString("ResponseDescription");
+                    String MerchantRequestID = jsonObject.getString("MerchantRequestID");
+                    String ResultCode = jsonObject.getString("ResultCode");
+                    String ResultDesc = jsonObject.getString("ResultDesc");
+                    if(ResultCode.contentEquals("1032"))
+                        return false;// the result was cancelled by the user
+                    else if(ResultCode.contentEquals("1037"))
+                        return false;// DS timeout
+                    else if(ResultCode.contentEquals("0"))
+                        return true; // paid
+
+                    return false;
+                }
+            }
+            catch (IOException | JSONException e)
+            {
+                Log.e(TAG," "+e.getMessage());
+                e.printStackTrace();
+                return false;
+            }
+
+            return false;
+        }
+        @Override
+        protected void onPostExecute(final Boolean successful)
+        {
+
+            if (successful)
+            {
+                //check the status
+                new UpdateOrderTask(storeEmail,orderNumber, dateAdded,"-1").execute((Void)null);
+            }
+            else
+                Log.e(TAG,"mp check pay status failed");
+
+        }
+    }
+    private class UpdateOrderTask extends AsyncTask<Void, Void, Boolean>
+    {
+        private String url_update=base_url+"update_seller_order.php";
+        private String TAG_SUCCESS="success";
+        private String TAG_MESSAGE="message";
+        private JSONParser jsonParser;
+        final private String orderNumber;
+        private final String dateAdded;
+        private final String orderStatus;
+        private final String sellerEmail;
+
+        public  UpdateOrderTask(String sellerEmail, String orderNumber, String dateAdded, String orderStatus)
+        {
+            this.sellerEmail = sellerEmail;
+            this.orderNumber = orderNumber;
+            this.dateAdded = dateAdded;
+            this.orderStatus = orderStatus; // order status for unpaid order is -1, delete is 0 and for a succesful order is 1
+            jsonParser = new JSONParser();
+        }
+        @Override
+        protected Boolean doInBackground(Void... params)
+        {
+            //getting columns list
+            List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
+            info.add(new BasicNameValuePair("seller_email", sellerEmail));
+            info.add(new BasicNameValuePair("buyer_email",serverAccount.getEmail()));
+            info.add(new BasicNameValuePair("waiter_email", "unavailable"));
+            info.add(new BasicNameValuePair("order_number",orderNumber));
+            info.add(new BasicNameValuePair("status",orderStatus));
+            info.add(new BasicNameValuePair("date_added",dateAdded));
+
+            // making HTTP request
+            JSONObject jsonObject= jsonParser.makeHttpRequest(url_update,"POST",info);
+            try
+            {
+                int success=jsonObject.getInt(TAG_SUCCESS);
+                if(success==1)
+                {
+                    return true;
+                }
+                else
+                {
+                    String message=jsonObject.getString(TAG_MESSAGE);
+                    Log.e(TAG_MESSAGE,""+message);
+                    return false;
+                }
+            }
+            catch (JSONException e)
+            {
+                Log.e("JSON",""+e.getMessage());
+                return false;
+            }
+        }
+        @Override
+        protected void onPostExecute(final Boolean successful)
+        {
+            if (successful )
+            {
+            }
+            else
+            {
+                Log.e(TAG,"update order failed");
             }
         }
     }

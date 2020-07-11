@@ -36,10 +36,11 @@ public class OrdersActivity extends AppCompatActivity
        String unique_order_name = getIntent().getStringExtra("unique_order_name");
        int order_format = getIntent().getIntExtra("order_format",1);
        int order_status = getIntent().getIntExtra("order_status",-1);
+       int pre_order = getIntent().getIntExtra("pre_order",0);
        String seller_names = getIntent().getStringExtra("seller_names");
        setTitle(seller_names);
 
-        Fragment fragment= OneOrderFragment.newInstance(unique_order_name, order_format, order_status);
+        Fragment fragment= OneOrderFragment.newInstance(unique_order_name, order_format, order_status, pre_order);
         FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
         transaction.add(R.id.base,fragment,"order");
         transaction.commit();

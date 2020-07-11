@@ -195,9 +195,11 @@ public class OrdersFragment extends Fragment
                         int order_format = jsonObjectNotis.getInt("order_format");
                         String waiter_names=jsonObjectNotis.getString("waiter_names");
                         int table_number=jsonObjectNotis.getInt("table_number");
+                        int pre_order = jsonObjectNotis.getInt("pre_order");
+                        String collect_time = jsonObjectNotis.getString("collect_time");
 
                         Orders orders =new Orders(id,waiter_email,item_id,order_number,order_status,date_added,date_changed,item,selling_price,seller_id, seller_image_type,
-                                username,waiter_names,order_format,table_number);
+                                username,waiter_names,order_format,table_number, pre_order, collect_time);
                         list.add( orders);
                         ordersLinkedHashMap.put(id,orders);
                         String[] date_pieces=date_added.split(" ");

@@ -12,6 +12,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 
 import com.spikingacacia.spikyletabuyer.R;
@@ -30,19 +31,22 @@ public class OneOrderFragment extends Fragment
     private static final String ARG_ORDER = "order";
     private static final String ARG_FORMAT = "order_format";
     private static final String ARG_ORDER_STATUS = "order_status";
+    private static final String ARG_PRE_ORDER = "pre_order";
     private String mOrder;
     private int mOrderFormat;
     private int mOrderStatus;
+    private int mPreOrder;
     private OnFragmentInteractionListener mListener;
 
 
-    public static OneOrderFragment newInstance(String order, int format, int station)
+    public static OneOrderFragment newInstance(String order, int format, int status, int pre_order)
     {
         OneOrderFragment fragment = new OneOrderFragment();
         Bundle args = new Bundle();
         args.putString(ARG_ORDER, order);
         args.putInt(ARG_FORMAT, format);
-        args.putInt(ARG_ORDER_STATUS, station);
+        args.putInt(ARG_ORDER_STATUS, status);
+        args.putInt(ARG_PRE_ORDER, pre_order);
         fragment.setArguments(args);
         return fragment;
     }
@@ -56,6 +60,7 @@ public class OneOrderFragment extends Fragment
             mOrder = getArguments().getString(ARG_ORDER);
             mOrderFormat = getArguments().getInt(ARG_FORMAT);
             mOrderStatus = getArguments().getInt(ARG_ORDER_STATUS);
+            mPreOrder = getArguments().getInt(ARG_PRE_ORDER);
         }
     }
 
@@ -72,6 +77,11 @@ public class OneOrderFragment extends Fragment
         TextView t_table=view.findViewById(R.id.table);
         TextView t_waiter=view.findViewById(R.id.waiter);
         TextView t_status = view.findViewById(R.id.status);
+        CardView c_table = view.findViewById(R.id.c_table);
+        CardView c_pre_order = view.findViewById(R.id.pre_order);
+        CardView c_collect_time = view.findViewById(R.id.c_collect_time);
+        TextView t_collect_time = view.findViewById(R.id.collect_time);
+        CardView c_paid = view.findViewById(R.id.paid);
         //set the buttons listeners
         Button b_pay=view.findViewById(R.id.pay);
         b_pay.setOnClickListener(new View.OnClickListener()
@@ -83,10 +93,27 @@ public class OneOrderFragment extends Fragment
                     mListener.onPay();
             }
         });
-
+       //the order status are
+        // -3 for new order, -2 = unpaid, -1 = paid, 0 = deleted, 1 = pending, 2 = ..... until 5 = finished
         String[] status_strings_1 = new String[]{"pending","in progress","delivery","payment","finished"};
         String[] status_strings_2 = new String[]{"pending","payment","in progress","delivery","finished"};
-        t_status.setText(mOrderFormat==1?status_strings_1[mOrderStatus-1]:status_strings_2[mOrderStatus-1]);
+
+        if(mPreOrder == 1)
+        {
+            c_pre_order.setVisibility(View.VISIBLE);
+            c_collect_time.setVisibility(View.VISIBLE);
+        }
+        if(mOrderStatus == -1)
+        {
+            t_status.setText(status_strings_1[0]);
+            c_paid.setVisibility(View.VISIBLE);
+        }
+        else if( mOrderStatus == -2)
+        {
+            //payment not gone through yet
+        }
+        else
+            t_status.setText(mOrderFormat==1?status_strings_1[mOrderStatus-1]:status_strings_2[mOrderStatus-1]);
         //show the respective buttons and change their labels accordingly
         //for pending the buttons remain as they are
         if(mOrderFormat==1)
@@ -108,6 +135,7 @@ public class OneOrderFragment extends Fragment
         double total_price=0.0;
         String date_to_show="";
         String waiter="";
+        String collect_time="";
         Iterator iterator= OrdersFragment.ordersLinkedHashMap.entrySet().iterator();
         while (iterator.hasNext())
         {
@@ -126,6 +154,7 @@ public class OneOrderFragment extends Fragment
             username= orders.getSellerNames();
             waiter= orders.getWaiterNames();
             table= orders.getTableNumber();
+            collect_time = orders.getCollectTime();
             if(count==0)
             {
                 progressBar.setProgress(orderStatus);
@@ -152,7 +181,11 @@ public class OneOrderFragment extends Fragment
         //set date text
         t_date.setText(date_to_show);
         t_username.setText(username);
-        t_table.setText("Table "+table);
+        t_collect_time.setText(collect_time);
+        if(table!=-1)
+            t_table.setText("Table "+table);
+        else
+            c_table.setVisibility(View.GONE);
         t_waiter.setText(waiter);
         return view;
     }

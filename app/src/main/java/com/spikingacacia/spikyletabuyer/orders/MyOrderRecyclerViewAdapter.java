@@ -24,11 +24,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-/**
- * {@link RecyclerView.Adapter} that can display a {@link OrderItem} and makes a call to the
- * specified {@link OnListFragmentInteractionListener}.
- * TODO: Replace the implementation with code for your data type.
- */
 public class MyOrderRecyclerViewAdapter extends RecyclerView.Adapter<MyOrderRecyclerViewAdapter.ViewHolder>
 {
 
@@ -60,7 +55,8 @@ public class MyOrderRecyclerViewAdapter extends RecyclerView.Adapter<MyOrderRecy
         String image_url= LoginA.base_url+"src/sellers_pics/";
         holder.mItem = mValues.get(position);
         holder.mOrderView.setText("Order "+mValues.get(position).getOrderNumber());
-        holder.mTableView.setText("Table "+mValues.get(position).getTableNumber());
+        int table_number = mValues.get(position).getTableNumber();
+        holder.mTableView.setText(table_number == -1 ? "Pre - Order" : "Table "+table_number);
         holder.mUsernameView.setText(mValues.get(position).getSellerNames());
         //format the date
         SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:mm");

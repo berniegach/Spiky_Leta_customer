@@ -31,12 +31,17 @@ public class SRRestaurantsA extends AppCompatActivity
     @Override
     public void onItemClicked(Restaurants item)
     {
+        boolean has_payment = true;
+        if( item.getmCode().contentEquals("") ||  item.getmCode().contentEquals("null") || item.getmCode().contentEquals("NULL"))
+            has_payment = false;
         Intent intent=new Intent(this, ShopA.class);
          intent.putExtra("seller_email",item.getEmail());
          intent.putExtra("order_radius",item.getRadius());
          intent.putExtra("buyer_distance",item.getDistance());
         intent.putExtra("number_of_tables",item.getNumberOfTables());
         intent.putExtra("table_number",item.getTableNumber());
+        intent.putExtra("has_payment", has_payment);
+        intent.putExtra("m_code", has_payment ? item.getmCode() : "");
         startActivity(intent);
     }
 }
