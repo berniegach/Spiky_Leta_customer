@@ -754,6 +754,8 @@ implementation of OrdersFragment.java
                         return false;// the result was cancelled by the user
                     else if(ResultCode.contentEquals("1037"))
                         return false;// DS timeout
+                    else if(ResultCode.contentEquals("1037"))
+                        return false; //wrong password for the customer
                     else if(ResultCode.contentEquals("0"))
                         return true; // paid
 
@@ -779,7 +781,7 @@ implementation of OrdersFragment.java
                 new UpdateOrderTask(storeEmail,orderNumber, dateAdded,"-1").execute((Void)null);
             }
             else
-                Log.e(TAG,"mp check pay status failed");
+                ;//Log.e(TAG,"mp check pay status failed");
 
         }
     }

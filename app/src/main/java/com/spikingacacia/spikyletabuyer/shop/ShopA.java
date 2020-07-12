@@ -392,8 +392,9 @@ public class ShopA extends AppCompatActivity
                 }
                 else
                 {
+                    showProgress(false);
                     Snackbar.make(fab,"Order Placed",Snackbar.LENGTH_LONG).show();
-                    cartLinkedHashMap.clear();;
+                    cartLinkedHashMap.clear();
                     tempCartLinkedHashMap.clear();
                     tempTotal = 0.0;
                     fab.setText(Integer.toString(getCartCount()));
@@ -515,8 +516,9 @@ public class ShopA extends AppCompatActivity
             password = Base64.encodeToString(bytes, Base64.NO_WRAP | Base64.URL_SAFE);
             try
             {
+                String amount = String.valueOf(tempTotal);
                 JSONObject jobject= Mpesa.STKPushSimulation(mPesaTillNumber,password,
-                        timeStamp,"CustomerPayBillOnline","1",msisdn,msisdn,mPesaTillNumber,
+                        timeStamp,"CustomerPayBillOnline",amount,msisdn,msisdn,mPesaTillNumber,
                         confirmationUrl,"https://sandbox.safaricom.co.ke/mpesa/",
                         "order","Testing stk push");
                 MerchantRequestID = jobject.getString("MerchantRequestID");

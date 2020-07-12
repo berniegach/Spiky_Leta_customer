@@ -230,19 +230,21 @@ public class BMapsA extends FragmentActivity implements
      * Enables the My Location layer if the fine location permission has been granted.
      */
     private void enableMyLocation() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)       != PackageManager.PERMISSION_GRANTED)
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED)
         {
             // Permission to access the location is missing.
             ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},PERMISSION_REQUEST_INTERNET);
         }
-        else if (mMap != null) {
+        else if (mMap != null)
+        {
             // Access to the location has been granted to the app.
             mMap.setMyLocationEnabled(true);
         }
     }
 
     @Override
-    public boolean onMyLocationButtonClick() {
+    public boolean onMyLocationButtonClick()
+    {
         Toast.makeText(this, "Using my Location", Toast.LENGTH_SHORT).show();
         // Return false so that we don't consume the event and the default behavior still occurs
         // (the camera animates to the user's current position).
@@ -257,16 +259,20 @@ public class BMapsA extends FragmentActivity implements
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        if (requestCode != LOCATION_PERMISSION_REQUEST_CODE) {
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,    @NonNull int[] grantResults)
+    {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode != LOCATION_PERMISSION_REQUEST_CODE)
+        {
             return;
         }
 
-        if (isPermissionGranted(permissions, grantResults,  Manifest.permission.ACCESS_FINE_LOCATION)) {
+        if (isPermissionGranted(permissions, grantResults, Manifest.permission.ACCESS_FINE_LOCATION))
+        {
             // Enable the my location layer if the permission has been granted.
             enableMyLocation();
-        } else {
+        } else
+        {
             // Display the missing permission error dialog when the fragments resume.
             mPermissionDenied = true;
         }

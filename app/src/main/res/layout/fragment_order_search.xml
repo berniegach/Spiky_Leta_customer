@@ -26,7 +26,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:text="Scan QR code to open to open \nyour menu and order now"
+            android:text="Scan QR code to open \nyour menu and order now"
             android:textSize="16sp" />
     </LinearLayout>
 
