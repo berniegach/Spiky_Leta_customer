@@ -355,8 +355,12 @@ public class MainActivity extends AppCompatActivity implements
     }
     private void showRestaurants()
     {
+        Log.d(TAG," GOT THE RESTRAUNTS");
+
         if(restaurantsList.size()==0)
         {
+            Log.d(TAG," GOT THE RESTRAUNTS 1");
+
             Snackbar.make(getWindow().getDecorView().getRootView(), "No restaurants near you.", Snackbar.LENGTH_LONG)
                     .setAction("Retry", new View.OnClickListener()
                     {
@@ -554,6 +558,7 @@ implementation of OrdersFragment.java
         final private String longitude;
         final private String location;
         final private String barcode;
+        private  int success;
 
 
         public RestaurantQRTask( String latitude, String longitude, String location, String barcode)
@@ -579,33 +584,30 @@ implementation of OrdersFragment.java
             info.add(new BasicNameValuePair("url_code",barcode));
             // making HTTP request
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_restaurants_qr,"POST",info);
+            Log.d(TAG,"json:"+jsonObject.toString());
             try
             {
-                JSONArray restArrayList=null;
-                int success=jsonObject.getInt(TAG_SUCCESS);
+                success=jsonObject.getInt(TAG_SUCCESS);
                 if(success==1)
                 {
-                    restArrayList=jsonObject.getJSONArray("restaurants");
-                    restArrayList=restArrayList.getJSONArray(0);
-                    for(int count=0; count<restArrayList.length(); count+=1)
-                    {
-                        JSONObject jsonObject_restaurants=restArrayList.getJSONObject(count);
-                        int id=jsonObject_restaurants.getInt("id");
-                        String email = jsonObject_restaurants.getString("email");
-                        String names=jsonObject_restaurants.getString("username");
-                        double distance=jsonObject_restaurants.getDouble("distance");
-                        double latitude=jsonObject_restaurants.getDouble("latitude");
-                        double longitude=jsonObject_restaurants.getDouble("longitude");
-                        String locality=jsonObject_restaurants.getString("locality");
-                        int order_radius=jsonObject_restaurants.getInt("order_radius");
-                        int tables = jsonObject_restaurants.getInt("number_of_tables");
-                        String image_type=jsonObject_restaurants.getString("image_type");
-                        int table_number = jsonObject_restaurants.getInt("table_number");
-                        String m_code = jsonObject_restaurants.getString("m_code");
+                    JSONArray accountArray=jsonObject.getJSONArray("restaurants");
+                    JSONObject jsonObject_restaurants=accountArray.getJSONObject(0);
 
-                        Restaurants restaurants =new Restaurants(id, email, names,distance,latitude,longitude,locality,order_radius, tables, image_type, table_number, m_code);
-                        restaurantsList.add(restaurants);
-                    }
+                    int id=jsonObject_restaurants.getInt("id");
+                    String email = jsonObject_restaurants.getString("email");
+                    String names=jsonObject_restaurants.getString("username");
+                    double distance=jsonObject_restaurants.getDouble("distance");
+                    double latitude=jsonObject_restaurants.getDouble("latitude");
+                    double longitude=jsonObject_restaurants.getDouble("longitude");
+                    String locality=jsonObject_restaurants.getString("locality");
+                    int order_radius=jsonObject_restaurants.getInt("order_radius");
+                    int tables = jsonObject_restaurants.getInt("number_of_tables");
+                    String image_type=jsonObject_restaurants.getString("image_type");
+                    int table_number = jsonObject_restaurants.getInt("table_number");
+                    String m_code = jsonObject_restaurants.getString("m_code");
+
+                    Restaurants restaurants =new Restaurants(id, email, names,distance,latitude,longitude,locality,order_radius, tables, image_type, table_number, m_code);
+                    restaurantsList.add(restaurants);
                     return true;
                 }
                 else
@@ -633,7 +635,14 @@ implementation of OrdersFragment.java
             }
             else
             {
-                Toast.makeText(getBaseContext(),"Error getting restaurants",Toast.LENGTH_SHORT).show();
+                String message;
+                if(barcode.contentEquals("https://play.google.com/store/apps/details?id=com.spikingacacia.spikyletabuyer"))
+                    message = "Wrong QR code\nScan the bottom QR code";
+                else if(success ==-3)
+                    message = "You are too far away from the restaurant";
+                else
+                    message = "Error getting restaurants";
+                Toast.makeText(getBaseContext(),message,Toast.LENGTH_SHORT).show();
             }
         }
     }

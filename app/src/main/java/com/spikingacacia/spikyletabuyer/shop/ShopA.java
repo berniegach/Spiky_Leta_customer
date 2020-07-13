@@ -516,7 +516,7 @@ public class ShopA extends AppCompatActivity
             password = Base64.encodeToString(bytes, Base64.NO_WRAP | Base64.URL_SAFE);
             try
             {
-                String amount = String.valueOf(tempTotal);
+                String amount = String.valueOf(tempTotal.intValue());
                 JSONObject jobject= Mpesa.STKPushSimulation(mPesaTillNumber,password,
                         timeStamp,"CustomerPayBillOnline",amount,msisdn,msisdn,mPesaTillNumber,
                         confirmationUrl,"https://sandbox.safaricom.co.ke/mpesa/",
