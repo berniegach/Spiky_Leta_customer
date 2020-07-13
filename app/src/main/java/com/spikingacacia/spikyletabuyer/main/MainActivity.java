@@ -487,10 +487,10 @@ implementation of OrdersFragment.java
             info.add(new BasicNameValuePair("latitude",latitude));
             info.add(new BasicNameValuePair("longitude",longitude));
             info.add(new BasicNameValuePair("location",location));
-            info.add(new BasicNameValuePair("which","1"));
+            info.add(new BasicNameValuePair("which","2"));
             // making HTTP request
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_restaurants,"POST",info);
-            Log.d("cTasks",""+jsonObject.toString());
+            //Log.d("cTasks",""+jsonObject.toString());
             try
             {
                 JSONArray restArrayList=null;
