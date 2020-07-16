@@ -282,7 +282,7 @@ public class MapsExploreActivity extends AppCompatActivity implements
                                     try
                                     {
                                         addresses=geocoder.getFromLocation(latitude,longitude,10);
-                                        new RestaurantsTask(String.valueOf(latitude),String.valueOf(longitude),addresses.get(0).getLocality()).execute((Void)null);
+                                        new RestaurantsTask(String.valueOf(latitude),String.valueOf(longitude),addresses.get(0).getCountryCode()).execute((Void)null);
                                         for(int c=0; c<addresses.size(); c+=1)
                                             Log.d("loc: ",addresses.get(c).getLocality()+"\n");
                                     }
@@ -571,6 +571,7 @@ public class MapsExploreActivity extends AppCompatActivity implements
             if (successful)
             {
                 showRestaurants();
+                RestaurantsData.setRestaurantsData();
             }
             else
             {

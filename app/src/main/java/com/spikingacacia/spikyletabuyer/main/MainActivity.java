@@ -288,7 +288,7 @@ public class MainActivity extends AppCompatActivity implements
                                     if(useQrCode)
                                         new RestaurantQRTask(String.valueOf(latitude),String.valueOf(longitude),addresses.get(0).getLocality(),barcode.displayValue).execute((Void)null);
                                     else
-                                        new RestaurantsTask(String.valueOf(latitude),String.valueOf(longitude),addresses.get(0).getLocality()).execute((Void)null);
+                                        new RestaurantsTask(String.valueOf(latitude),String.valueOf(longitude),addresses.get(0).getCountryCode()).execute((Void)null);
                                     for(int c=0; c<addresses.size(); c+=1)
                                         Log.d("loc: ",addresses.get(c).getLocality()+"\n");
                                 }

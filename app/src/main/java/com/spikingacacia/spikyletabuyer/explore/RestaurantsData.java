@@ -37,4 +37,14 @@ public class RestaurantsData
         }
         return searchResults;
     }
+    public static void setRestaurantsData()
+    {
+        restaurants.clear();
+        for(int c=0; c<MapsExploreActivity.restaurantsList.size(); c++)
+        {
+            Restaurants restaurants_info = MapsExploreActivity.restaurantsList.get(c);
+            String name = restaurants_info.getNames();
+            restaurants.add(name+":"+c);
+        }
+    }
 }

@@ -53,7 +53,6 @@ public class MySuggestionProvider extends SearchRecentSuggestionsProvider
 
     private MatrixCursor getSearchResultsCursor(String searchString){
         MatrixCursor searchResults =  new MatrixCursor(matrixCursorColumns);
-        Log.d("hjfhfjf","size:"+searchResults.getColumnCount());
         Object[] mRow = new Object[5];
         int counterId = 0;
         if(searchString != null)
