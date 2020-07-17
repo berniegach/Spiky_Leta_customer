@@ -324,23 +324,40 @@ public class MainActivity extends AppCompatActivity implements
                             //Get last known location. In some rare situations this can be null
                             if(location!=null)
                             {
-                                double latitude=location.getLatitude();
-                                double longitude=location.getLongitude();
-                                //get addresses
-                                Geocoder geocoder=new Geocoder(MainActivity.this, Locale.getDefault());
-                                List<Address> addresses;
-                                try
+                                final double latitude=location.getLatitude();
+                                final double longitude=location.getLongitude();
+                                Thread thread_location=new Thread()
                                 {
-                                    addresses=geocoder.getFromLocation(latitude,longitude,10);
-                                    if(addresses.get(0).getCountryCode().contentEquals("KE"))
-                                        thread.start();
-                                }
-                                catch (IOException e)
-                                {
-                                    showProgress(false);
-                                    Snackbar.make(getWindow().getDecorView().getRootView(),"Error getting your location.\nPlease try again.", Snackbar.LENGTH_SHORT).show();
-                                    Log.e("address",""+e.getMessage());
-                                }
+                                    @Override
+                                    public void run()
+                                    {
+                                        //get addresses
+                                        Geocoder geocoder=new Geocoder(MainActivity.this, Locale.getDefault());
+                                        List<Address> addresses;
+                                        try
+                                        {
+                                            addresses=geocoder.getFromLocation(latitude,longitude,10);
+                                            if(addresses.get(0).getCountryCode().contentEquals("KE"))
+                                                thread.start();
+                                        }
+                                        catch (IOException e)
+                                        {
+                                            runOnUiThread(new Runnable()
+                                            {
+                                                @Override
+                                                public void run()
+                                                {
+                                                    showProgress(false);
+                                                    //Snackbar.make(getWindow().getDecorView().getRootView(),"Error getting your location.\nPlease try again.", Snackbar.LENGTH_SHORT).show();
+                                                }
+                                            });
+
+                                            Log.e(TAG,""+e.getMessage());
+                                        }
+                                    }
+                                };
+                                thread_location.start();
+
                             }
 
                         }

@@ -217,7 +217,6 @@ public class BMapsA extends FragmentActivity implements
         {
             positions.add(0.0);
             positions.add(0.0);
-            Log.d(TAG,"LAT2: 0.0 LONG2: 0.0");
         }
         return positions;
 

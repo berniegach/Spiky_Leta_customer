@@ -36,16 +36,15 @@ public class CartContent
             String name = inv.getItem();
             String imageType = inv.getImageType();
 
-            //int pos = StoreActivity.itemPriceSizeLinkedHashMap.get(id);
-           // String priceString = inv.getPrices();
-           // final String[] prices = priceString.split(":");
-            //String[] sizes = inv.getSizes().split(":");
-            //Double price = Double.parseDouble( prices[pos].contentEquals("null")?"0":prices[pos]);
-            //String size = sizes[pos];
+            int pos = ShopA.itemPriceSizeLinkedHashMap.get(id);
+            String priceString = inv.getPrices();
+            final String[] prices = priceString.split(":");
+            String[] sizes = inv.getSizes().split(":");
+            Double price = Double.parseDouble( prices[pos].contentEquals("null")?"0":prices[pos]);
+            String size = sizes[pos];
             String description = inv.getDescription();
-            Double price = inv.getSellingPrice();
 
-            addItem(createItem(id,serverInvId, name,price,"size",description,imageType,count));
+            addItem(createItem(id,serverInvId, name,price,size,description,imageType,count));
         }
     }
     private void addItem(CartItem item)

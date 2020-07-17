@@ -78,7 +78,7 @@ public class MapsExploreActivity extends AppCompatActivity implements
     private float maxZoomLevel;
     private int who;
     private String location;
-    private String TAG="MapsA";
+    private String TAG="explore_a";
     private Marker myMarker;
     private View mapView;
     private String url_get_restaurants=base_url+"get_near_restaurants.php";
@@ -172,15 +172,7 @@ public class MapsExploreActivity extends AppCompatActivity implements
     protected void onResume()
     {
         super.onResume();
-        Thread thread=new Thread()
-        {
-            @Override
-            public void run()
-            {
-                getCurrentLocation();
-            }
-        };
-        thread.start();
+        getCurrentLocation();
     }
 
     @Override
@@ -258,39 +250,37 @@ public class MapsExploreActivity extends AppCompatActivity implements
                             if(location!=null)
                             {
                                 //Get last known location. In some rare situations this can be null
-                                if(location!=null)
+                                final double latitude=location.getLatitude();
+                                final double longitude=location.getLongitude();
+                                CameraPosition cameraPosition = new CameraPosition.Builder()
+                                        .target(new LatLng(latitude, longitude))      // Sets the center of the map to location user
+                                        .zoom(17)                   // Sets the zoom
+                                        //.bearing(90)                // Sets the orientation of the camera to east
+                                        .tilt(40)                   // Sets the tilt of the camera to 30 degrees
+                                        .build();                   // Creates a CameraPosition from the builder
+                                mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                                Thread thread=new Thread()
                                 {
-                                    final double latitude=location.getLatitude();
-                                    final double longitude=location.getLongitude();
-                                    runOnUiThread(new Runnable()
+                                    @Override
+                                    public void run()
                                     {
-                                        @Override
-                                        public void run()
+                                        //get addresses
+                                        Geocoder geocoder=new Geocoder(MapsExploreActivity.this, Locale.getDefault());
+                                        List<Address> addresses;
+                                        try
                                         {
-                                            CameraPosition cameraPosition = new CameraPosition.Builder()
-                                                    .target(new LatLng(latitude, longitude))      // Sets the center of the map to location user
-                                                    .zoom(17)                   // Sets the zoom
-                                                    //.bearing(90)                // Sets the orientation of the camera to east
-                                                    .tilt(40)                   // Sets the tilt of the camera to 30 degrees
-                                                    .build();                   // Creates a CameraPosition from the builder
-                                            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+                                            addresses=geocoder.getFromLocation(latitude,longitude,10);
+                                            new RestaurantsTask(String.valueOf(latitude),String.valueOf(longitude),addresses.get(0).getCountryCode()).execute((Void)null);
+                                            for(int c=0; c<addresses.size(); c+=1)
+                                                Log.d("loc: ",addresses.get(c).getLocality()+"\n");
                                         }
-                                    });
-                                    //get addresses
-                                    Geocoder geocoder=new Geocoder(MapsExploreActivity.this, Locale.getDefault());
-                                    List<Address> addresses;
-                                    try
-                                    {
-                                        addresses=geocoder.getFromLocation(latitude,longitude,10);
-                                        new RestaurantsTask(String.valueOf(latitude),String.valueOf(longitude),addresses.get(0).getCountryCode()).execute((Void)null);
-                                        for(int c=0; c<addresses.size(); c+=1)
-                                            Log.d("loc: ",addresses.get(c).getLocality()+"\n");
+                                        catch (IOException e)
+                                        {
+                                            Log.e(TAG,""+e.getMessage());
+                                        }
                                     }
-                                    catch (IOException e)
-                                    {
-                                        Log.e(TAG,""+e.getMessage());
-                                    }
-                                }
+                                };
+                                thread.start();
 
                             }
 

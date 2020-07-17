@@ -347,20 +347,13 @@ public class menuFragment extends Fragment
                         }
                         String item=jsonObjectNotis.getString("item");
                         String description=jsonObjectNotis.getString("description");
-                        double selling_price;
-                        try
-                        {
-                            selling_price=jsonObjectNotis.getDouble("selling_price");
-                        }
-                        catch (Exception e)
-                        {
-                            selling_price = 0.0;
-                        }
+                        String sizes = jsonObjectNotis.getString("sizes");
+                        String prices = jsonObjectNotis.getString("prices");
                         String image_type=jsonObjectNotis.getString("image_type");
                         String date_added=jsonObjectNotis.getString("date_added");
                         String date_changed=jsonObjectNotis.getString("date_changed");
 
-                        DMenu dMenu =new DMenu(id,category_id,group_id,item,description,selling_price,image_type,date_added,date_changed);
+                        DMenu dMenu =new DMenu(id,category_id,group_id,item,description,sizes, prices,image_type,date_added,date_changed);
                         list.add(dMenu);
                         ShopA.menuLinkedHashMap.put(id,dMenu);
 

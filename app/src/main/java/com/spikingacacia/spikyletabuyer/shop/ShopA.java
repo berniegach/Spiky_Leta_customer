@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
@@ -182,7 +183,27 @@ public class ShopA extends AppCompatActivity
     public void onMenuItemInteraction(final DMenu item)
     {
         cartLinkedHashMap.put(item.getId(),1);
-        itemPriceSizeLinkedHashMap.put(item.getId(), 0);
+        //display a list of different sizes and prices for the customer to choose
+        String[] sizes = item.getSizes().split(":");
+        String[] prices = item.getPrices().split(":");
+        if(sizes.length == 1)
+            itemPriceSizeLinkedHashMap.put(item.getId(), 0);
+        else
+        {
+            String[] sizesPrices = new String[sizes.length];
+            for( int c=0; c< sizesPrices.length; c++)
+                sizesPrices[c] = sizes[c]+" @ "+ prices[c];
+            new AlertDialog.Builder(ShopA.this)
+                    .setTitle("Choose the size")
+                    .setItems(sizesPrices, new DialogInterface.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which)
+                        {
+                            itemPriceSizeLinkedHashMap.put(item.getId(), which);
+                        }
+                    }).create().show();
+        }
         if(getCartCount()>0)
             fab.setVisibility(View.VISIBLE);
         fab.setText(Integer.toString(getCartCount()));
@@ -292,10 +313,10 @@ public class ShopA extends AppCompatActivity
             int count=set.getValue();
             DMenu inv = menuLinkedHashMap.get(id);
 
-           // int pos = itemPriceSizeLinkedHashMap.get(id);
-            //String priceString = inv.getPrices();
-           // final String[] prices = priceString.split(":");
-            Double price = inv.getSellingPrice();//Double.parseDouble( prices[pos].contentEquals("null")?"0":prices[pos]);
+            int pos = itemPriceSizeLinkedHashMap.get(id);
+            String priceString = inv.getPrices();
+           final String[] prices = priceString.split(":");
+            Double price = Double.parseDouble( prices[pos].contentEquals("null")?"0":prices[pos]);
 
             total += count*price;
 
@@ -315,6 +336,7 @@ public class ShopA extends AppCompatActivity
         private String TAG_MESSAGE = "message";
         private String TAG_SUCCESS = "success";
         private String itemsIds="";
+        private String itemSizes="";
         private String itemPrices="";
         private int tableNumber=0;
         private String collectTime;
@@ -350,6 +372,7 @@ public class ShopA extends AppCompatActivity
             info.add(new BasicNameValuePair("seller_email",sellerEmail));
             info.add(new BasicNameValuePair("user_email",serverAccount.getEmail()));
             info.add(new BasicNameValuePair("items_ids",itemsIds));
+            info.add(new BasicNameValuePair("items_sizes",itemSizes));
             info.add(new BasicNameValuePair("items_prices",itemPrices));
             info.add(new BasicNameValuePair("table_number",String.valueOf(tableNumber)));
             info.add(new BasicNameValuePair("has_payment", hasPayment? "1" : "0"));
@@ -417,23 +440,23 @@ public class ShopA extends AppCompatActivity
                 DMenu inv = menuLinkedHashMap.get(id);
                 int quantity = set.getValue();
 
-                //int pos = StoreActivity.itemPriceSizeLinkedHashMap.get(id);
-                //String priceString = inv.getPrices();
-                //final String[] prices = priceString.split(":");
-                //String[] sizes = inv.getSizes().split(":");
-                String  price =  String.valueOf(inv.getSellingPrice());//prices[pos].contentEquals("null")?"0":prices[pos];
-                //String size = sizes[pos];
+                int pos = itemPriceSizeLinkedHashMap.get(id);
+                String priceString = inv.getPrices();
+                final String[] prices = priceString.split(":");
+                String[] sizes = inv.getSizes().split(":");
+                String  price =  prices[pos].contentEquals("null")?"0":prices[pos];
+                String size = sizes[pos];
                 for(int c=0; c<quantity; c++)
                 {
                     if (!itemsIds.contentEquals(""))
                     {
                         itemsIds += ",";
                         itemPrices += ",";
-                        //itemSizes += ",";
+                        itemSizes += ",";
                     }
                     itemsIds += String.valueOf(inv.getId());
                     itemPrices += price;
-                    //itemSizes += size;
+                    itemSizes += size;
                 }
             }
 

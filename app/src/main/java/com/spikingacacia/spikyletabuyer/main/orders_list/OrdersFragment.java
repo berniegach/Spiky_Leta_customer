@@ -188,7 +188,7 @@ public class OrdersFragment extends Fragment
                         String date_added=jsonObjectNotis.getString("date_added");
                         String date_changed=jsonObjectNotis.getString("date_changed");
                         String item=jsonObjectNotis.getString("item");
-                        double selling_price=jsonObjectNotis.getDouble("selling_price");
+                        double selling_price=jsonObjectNotis.getDouble("price");
                         int seller_id = jsonObjectNotis.getInt("seller_id");
                         String seller_image_type = jsonObjectNotis.getString("seller_image_type");
                         String username=jsonObjectNotis.getString("username");
@@ -234,6 +234,8 @@ public class OrdersFragment extends Fragment
                     unique_order.add(value.getValue());
                 }
                 myOrderRecyclerViewAdapter.listUpdated(unique_order);
+                recyclerView.scrollToPosition(myOrderRecyclerViewAdapter.getItemCount()-1);
+
             }
             else
             {
