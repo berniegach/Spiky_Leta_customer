@@ -214,8 +214,7 @@ public class BPreferencePic extends Preference
                         public void onResponse(NetworkResponse response)
                         {
                             int statusCode = response.statusCode;
-                            Log.d("gdjhsdj",""+statusCode);
-                            serverAccount.setImageType(".png");
+                            serverAccount.setImageType(".jpg");
                             SettingsActivity.settingsChanged = true;
                             Toast.makeText(context, "Profile pic changed", Toast.LENGTH_SHORT).show();
                         }
@@ -234,7 +233,7 @@ public class BPreferencePic extends Preference
                 protected Map<String, DataPart> getByteData() {
                     Map<String, DataPart> params = new HashMap<>();
                     long imagename = System.currentTimeMillis();
-                    params.put("png", new DataPart(imagename + ".png", getFileDataFromDrawable(bitmap)));
+                    params.put("png", new DataPart(imagename + ".jpg", getFileDataFromDrawable(bitmap)));
                     return params;
                 }
 
@@ -254,8 +253,21 @@ public class BPreferencePic extends Preference
         }
         public byte[] getFileDataFromDrawable(Bitmap bitmap) {
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteArrayOutputStream);
-            return byteArrayOutputStream.toByteArray();
+            int quality = 100;
+            while(true)
+            {
+                byteArrayOutputStream.reset();
+                if(bitmap.compress(Bitmap.CompressFormat.JPEG, quality, byteArrayOutputStream))
+                {
+
+                    //Log.e(TAG,"bytes length "+byteArrayOutputStream.toByteArray().length);
+                    if(byteArrayOutputStream.toByteArray().length<=2000000)
+                        return byteArrayOutputStream.toByteArray();
+                }
+                else
+                    return null;
+                quality-=10;
+            }
         }
     }
 }

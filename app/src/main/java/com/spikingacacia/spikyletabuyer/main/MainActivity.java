@@ -768,7 +768,7 @@ implementation of OrdersFragment.java
             {
                 JSONObject jsonObject = Mpesa.STKPushTransactionStatus(businessShortCode,password,timestamp,checkoutRequestID);
 
-                Log.d(TAG,"JSON"+jsonObject.toString());
+                //Log.d(TAG,"JSON"+jsonObject.toString());
                 String  ResponseCode = jsonObject.getString("ResponseCode");
                 if(ResponseCode.contentEquals("0"))
                 {

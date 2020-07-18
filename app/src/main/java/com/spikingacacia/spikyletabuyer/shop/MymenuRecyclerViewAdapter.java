@@ -1,6 +1,9 @@
 package com.spikingacacia.spikyletabuyer.shop;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,6 +22,7 @@ import com.spikingacacia.spikyletabuyer.database.DMenu;
 import com.spikingacacia.spikyletabuyer.shop.menuFragment.OnListFragmentInteractionListener;
 
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -74,7 +78,9 @@ public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecycl
             @Override
             public void onClick(View v)
             {
-                mListener.onMenuItemInteraction(holder.mItem);
+                //first choose accompaniment
+                chooseLinkedFood(holder.mItem);
+                //mListener.onMenuItemInteraction(holder.mItem);
             }
         });
 
@@ -157,5 +163,86 @@ public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecycl
         mValues.addAll(newitems);
         itemsCopy.addAll(newitems);
         notifyDataSetChanged();
+    }
+    private void chooseLinkedFood(final DMenu dMenu)
+    {
+        final List<DMenu> dMenuList = new ArrayList<>();
+        String linked_foods = dMenu.getLinkedItems();
+        String[] links = linked_foods.split(":");
+        String[] items = new String[mValues.size()];
+        final String[] ids = new String[mValues.size()];
+        final boolean[] items_checked = new boolean[mValues.size()];
+
+        if(links.length==1 && links[0].contentEquals("null"))
+            links[0]="-1";
+        int itemsCount = 0;
+        for(int c=0; c<items.length; c++)
+        {
+            items[c] = mValues.get(c).getItem();
+            ids[c] = String.valueOf(mValues.get(c).getId());
+            //set the linked item to true
+            for( int d=0; d<links.length; d++)
+            {
+                int id = Integer.valueOf(links[d]);
+                for(int e=0; e<mValues.size(); e++)
+                {
+                    if( id==mValues.get(c).getId())
+                    {
+                        items_checked[c]=true;
+                        itemsCount+=1;
+                        break;
+                    }
+                }
+            }
+        }
+        //form now a new list but with only linked items
+        String[] items_new = new String[itemsCount];
+        final DMenu[] dmenu_new = new DMenu[itemsCount];
+        final boolean[] items_checked_new = new boolean[itemsCount];
+        int index = 0;
+        for(int c=0; c<items_checked.length; c++)
+        {
+            if(items_checked[c])
+            {
+                items_new[index]= mValues.get(c).getItem();
+                dmenu_new[index] = mValues.get(c);
+                index+=1;
+
+            }
+        }
+        if(items_new.length==0)
+        {
+            dMenuList.add(dMenu);
+            mListener.onMenuItemInteraction(dMenuList);
+        }
+        else
+        {
+            new AlertDialog.Builder(context)
+                    .setTitle("Accompaniments")
+                    .setMultiChoiceItems(items_new, items_checked_new, new DialogInterface.OnMultiChoiceClickListener()
+                    {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which, boolean isChecked)
+                        {
+                            items_checked_new[which] = isChecked;
+                        }
+                    })
+                    .setPositiveButton("Proceed", new DialogInterface.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which)
+                        {
+                            for(int c=0; c<items_checked_new.length; c++)
+                            {
+                                if(items_checked_new[c])
+                                    dMenuList.add(dmenu_new[c]);
+                            }
+                            dMenuList.add(dMenu);
+                            mListener.onMenuItemInteraction(dMenuList);
+                        }
+                    }).create().show();
+        }
+
+
     }
 }

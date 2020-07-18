@@ -178,7 +178,7 @@ public class menuFragment extends Fragment
     {
         // TODO: Update argument type and name
         //void onEditMenu(int which, DMenu dMenu);
-        void onMenuItemInteraction(DMenu item);
+        void onMenuItemInteraction(List<DMenu> item);
         //void onCategoryItemInteraction(Categories item);
     }
     private int getHorizontalItemCount()
@@ -345,6 +345,7 @@ public class menuFragment extends Fragment
                         {
                             group_id = -1;
                         }
+                        String linked_items = jsonObjectNotis.getString("linked_items");
                         String item=jsonObjectNotis.getString("item");
                         String description=jsonObjectNotis.getString("description");
                         String sizes = jsonObjectNotis.getString("sizes");
@@ -353,7 +354,7 @@ public class menuFragment extends Fragment
                         String date_added=jsonObjectNotis.getString("date_added");
                         String date_changed=jsonObjectNotis.getString("date_changed");
 
-                        DMenu dMenu =new DMenu(id,category_id,group_id,item,description,sizes, prices,image_type,date_added,date_changed);
+                        DMenu dMenu =new DMenu(id,category_id,group_id,linked_items,item,description,sizes, prices,image_type,date_added,date_changed);
                         list.add(dMenu);
                         ShopA.menuLinkedHashMap.put(id,dMenu);
 

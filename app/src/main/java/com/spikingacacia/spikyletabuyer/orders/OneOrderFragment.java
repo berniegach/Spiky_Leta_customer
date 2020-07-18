@@ -146,6 +146,7 @@ public class OneOrderFragment extends Fragment
             int orderStatus= orders.getOrderStatus();
             String orderName= orders.getItem();
             orderName=orderName.replace("_"," ");
+            String size = orders.getSize();
             double price= orders.getPrice();
             String dateAdded= orders.getDateAdded();
             String[] date=dateAdded.split(" ");
@@ -168,7 +169,7 @@ public class OneOrderFragment extends Fragment
 
             t_count.setText(String.valueOf(count+1));
             t_item.setText(orderName);
-            t_price.setText(String.valueOf(price));
+            t_price.setText(size+" @ "+String.valueOf(price));
             l_base.addView(layout);
 
 

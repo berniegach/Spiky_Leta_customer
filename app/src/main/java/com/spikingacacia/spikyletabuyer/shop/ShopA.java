@@ -180,33 +180,41 @@ public class ShopA extends AppCompatActivity
     }
 
     @Override
-    public void onMenuItemInteraction(final DMenu item)
+    public void onMenuItemInteraction(final List<DMenu> dMenuList)
     {
-        cartLinkedHashMap.put(item.getId(),1);
-        //display a list of different sizes and prices for the customer to choose
-        String[] sizes = item.getSizes().split(":");
-        String[] prices = item.getPrices().split(":");
-        if(sizes.length == 1)
-            itemPriceSizeLinkedHashMap.put(item.getId(), 0);
-        else
+        for( int index=0; index< dMenuList.size(); index++)
         {
-            String[] sizesPrices = new String[sizes.length];
-            for( int c=0; c< sizesPrices.length; c++)
-                sizesPrices[c] = sizes[c]+" @ "+ prices[c];
-            new AlertDialog.Builder(ShopA.this)
-                    .setTitle("Choose the size")
-                    .setItems(sizesPrices, new DialogInterface.OnClickListener()
-                    {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which)
+            final DMenu item = dMenuList.get(index);
+            Log.d(TAG,"NAME "+item.getItem());
+            cartLinkedHashMap.put(item.getId(),1);
+            //display a list of different sizes and prices for the customer to choose
+            String[] sizes = item.getSizes().split(":");
+            String[] prices = item.getPrices().split(":");
+            if(sizes.length == 1)
+                itemPriceSizeLinkedHashMap.put(item.getId(), 0);
+            else
+            {
+                String[] sizesPrices = new String[sizes.length];
+                for( int c=0; c< sizesPrices.length; c++)
+                    sizesPrices[c] = sizes[c]+" @ "+ prices[c];
+                new AlertDialog.Builder(ShopA.this)
+                        .setTitle("Size for "+item.getItem())
+                        .setItems(sizesPrices, new DialogInterface.OnClickListener()
                         {
-                            itemPriceSizeLinkedHashMap.put(item.getId(), which);
-                        }
-                    }).create().show();
+                            @Override
+                            public void onClick(DialogInterface dialog, int which)
+                            {
+                                itemPriceSizeLinkedHashMap.put(item.getId(), which);
+                            }
+                        })
+                        .setCancelable(false)
+                        .create().show();
+            }
+            if(getCartCount()>0)
+                fab.setVisibility(View.VISIBLE);
+            fab.setText(Integer.toString(getCartCount()));
         }
-        if(getCartCount()>0)
-            fab.setVisibility(View.VISIBLE);
-        fab.setText(Integer.toString(getCartCount()));
+
     }
     /*************************************************************************************************************************************************************************************
      * implementation of CartFragment.java

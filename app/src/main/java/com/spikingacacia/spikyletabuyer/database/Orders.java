@@ -10,6 +10,7 @@ public class Orders
     private String dateAdded;
     private String dateChanged;
     private String item;
+    private String size;
     private double price;
     private int sellerId;
     private String sellerImageType;
@@ -20,7 +21,7 @@ public class Orders
     private int preOrder;
     private String collectTime;
 
-    public Orders(int id, String waiterEmail, int itemId, int orderNumber, int orderStatus, String dateAdded, String dateChanged, String item, double price, int sellerId, String sellerImageType,
+    public Orders(int id, String waiterEmail, int itemId, int orderNumber, int orderStatus, String dateAdded, String dateChanged, String item, String size, double price, int sellerId, String sellerImageType,
                   String sellerNames, String waiterNames, int orderFormat, int tableNumber, int preOrder, String collectTime)
     {
         this.id = id;
@@ -31,6 +32,7 @@ public class Orders
         this.dateAdded = dateAdded;
         this.dateChanged = dateChanged;
         this.item = item;
+        this.size = size;
         this.price = price;
         this.sellerId = sellerId;
         this.sellerImageType = sellerImageType;
@@ -120,6 +122,16 @@ public class Orders
     public void setItem(String item)
     {
         this.item = item;
+    }
+
+    public String getSize()
+    {
+        return size;
+    }
+
+    public void setSize(String size)
+    {
+        this.size = size;
     }
 
     public double getPrice()

@@ -188,6 +188,7 @@ public class OrdersFragment extends Fragment
                         String date_added=jsonObjectNotis.getString("date_added");
                         String date_changed=jsonObjectNotis.getString("date_changed");
                         String item=jsonObjectNotis.getString("item");
+                        String size = jsonObjectNotis.getString("size");
                         double selling_price=jsonObjectNotis.getDouble("price");
                         int seller_id = jsonObjectNotis.getInt("seller_id");
                         String seller_image_type = jsonObjectNotis.getString("seller_image_type");
@@ -198,7 +199,7 @@ public class OrdersFragment extends Fragment
                         int pre_order = jsonObjectNotis.getInt("pre_order");
                         String collect_time = jsonObjectNotis.getString("collect_time");
 
-                        Orders orders =new Orders(id,waiter_email,item_id,order_number,order_status,date_added,date_changed,item,selling_price,seller_id, seller_image_type,
+                        Orders orders =new Orders(id,waiter_email,item_id,order_number,order_status,date_added,date_changed,item,size,selling_price,seller_id, seller_image_type,
                                 username,waiter_names,order_format,table_number, pre_order, collect_time);
                         list.add( orders);
                         ordersLinkedHashMap.put(id,orders);
