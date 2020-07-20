@@ -230,7 +230,7 @@ public class ShopA extends AppCompatActivity
     public void onProceed()
     {
         //first check if the the location is within the restaurants range
-        if(buyerDistance>sellerOrderRadius)
+        if(!preOrder && buyerDistance>sellerOrderRadius)
         {
             Snackbar.make(fab,"You are not within the restaurant's order radius",Snackbar.LENGTH_LONG).show();
             return;
