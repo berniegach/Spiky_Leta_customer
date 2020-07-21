@@ -21,14 +21,16 @@
 
     </PreferenceCategory>
 
-    <!--<PreferenceCategory app:title="Location">
-        <PreferenceScreen app:title="Current Location">
-            <intent
-                app:action="android.intent.action.VIEW"
-                android:targetPackage="com.spikingacacia.spikyletabuyer"
-                android:targetClass="com.spikingacacia.spikyletabuyer.BMapsA"/>
-        </PreferenceScreen>
-    </PreferenceCategory>-->
+    <PreferenceCategory
+        android:title="Legal">
+        <Preference
+            app:fragment="com.spikingacacia.spikyletabuyer.SettingsActivity$TermsAndConditionsPreferenceFragment"
+            app:title="Terms and Conditions" />
+        <Preference
+            app:fragment="com.spikingacacia.spikyletabuyer.SettingsActivity$PrivacyPolicyPreferenceFragment"
+            app:title="Privacy Policy" />
+
+    </PreferenceCategory>
     <Preference
         android:fragment="com.spikingacacia.spikyletabuyer.SettingsActivity$AboutPreferenceFragment"
         android:icon="@drawable/ic_help"
