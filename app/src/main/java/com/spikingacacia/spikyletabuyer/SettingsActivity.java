@@ -31,7 +31,7 @@ public class SettingsActivity extends AppCompatActivity
 {
     private static final String TITLE_TAG = "Settings";
     private UpdateAccount updateTask;
-    public static boolean settingsChanged;
+    public static boolean settingsChange;
     // public static boolean permissionsChanged;
     static private Context context;
     public static ServerAccount tempServerAccount;
@@ -57,7 +57,7 @@ public class SettingsActivity extends AppCompatActivity
     @Override
     protected void onDestroy()
     {
-        new Thread(new Runnable()
+        /*new Thread(new Runnable()
         {
             @Override
             public void run()
@@ -67,7 +67,7 @@ public class SettingsActivity extends AppCompatActivity
                     updateTask.execute((Void)null);
                 }
             }
-        }).start();
+        }).start();*/
         super.onDestroy();
     }
     public static class SettingsFragment extends PreferenceFragmentCompat
@@ -88,8 +88,8 @@ public class SettingsActivity extends AppCompatActivity
                     EditTextPreference pref = (EditTextPreference) preference;
                     String name = o.toString();
                     tempServerAccount.setUsername(name);
-                    settingsChanged=true;
                     pref.setText(name);
+                    updateSettings();
                     return false;
                 }
             });
@@ -99,7 +99,7 @@ public class SettingsActivity extends AppCompatActivity
             preference_est_type.setText(LoginA.serverAccount.getEmail());
 
             //location
-            String[] pos=LoginA.serverAccount.getLocation().split(",");
+            //String[] pos=LoginA.serverAccount.getLocation().split(",");
             //final Preference pref_location=findPreference("location");
             //pref_location.setSummary(pos.length==3?pos[2]:"Please set your location");
         }
@@ -143,7 +143,11 @@ public class SettingsActivity extends AppCompatActivity
         }
 
     }
-    public class UpdateAccount extends AsyncTask<Void, Void, Boolean>
+    public static void updateSettings()
+    {
+        new UpdateAccount().execute((Void)null);
+    }
+    private static class UpdateAccount extends AsyncTask<Void, Void, Boolean>
     {
         private String url_update_account= LoginA.base_url+"update_buyer_account.php";
         private JSONParser jsonParser;
@@ -194,7 +198,7 @@ public class SettingsActivity extends AppCompatActivity
             {
                 Log.d("settings", "update done");
                 LoginA.serverAccount = tempServerAccount;
-                settingsChanged=false;
+                //settingsChanged=false;
             }
             else
             {

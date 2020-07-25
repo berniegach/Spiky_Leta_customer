@@ -3,6 +3,7 @@ package com.spikingacacia.spikyletabuyer.main.orders_list;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,6 +30,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import static com.spikingacacia.spikyletabuyer.LoginA.bMessagesList;
 import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
 import static com.spikingacacia.spikyletabuyer.LoginA.serverAccount;
 
@@ -45,9 +47,11 @@ public class OrdersFragment extends Fragment
     private int mColumnCount = 1;
     private OnListFragmentInteractionListener mListener;
     private int mWhichOrder=0;
-    private  RecyclerView recyclerView;
+    private static RecyclerView recyclerView;
     public static LinkedHashMap<Integer,Orders> ordersLinkedHashMap;
-    private MyOrderRecyclerViewAdapter myOrderRecyclerViewAdapter;
+    private static MyOrderRecyclerViewAdapter myOrderRecyclerViewAdapter;
+    private String TAG = "orders_f";
+    private Thread ordersThread;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -104,7 +108,7 @@ public class OrdersFragment extends Fragment
     public void onResume()
     {
         super.onResume();
-        new OrdersTask().execute((Void)null);
+        getOrders();
     }
 
     @Override
@@ -125,12 +129,36 @@ public class OrdersFragment extends Fragment
     public void onDetach()
     {
         super.onDetach();
+        ordersThread.interrupt();
         mListener = null;
     }
     public interface OnListFragmentInteractionListener
     {
         // TODO: Update argument type and name
         void onOrderClicked(Orders item);
+    }
+    private void getOrders()
+    {
+        ordersThread=new Thread()
+        {
+            @Override
+            public void run()
+            {
+                try
+                {
+                    while(true)
+                    {
+                        new OrdersTask().execute((Void)null);
+                        sleep(5000);
+                    }
+                }
+                catch (InterruptedException e)
+                {
+                    //Log.e(TAG,"order thread quit");
+                }
+            }
+        };
+        ordersThread.start();
     }
     /**
      * Following code will get the buyers orders
@@ -156,7 +184,7 @@ public class OrdersFragment extends Fragment
             Log.d("BORDERS: ","starting....");
             list = new LinkedList<>();
             uniqueOrderLinkedHashMap = new LinkedHashMap<>();
-            ordersLinkedHashMap.clear();
+            //ordersLinkedHashMap.clear();
             super.onPreExecute();
         }
         @Override
@@ -167,7 +195,7 @@ public class OrdersFragment extends Fragment
             info.add(new BasicNameValuePair("email",serverAccount.getEmail()));
             // making HTTP request
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_b_orders,"POST",info);
-            Log.d("sItems",""+jsonObject.toString());
+            //Log.d("sItems",""+jsonObject.toString());
             try
             {
                 JSONArray itemsArrayList=null;
@@ -234,8 +262,7 @@ public class OrdersFragment extends Fragment
                     LinkedHashMap.Entry<String, Orders> value = ( LinkedHashMap.Entry<String, Orders>) iterator.next();
                     unique_order.add(value.getValue());
                 }
-                myOrderRecyclerViewAdapter.listUpdated(unique_order);
-                recyclerView.scrollToPosition(myOrderRecyclerViewAdapter.getItemCount()-1);
+                checkIfOrderChanged(unique_order);
 
             }
             else
@@ -244,4 +271,15 @@ public class OrdersFragment extends Fragment
             }
         }
     }
+    private void checkIfOrderChanged(List<Orders> unique_order)
+    {
+        //check size
+        if(myOrderRecyclerViewAdapter.getItemCount()!=unique_order.size())
+        {
+            myOrderRecyclerViewAdapter.listUpdated(unique_order);
+            recyclerView.scrollToPosition(myOrderRecyclerViewAdapter.getItemCount()-1);
+        }
+
+    }
+
 }

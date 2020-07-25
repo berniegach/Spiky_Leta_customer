@@ -58,7 +58,7 @@
             android:id="@+id/add"
             android:layout_width="50dp"
             android:layout_height="50dp"
-            android:src="@drawable/ic_baseline_add_circle"
+            android:src="@drawable/ic_baseline_add_circle_48"
             android:backgroundTint="@android:color/transparent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

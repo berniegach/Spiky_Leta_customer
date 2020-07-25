@@ -7,12 +7,19 @@ import androidx.fragment.app.FragmentTransaction;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.media.MediaPlayer;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.ProgressBar;
@@ -21,6 +28,7 @@ import android.widget.TimePicker;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.spikingacacia.spikyletabuyer.MyBounceInterpolator;
 import com.spikingacacia.spikyletabuyer.Preferences;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.JSONParser;
@@ -205,6 +213,12 @@ public class ShopA extends AppCompatActivity
                             public void onClick(DialogInterface dialog, int which)
                             {
                                 itemPriceSizeLinkedHashMap.put(item.getId(), which);
+                                //animate the fab button
+                                final Animation myAnim = AnimationUtils.loadAnimation(getBaseContext(), R.anim.bounce);
+                                // Use bounce interpolator with amplitude 0.2 and frequency 20
+                                MyBounceInterpolator interpolator = new MyBounceInterpolator(0.2, 20);
+                                myAnim.setInterpolator(interpolator);
+                                fab.startAnimation(myAnim);
                             }
                         })
                         .setCancelable(false)
@@ -213,6 +227,14 @@ public class ShopA extends AppCompatActivity
             if(getCartCount()>0)
                 fab.setVisibility(View.VISIBLE);
             fab.setText(Integer.toString(getCartCount()));
+            //animate the fab button
+            final Animation myAnim = AnimationUtils.loadAnimation(this, R.anim.bounce);
+            // Use bounce interpolator with amplitude 0.2 and frequency 20
+            MyBounceInterpolator interpolator = new MyBounceInterpolator(0.2, 20);
+            myAnim.setInterpolator(interpolator);
+            fab.startAnimation(myAnim);
+            vibrate_on_click();
+            //play_notification();
         }
 
     }
@@ -337,6 +359,31 @@ public class ShopA extends AppCompatActivity
         mainFragment.setVisibility( show? View.INVISIBLE :View.VISIBLE);
         fab.setVisibility( show? View.INVISIBLE :View.VISIBLE);
     }
+    private void play_notification()
+    {
+        Uri alarmSound =
+                RingtoneManager. getDefaultUri (RingtoneManager. TYPE_NOTIFICATION );
+        MediaPlayer mp = MediaPlayer. create (getBaseContext(), alarmSound);
+        mp.start();
+
+       /* NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(SMenuA.this, default_notification_channel_id )
+                        .setSmallIcon(R.mipmap.ic_launcher )
+                        .setContentTitle( "New Order" )
+                        .setContentText( "a new order has arrived" ) ;
+        NotificationManager mNotificationManager = (NotificationManager)
+                getSystemService(Context. NOTIFICATION_SERVICE );
+        mNotificationManager.notify(( int ) System. currentTimeMillis () ,
+                mBuilder.build());*/
+    }
+    private void vibrate_on_click()
+    {
+        Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+        if(vibrator == null)
+            Log.e(TAG,"No vibrator");
+        else
+            vibrator.vibrate(100);
+    }
 
     private class OrderTask extends AsyncTask<Void, Void, Boolean>
     {
@@ -431,6 +478,7 @@ public class ShopA extends AppCompatActivity
                     fab.setText(Integer.toString(getCartCount()));
                     fab.setVisibility(View.GONE);
                     onBackPressed();
+                    play_notification();
                 }
             }
             else

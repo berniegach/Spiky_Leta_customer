@@ -215,7 +215,7 @@ public class BPreferencePic extends Preference
                         {
                             int statusCode = response.statusCode;
                             serverAccount.setImageType(".jpg");
-                            SettingsActivity.settingsChanged = true;
+                            SettingsActivity.updateSettings();
                             Toast.makeText(context, "Profile pic changed", Toast.LENGTH_SHORT).show();
                         }
                     },
@@ -261,7 +261,7 @@ public class BPreferencePic extends Preference
                 {
 
                     //Log.e(TAG,"bytes length "+byteArrayOutputStream.toByteArray().length);
-                    if(byteArrayOutputStream.toByteArray().length<=2000000)
+                    if(byteArrayOutputStream.toByteArray().length<=1000000)
                         return byteArrayOutputStream.toByteArray();
                 }
                 else

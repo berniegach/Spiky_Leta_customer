@@ -172,6 +172,7 @@ public class MainActivity extends AppCompatActivity implements
         getCurrentLocation();
         restaurantsList =new LinkedList<>();
         mpesaRequestsList = new ArrayList<>();
+
     }
 
     @Override
