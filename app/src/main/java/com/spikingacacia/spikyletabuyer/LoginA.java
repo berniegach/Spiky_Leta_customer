@@ -34,6 +34,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import static java.lang.Thread.sleep;
+
 
 public class LoginA extends AppCompatActivity implements View.OnClickListener
 {
@@ -61,6 +63,13 @@ public class LoginA extends AppCompatActivity implements View.OnClickListener
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
+        try
+        {
+            sleep(5000);
+        } catch (InterruptedException e)
+        {
+            Log.e(TAG,"failed to sleep");
+        }
         setTheme(R.style.AppTheme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.a_login);

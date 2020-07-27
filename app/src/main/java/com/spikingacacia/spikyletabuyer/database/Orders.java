@@ -20,9 +20,10 @@ public class Orders
     public int tableNumber;
     private int preOrder;
     private String collectTime;
+    private int orderType;
 
     public Orders(int id, String waiterEmail, int itemId, int orderNumber, int orderStatus, String dateAdded, String dateChanged, String item, String size, double price, int sellerId, String sellerImageType,
-                  String sellerNames, String waiterNames, int orderFormat, int tableNumber, int preOrder, String collectTime)
+                  String sellerNames, String waiterNames, int orderFormat, int tableNumber, int preOrder, String collectTime, int order_type)
     {
         this.id = id;
         this.waiterEmail = waiterEmail;
@@ -42,6 +43,7 @@ public class Orders
         this.tableNumber = tableNumber;
         this.preOrder = preOrder;
         this.collectTime = collectTime;
+        this.orderType = order_type;
     }
 
     public int getId()
@@ -222,6 +224,14 @@ public class Orders
     {
         this.collectTime = collectTime;
     }
+    public int getOrderType()
+    {
+        return orderType;
+    }
 
+    public void setOrderType(int orderType)
+    {
+        this.orderType = orderType;
+    }
 
 }

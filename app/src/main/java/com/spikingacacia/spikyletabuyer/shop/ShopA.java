@@ -257,57 +257,68 @@ public class ShopA extends AppCompatActivity
             Snackbar.make(fab,"You are not within the restaurant's order radius",Snackbar.LENGTH_LONG).show();
             return;
         }
-        // if pre order get collect time
-        if(preOrder)
-        {
-            Calendar mcurrentTime = Calendar.getInstance();
-            int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
-            int minute = mcurrentTime.get(Calendar.MINUTE);
-            TimePickerDialog timePickerDialog = new TimePickerDialog(ShopA.this, new TimePickerDialog.OnTimeSetListener()
-            {
-                @Override
-                public void onTimeSet(TimePicker view, int hourOfDay, int minute)
+        //set the type of order
+        new androidx.appcompat.app.AlertDialog.Builder(ShopA.this)
+                .setTitle("How will you take your order?")
+                .setItems(new String[]{"In house", "Take away", "Delivery"}, new DialogInterface.OnClickListener()
                 {
-                    String time;
-                    if(hourOfDay == 12)
-                        time =  String.format("%d:%d pm",hourOfDay, minute);
-                    else
-                        time = hourOfDay>12? String.format("%d:%d pm",hourOfDay - 12, minute) : String.format("%d:%d am",hourOfDay, minute);
-                    new OrderTask(tableNumber,time).execute((Void)null);
-                }
-            }, hour, minute, false);
-            timePickerDialog.setTitle("Select Pick-up Time");
-            timePickerDialog.show();
-        }
-        else if(tableNumber==-1 )
-        {
-            final NumberPicker numberPicker=new NumberPicker(getBaseContext());
-            numberPicker.setMinValue(1);
-            numberPicker.setMaxValue(numberOfTables);
-            new androidx.appcompat.app.AlertDialog.Builder(ShopA.this)
-                    .setTitle("Table Number?")
-                    .setView(numberPicker)
-                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+                    @Override
+                    public void onClick(DialogInterface dialog, final int which)
                     {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which)
+                        // if pre order get collect time
+                        if(preOrder)
                         {
-                            dialog.dismiss();
+                            Calendar mcurrentTime = Calendar.getInstance();
+                            int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
+                            int minute = mcurrentTime.get(Calendar.MINUTE);
+                            TimePickerDialog timePickerDialog = new TimePickerDialog(ShopA.this, new TimePickerDialog.OnTimeSetListener()
+                            {
+                                @Override
+                                public void onTimeSet(TimePicker view, int hourOfDay, int minute)
+                                {
+                                    String time;
+                                    if(hourOfDay == 12)
+                                        time =  String.format("%d:%d pm",hourOfDay, minute);
+                                    else
+                                        time = hourOfDay>12? String.format("%d:%d pm",hourOfDay - 12, minute) : String.format("%d:%d am",hourOfDay, minute);
+                                    new OrderTask(tableNumber,time, which).execute((Void)null);
+                                }
+                            }, hour, minute, false);
+                            timePickerDialog.setTitle("Select Pick-up Time");
+                            timePickerDialog.show();
                         }
-                    })
-                    .setPositiveButton("Proceed", new DialogInterface.OnClickListener()
-                    {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which)
+                        else if(tableNumber==-1 )
                         {
-                            int tableNumber=numberPicker.getValue();
-                            new OrderTask(tableNumber,"null").execute((Void)null);
+                            final NumberPicker numberPicker=new NumberPicker(getBaseContext());
+                            numberPicker.setMinValue(1);
+                            numberPicker.setMaxValue(numberOfTables);
+                            new androidx.appcompat.app.AlertDialog.Builder(ShopA.this)
+                                    .setTitle("Table Number?")
+                                    .setView(numberPicker)
+                                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+                                    {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which)
+                                        {
+                                            dialog.dismiss();
+                                        }
+                                    })
+                                    .setPositiveButton("Proceed", new DialogInterface.OnClickListener()
+                                    {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which)
+                                        {
+                                            int tableNumber=numberPicker.getValue();
+                                            new OrderTask(tableNumber,"null", which).execute((Void)null);
+                                        }
+                                    })
+                                    .create().show();
                         }
-                    })
-                    .create().show();
-        }
-        else
-            new OrderTask(tableNumber,"null").execute((Void)null);
+                        else
+                            new OrderTask(tableNumber,"null", which).execute((Void)null);
+                    }
+                }).create().show();
+
 
     }
 
@@ -395,14 +406,16 @@ public class ShopA extends AppCompatActivity
         private String itemPrices="";
         private int tableNumber=0;
         private String collectTime;
+        private String orderType;
         private String orderNumber;
         private String dateAdded;
 
 
-        public OrderTask(int tableNumber, String collectTime)
+        public OrderTask(int tableNumber, String collectTime, int orderType)
         {
             this.tableNumber=tableNumber;
             this.collectTime = collectTime;
+            this.orderType = String.valueOf(orderType);
             formData();
         }
         @Override
@@ -431,8 +444,9 @@ public class ShopA extends AppCompatActivity
             info.add(new BasicNameValuePair("items_prices",itemPrices));
             info.add(new BasicNameValuePair("table_number",String.valueOf(tableNumber)));
             info.add(new BasicNameValuePair("has_payment", hasPayment? "1" : "0"));
-            info.add(new BasicNameValuePair("pre_order", preOrder? "1" : "0"));
+            info.add(new BasicNameValuePair("pre_order", preOrder? "1" : "0")); // 1 means pre order 0 means not
             info.add(new BasicNameValuePair("collect_time", preOrder? collectTime : "null"));
+            info.add(new BasicNameValuePair("order_type", orderType)); // 0 means eat while eat , 1 is for take away and 2 is for delivery
             // making HTTP request
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_place_order,"POST",info);
             Log.d("sItems",""+jsonObject.toString());
