@@ -260,7 +260,7 @@ public class ShopA extends AppCompatActivity
         //set the type of order
         new androidx.appcompat.app.AlertDialog.Builder(ShopA.this)
                 .setTitle("How will you take your order?")
-                .setItems(new String[]{"In house", "Take away", "Delivery"}, new DialogInterface.OnClickListener()
+                .setItems(new String[]{"Sit in", "Take away", "Delivery"}, new DialogInterface.OnClickListener()
                 {
                     @Override
                     public void onClick(DialogInterface dialog, final int which)
@@ -477,12 +477,12 @@ public class ShopA extends AppCompatActivity
             if (successful)
             {
                 //check if we can be able to do payments
-                if(hasPayment)
+                /*if(hasPayment)
                 {
                     // the order is succesfully registered, so we carry out the payment
                     showMobileNumberDialog(orderNumber, dateAdded);
                 }
-                else
+                else*/
                 {
                     showProgress(false);
                     Snackbar.make(fab,"Order Placed",Snackbar.LENGTH_LONG).show();
