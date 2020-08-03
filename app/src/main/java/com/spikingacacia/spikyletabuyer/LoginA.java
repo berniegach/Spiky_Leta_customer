@@ -39,23 +39,15 @@ import static java.lang.Thread.sleep;
 
 public class LoginA extends AppCompatActivity implements View.OnClickListener
 {
-    private static final int OVERLAY_PERMISSION_CODE=541;
     //REMEMBER TO CHANGE THIS WHEN CHANGING BETWEEN ONLINE AND LOCALHOST
     public static final String base_url="http://ec2-18-189-193-108.us-east-2.compute.amazonaws.com/order/"; //online
     //public static final String base_url="http://10.0.2.2/leta_project/android/"; //localhost no connection for testing user accounts coz it doesnt require subscription checking
     private String TAG="LoginA";
-    private Intent intentLoginProgress;
-    private static int loginProgress;
-    public static boolean AppRunningInThisActivity=true;//check if the app is running the in this activity
-    //whenever you add a background asynctask make sure to update the finalprogress variables accordingly
-    private static int sFinalProgress=5;
-    private static int bFinalProgress=2;
     //buyers
     public static ServerAccount serverAccount;
     public static LinkedHashMap<String, Messages> bMessagesList;
     public static LinkedHashMap<Integer, Orders>bOrdersList;
     public static int who;
-    Preferences preferences;
     public static GoogleSignInClient mGoogleSignInClient;
     private int RC_SIGN_IN = 21;
     static public GoogleSignInAccount account;

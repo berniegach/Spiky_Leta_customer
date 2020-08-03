@@ -111,6 +111,7 @@ public class MainActivity extends AppCompatActivity implements
 
                 }
             });
+    public static String myLocation = "";
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -286,6 +287,7 @@ public class MainActivity extends AppCompatActivity implements
                                 {
                                     addresses=geocoder.getFromLocation(latitude,longitude,10);
                                     Log.d("LOCATIONS: ", "lat: "+latitude+" long: "+longitude);
+                                    myLocation = String.valueOf(latitude)+":"+String.valueOf(longitude)+":"+addresses.get(0).getCountryCode();
                                     if(useQrCode)
                                         new RestaurantQRTask(String.valueOf(latitude),String.valueOf(longitude),addresses.get(0).getLocality(),barcode.displayValue).execute((Void)null);
                                     else
@@ -338,6 +340,7 @@ public class MainActivity extends AppCompatActivity implements
                                         try
                                         {
                                             addresses=geocoder.getFromLocation(latitude,longitude,10);
+                                            myLocation = String.valueOf(latitude)+":"+String.valueOf(longitude)+":"+addresses.get(0).getCountryCode();
                                             if(addresses.get(0).getCountryCode().contentEquals("KE"))
                                                 thread.start();
                                         }

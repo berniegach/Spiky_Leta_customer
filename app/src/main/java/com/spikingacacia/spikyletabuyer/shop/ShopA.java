@@ -24,6 +24,7 @@ import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.ProgressBar;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
@@ -34,6 +35,7 @@ import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.JSONParser;
 import com.spikingacacia.spikyletabuyer.database.Categories;
 import com.spikingacacia.spikyletabuyer.database.DMenu;
+import com.spikingacacia.spikyletabuyer.main.MainActivity;
 import com.spikingacacia.spikyletabuyer.shop.cart.CartContent;
 import com.spikingacacia.spikyletabuyer.shop.cart.CartFragment;
 import com.spikingacacia.spikyletabuyer.util.Mpesa;
@@ -60,7 +62,8 @@ public class ShopA extends AppCompatActivity
         implements
         BSOrderFragment.OnFragmentInteractionListener,
         menuFragment.OnListFragmentInteractionListener,
-        CartFragment.OnListFragmentInteractionListener
+        CartFragment.OnListFragmentInteractionListener,
+        OrderParamsFragment.OnFragmentInteractionListener
 {
     public static LinkedHashMap<Integer, Categories> categoriesLinkedHashMap;
     public static LinkedHashMap<Integer, DMenu> menuLinkedHashMap;
@@ -149,32 +152,38 @@ public class ShopA extends AppCompatActivity
     public void onBackPressed()
     {
         super.onBackPressed();
-        if (items.size()>0)
+        if (cartLinkedHashMap.size()>0)
         {
             if(!fab.isShown())
             {
                 fab.show();
-                fab.setText(String.valueOf(cartCount));
+                fab.setText(String.valueOf(getCartCount()));
             }
         }
-        /*if(whichFragment==2)
-            getSupportActionBar().setTitle("Order");
-        else
-        {
-            getSupportActionBar().setTitle(previousTitle[whichFragment-3]);
-            whichFragment-=1;
-
-        }*/
-
     }
     void cartClicked()
     {
+        if(cartLinkedHashMap.size()<=0)
+        {
+            Toast.makeText(getBaseContext(),"Cart empty",Toast.LENGTH_SHORT).show();
+            return;
+        }
+        fab.hide();
         tempCartLinkedHashMap=cartLinkedHashMap;
         getTotal();
         Fragment fragment= CartFragment.newInstance(1);
         FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.base,fragment,"cart");
         transaction.addToBackStack("cart");
+        transaction.commit();
+    }
+    void onOrderClickedPreOder()
+    {
+        fab.hide();
+        Fragment fragment= OrderParamsFragment.newInstance(false,"");
+        FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.base,fragment,"order");
+        transaction.addToBackStack("order");
         transaction.commit();
     }
 
@@ -190,6 +199,11 @@ public class ShopA extends AppCompatActivity
     @Override
     public void onMenuItemInteraction(final List<DMenu> dMenuList)
     {
+        if(!fab.isShown())
+        {
+            fab.show();
+            fab.setText(String.valueOf(getCartCount()));
+        }
         for( int index=0; index< dMenuList.size(); index++)
         {
             final DMenu item = dMenuList.get(index);
@@ -258,17 +272,10 @@ public class ShopA extends AppCompatActivity
             return;
         }
         //set the type of order
-        new androidx.appcompat.app.AlertDialog.Builder(ShopA.this)
-                .setTitle("How will you take your order?")
-                .setItems(new String[]{"Sit in", "Take away", "Delivery"}, new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialog, final int which)
-                    {
-                        // if pre order get collect time
-                        if(preOrder)
-                        {
-                            Calendar mcurrentTime = Calendar.getInstance();
+        if(preOrder)
+        {
+            onOrderClickedPreOder();
+             /*Calendar mcurrentTime = Calendar.getInstance();
                             int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
                             int minute = mcurrentTime.get(Calendar.MINUTE);
                             TimePickerDialog timePickerDialog = new TimePickerDialog(ShopA.this, new TimePickerDialog.OnTimeSetListener()
@@ -285,39 +292,52 @@ public class ShopA extends AppCompatActivity
                                 }
                             }, hour, minute, false);
                             timePickerDialog.setTitle("Select Pick-up Time");
-                            timePickerDialog.show();
-                        }
-                        else if(tableNumber==-1 )
+                            timePickerDialog.show();*/
+        }
+        else
+        {
+            new androidx.appcompat.app.AlertDialog.Builder(ShopA.this)
+                    .setTitle("How will you take your order?")
+                    .setItems(new String[]{"Sit in", "Take away"}, new DialogInterface.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(DialogInterface dialog, final int which)
                         {
-                            final NumberPicker numberPicker=new NumberPicker(getBaseContext());
-                            numberPicker.setMinValue(1);
-                            numberPicker.setMaxValue(numberOfTables);
-                            new androidx.appcompat.app.AlertDialog.Builder(ShopA.this)
-                                    .setTitle("Table Number?")
-                                    .setView(numberPicker)
-                                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener()
-                                    {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which)
+                            // if pre order get collect time
+
+                            if(tableNumber==-1 )
+                            {
+                                final NumberPicker numberPicker=new NumberPicker(getBaseContext());
+                                numberPicker.setMinValue(1);
+                                numberPicker.setMaxValue(numberOfTables);
+                                new androidx.appcompat.app.AlertDialog.Builder(ShopA.this)
+                                        .setTitle("Table Number?")
+                                        .setView(numberPicker)
+                                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener()
                                         {
-                                            dialog.dismiss();
-                                        }
-                                    })
-                                    .setPositiveButton("Proceed", new DialogInterface.OnClickListener()
-                                    {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which)
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which)
+                                            {
+                                                dialog.dismiss();
+                                            }
+                                        })
+                                        .setPositiveButton("Proceed", new DialogInterface.OnClickListener()
                                         {
-                                            int tableNumber=numberPicker.getValue();
-                                            new OrderTask(tableNumber,"null", which).execute((Void)null);
-                                        }
-                                    })
-                                    .create().show();
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which)
+                                            {
+                                                int tableNumber=numberPicker.getValue();
+                                                new OrderTask(tableNumber,"null", which,"null","null","null").execute((Void)null);
+                                            }
+                                        })
+                                        .create().show();
+                            }
+                            else
+                                new OrderTask(tableNumber,"null", which,"null","null","null").execute((Void)null);
                         }
-                        else
-                            new OrderTask(tableNumber,"null", which).execute((Void)null);
-                    }
-                }).create().show();
+                    }).create().show();
+        }
+
 
 
     }
@@ -395,6 +415,20 @@ public class ShopA extends AppCompatActivity
         else
             vibrator.vibrate(100);
     }
+    /*************************************************************************************************************************************************************************************
+     * implementation of OrderParamsFragment.java
+     * ************************************************************************************************************************************************************************************/
+    @Override
+    public void onDetachCalled()
+    {
+        fab.hide();
+    }
+
+    @Override
+    public void onPlacePreOrder(int which, String time, String mobile_mpesa, String mobile_delivery, String instructions)
+    {
+        new OrderTask(tableNumber,time, which, mobile_mpesa, mobile_delivery, instructions).execute((Void)null);
+    }
 
     private class OrderTask extends AsyncTask<Void, Void, Boolean>
     {
@@ -407,15 +441,21 @@ public class ShopA extends AppCompatActivity
         private int tableNumber=0;
         private String collectTime;
         private String orderType;
+        private String deliveryMobile;
+        private String mpesaMobile;
+        private String deliveryInstructions;
         private String orderNumber;
         private String dateAdded;
 
 
-        public OrderTask(int tableNumber, String collectTime, int orderType)
+        public OrderTask(int tableNumber, String collectTime, int orderType, String mpesaMobile, String deliveryMobile, String deliveryInstructions)
         {
             this.tableNumber=tableNumber;
             this.collectTime = collectTime;
             this.orderType = String.valueOf(orderType);
+            this.mpesaMobile = mpesaMobile;
+            this.deliveryMobile = deliveryMobile;
+            this.deliveryInstructions = deliveryInstructions;
             formData();
         }
         @Override
@@ -447,6 +487,9 @@ public class ShopA extends AppCompatActivity
             info.add(new BasicNameValuePair("pre_order", preOrder? "1" : "0")); // 1 means pre order 0 means not
             info.add(new BasicNameValuePair("collect_time", preOrder? collectTime : "null"));
             info.add(new BasicNameValuePair("order_type", orderType)); // 0 means eat while eat , 1 is for take away and 2 is for delivery
+            info.add(new BasicNameValuePair("delivery_mobile", deliveryMobile));
+            info.add(new BasicNameValuePair("delivery_instructions", deliveryInstructions));
+            info.add(new BasicNameValuePair("delivery_location", MainActivity.myLocation));
             // making HTTP request
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_place_order,"POST",info);
             Log.d("sItems",""+jsonObject.toString());
@@ -481,6 +524,7 @@ public class ShopA extends AppCompatActivity
                 {
                     // the order is succesfully registered, so we carry out the payment
                     showMobileNumberDialog(orderNumber, dateAdded);
+                    new LipaNaMpesaStkPush(orderNumber,dateAdded,mpesaMobile).execute((Void)null);
                 }
                 else*/
                 {
