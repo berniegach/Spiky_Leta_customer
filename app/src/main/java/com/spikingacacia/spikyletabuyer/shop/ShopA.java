@@ -113,7 +113,8 @@ public class ShopA extends AppCompatActivity
         buyerDistance=getIntent().getDoubleExtra("buyer_distance",0);
         numberOfTables=getIntent().getIntExtra("number_of_tables",10);
         tableNumber=getIntent().getIntExtra("table_number",-1);
-        hasPayment = getIntent().getBooleanExtra("has_payment",false);
+        // TODO: CHANGE HAS PAYMENT
+        hasPayment = false ;//= getIntent().getBooleanExtra("has_payment",false);
         mPesaTillNumber = getIntent().getStringExtra("m_code");
         if(which == 1)
             setTitle("Menu");
@@ -180,6 +181,7 @@ public class ShopA extends AppCompatActivity
     void onOrderClickedPreOder()
     {
         fab.hide();
+        getSupportFragmentManager().popBackStack();
         Fragment fragment= OrderParamsFragment.newInstance(false,"");
         FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.base,fragment,"order");
@@ -275,24 +277,6 @@ public class ShopA extends AppCompatActivity
         if(preOrder)
         {
             onOrderClickedPreOder();
-             /*Calendar mcurrentTime = Calendar.getInstance();
-                            int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
-                            int minute = mcurrentTime.get(Calendar.MINUTE);
-                            TimePickerDialog timePickerDialog = new TimePickerDialog(ShopA.this, new TimePickerDialog.OnTimeSetListener()
-                            {
-                                @Override
-                                public void onTimeSet(TimePicker view, int hourOfDay, int minute)
-                                {
-                                    String time;
-                                    if(hourOfDay == 12)
-                                        time =  String.format("%d:%d pm",hourOfDay, minute);
-                                    else
-                                        time = hourOfDay>12? String.format("%d:%d pm",hourOfDay - 12, minute) : String.format("%d:%d am",hourOfDay, minute);
-                                    new OrderTask(tableNumber,time, which).execute((Void)null);
-                                }
-                            }, hour, minute, false);
-                            timePickerDialog.setTitle("Select Pick-up Time");
-                            timePickerDialog.show();*/
         }
         else
         {
@@ -351,6 +335,8 @@ public class ShopA extends AppCompatActivity
         else
             fab.setVisibility(View.GONE);
     }
+
+
     private int getCartCount()
     {
         int total_count=0;
@@ -633,6 +619,7 @@ public class ShopA extends AppCompatActivity
             this.msisdn = msisdn;
             timeStamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
             //shortcode = "174379";// partyA = 601362 , partyB = 600000, lipa na mpesa = 174379
+            Log.e(TAG,"STK PUSH CALLED");
         }
         @Override
         protected Boolean doInBackground(Void... voids)
