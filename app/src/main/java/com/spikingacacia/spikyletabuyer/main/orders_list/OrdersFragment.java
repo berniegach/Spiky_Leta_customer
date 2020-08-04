@@ -97,7 +97,7 @@ public class OrdersFragment extends Fragment
             Context context = view.getContext();
             recyclerView = (RecyclerView) view;
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            myOrderRecyclerViewAdapter = new MyOrderRecyclerViewAdapter(mListener);
+            myOrderRecyclerViewAdapter = new MyOrderRecyclerViewAdapter(mListener, getContext());
             recyclerView.setAdapter(myOrderRecyclerViewAdapter);
         }
         return view;

@@ -4,12 +4,14 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
+import com.bumptech.glide.Glide;
 import com.spikingacacia.spikyletabuyer.AppController;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.LoginA;
@@ -26,7 +28,6 @@ public class SRRestaurantsRecyclerViewAdapter extends RecyclerView.Adapter<SRRes
     private final OnListFragmentInteractionListener mListener;
     private List<Restaurants>itemsCopy;
     private final Context mContext;
-    ImageLoader imageLoader = AppController.getInstance().getImageLoader();
 
     public SRRestaurantsRecyclerViewAdapter( OnListFragmentInteractionListener listener, Context context) {
         mValues = new ArrayList<>();
@@ -35,8 +36,6 @@ public class SRRestaurantsRecyclerViewAdapter extends RecyclerView.Adapter<SRRes
         itemsCopy.addAll(MainActivity.restaurantsList);
         mListener = listener;
         mContext=context;
-        if (imageLoader == null)
-            imageLoader = AppController.getInstance().getImageLoader();
     }
 
     @Override
@@ -69,8 +68,7 @@ public class SRRestaurantsRecyclerViewAdapter extends RecyclerView.Adapter<SRRes
                 }
             }
         });
-        holder.mImageView.setImageUrl(url,imageLoader);
-
+        Glide.with(mContext).load(url).into(holder.mImageView);
     }
 
     @Override
@@ -97,7 +95,7 @@ public class SRRestaurantsRecyclerViewAdapter extends RecyclerView.Adapter<SRRes
     public class ViewHolder extends RecyclerView.ViewHolder {
         public final View mView;
         public final TextView mPositionView;
-        public final NetworkImageView mImageView;
+        public final ImageView mImageView;
         public final TextView mNamesView;
         public final TextView mDistanceView;
         public Restaurants mItem;

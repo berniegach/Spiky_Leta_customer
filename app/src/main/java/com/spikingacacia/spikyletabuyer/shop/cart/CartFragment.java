@@ -83,7 +83,7 @@ public class CartFragment extends Fragment
             recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
         }
         CartContent content=new CartContent();
-        recyclerView.setAdapter(new MyItemRecyclerViewAdapter(content.ITEMS, mListener, textViewTotal));
+        recyclerView.setAdapter(new MyItemRecyclerViewAdapter(content.ITEMS, mListener, getContext(), textViewTotal));
         proceed.setOnClickListener(new View.OnClickListener()
         {
             @Override

@@ -34,6 +34,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
 import com.android.volley.toolbox.Volley;
+import com.bumptech.glide.Glide;
 import com.spikingacacia.spikyletabuyer.util.VolleyMultipartRequest;
 
 import java.io.ByteArrayOutputStream;
@@ -53,10 +54,9 @@ public class BPreferencePic extends Preference
 {
     private static final int PERMISSION_REQUEST_INTERNET=2;
     private static String url_upload_profile_pic= LoginA.base_url+"upload_profile_pic_b.php";
-    public static NetworkImageView imageView;
+    public static ImageView imageView;
     private static Context context;
     private FragmentManager fragmentManager;
-    private ImageLoader imageLoader = AppController.getInstance().getImageLoader();
 
     public BPreferencePic(Context context)
     {
@@ -64,8 +64,6 @@ public class BPreferencePic extends Preference
         setLayoutResource(R.layout.bsettings_profilepic);
         this.context=context;
         fragmentManager=((AppCompatActivity)context).getFragmentManager();
-        if (imageLoader == null)
-            imageLoader = AppController.getInstance().getImageLoader();
     }
 
     public BPreferencePic(Context context, AttributeSet attrs)
@@ -74,8 +72,6 @@ public class BPreferencePic extends Preference
         setLayoutResource(R.layout.bsettings_profilepic);
         this.context=context;
         fragmentManager=((AppCompatActivity)context).getFragmentManager();
-        if (imageLoader == null)
-            imageLoader = AppController.getInstance().getImageLoader();
     }
     public BPreferencePic(Context context, AttributeSet attrs, int defStyleAttr)
     {
@@ -83,18 +79,18 @@ public class BPreferencePic extends Preference
         setLayoutResource(R.layout.bsettings_profilepic);
         this.context=context;
         fragmentManager=((AppCompatActivity)context).getFragmentManager();
-        if (imageLoader == null)
-            imageLoader = AppController.getInstance().getImageLoader();    }
+
+    }
     @Override
     public void onBindViewHolder(PreferenceViewHolder view)
     {
         super.onBindViewHolder(view);
         String image_url= LoginA.base_url+"src/buyers_pics/";
-        imageView=(NetworkImageView)view.findViewById(R.id.image);
+        imageView=(ImageView)view.findViewById(R.id.image);
         //get the profile pic
         // thumbnail image
         String url=image_url+String.valueOf(serverAccount.getId())+'_'+String.valueOf(serverAccount.getImageType());
-        imageView.setImageUrl(url, imageLoader);
+        Glide.with(context).load(url).into(imageView);
         view.findViewById(R.id.edit).setOnClickListener(new View.OnClickListener()
         {
             @Override

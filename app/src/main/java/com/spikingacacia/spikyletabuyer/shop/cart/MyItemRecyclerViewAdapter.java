@@ -1,16 +1,19 @@
 package com.spikingacacia.spikyletabuyer.shop.cart;
 
+import android.content.Context;
 import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
+import com.bumptech.glide.Glide;
 import com.spikingacacia.spikyletabuyer.AppController;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.shop.ShopA;
@@ -27,15 +30,13 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
     private final List<CartItem> mValues;
     private final CartFragment.OnListFragmentInteractionListener mListener;
     private TextView textViewTotal;
-    ImageLoader imageLoader = AppController.getInstance().getImageLoader();
-
-    public MyItemRecyclerViewAdapter(List<CartItem> items, CartFragment.OnListFragmentInteractionListener listener, TextView textView)
+    private Context context;
+    public MyItemRecyclerViewAdapter(List<CartItem> items, CartFragment.OnListFragmentInteractionListener listener, Context context, TextView textView)
     {
         mValues = items;
         mListener = listener;
         textViewTotal = textView;
-        if (imageLoader == null)
-            imageLoader = AppController.getInstance().getImageLoader();
+        this.context = context;
     }
 
     @Override
@@ -94,8 +95,7 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
         });
         // thumbnail image
         String url=image_url+String.valueOf(mValues.get(position).inventoryId)+'_'+String.valueOf(mValues.get(position).imageType);
-        holder.mImageView.setImageUrl(url, imageLoader);
-
+        Glide.with(context).load(url).into(holder.mImageView);
     }
 
     @Override
@@ -107,7 +107,7 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
     public class ViewHolder extends RecyclerView.ViewHolder
     {
         public final View mView;
-        public final NetworkImageView mImageView;
+        public final ImageView mImageView;
         public final TextView mPriceView;
         public final TextView mItemView;
         public final TextView mSizeView;

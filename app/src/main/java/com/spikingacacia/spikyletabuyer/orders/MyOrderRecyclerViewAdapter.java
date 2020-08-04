@@ -1,5 +1,6 @@
 package com.spikingacacia.spikyletabuyer.orders;
 
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
+import com.bumptech.glide.Glide;
 import com.spikingacacia.spikyletabuyer.AppController;
 import com.spikingacacia.spikyletabuyer.LoginA;
 import com.spikingacacia.spikyletabuyer.R;
@@ -30,15 +32,14 @@ public class MyOrderRecyclerViewAdapter extends RecyclerView.Adapter<MyOrderRecy
     private List<Orders> mValues;
     private List<Orders> itemsCopy;
     private final OnListFragmentInteractionListener mListener;
-    private ImageLoader imageLoader = AppController.getInstance().getImageLoader();
+    private Context context;
 
-    public MyOrderRecyclerViewAdapter( OnListFragmentInteractionListener listener)
+    public MyOrderRecyclerViewAdapter(OnListFragmentInteractionListener listener, Context context)
     {
         mValues = new LinkedList<>();
         mListener = listener;
         itemsCopy=new ArrayList<>();
-        if (imageLoader == null)
-            imageLoader = AppController.getInstance().getImageLoader();
+        this.context = context;
     }
 
     @Override
@@ -85,7 +86,7 @@ public class MyOrderRecyclerViewAdapter extends RecyclerView.Adapter<MyOrderRecy
             }
         });
         String url=image_url+String.valueOf(mValues.get(position).getSellerId())+'_'+String.valueOf(mValues.get(position).getSellerImageType());
-        holder.image.setImageUrl(url, imageLoader);
+        Glide.with(context).load(url).into(holder.image);
     }
 
     @Override
@@ -113,7 +114,7 @@ public class MyOrderRecyclerViewAdapter extends RecyclerView.Adapter<MyOrderRecy
     public class ViewHolder extends RecyclerView.ViewHolder
     {
         public final View mView;
-        public final NetworkImageView image;
+        public final ImageView image;
         public final TextView mOrderView;
         public final TextView mTableView;
         public final TextView mUsernameView;

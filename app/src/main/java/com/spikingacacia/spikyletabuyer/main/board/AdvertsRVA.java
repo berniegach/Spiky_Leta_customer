@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -12,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
+import com.bumptech.glide.Glide;
 import com.spikingacacia.spikyletabuyer.AppController;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.database.Adverts;
@@ -32,16 +34,12 @@ public class AdvertsRVA extends RecyclerView.Adapter<AdvertsRVA.ViewHolder>
     private final List<Adverts> mValues;
     private final AdvertsFragment.OnListFragmentInteractionListener mListener;
     Context mContext;
-    ImageLoader imageLoader = AppController.getInstance().getImageLoader();
-
 
     public AdvertsRVA(OnListFragmentInteractionListener listener, Context context)
     {
         mValues = new ArrayList<>();
         mListener = listener;
         mContext=context;
-        if (imageLoader == null)
-            imageLoader = AppController.getInstance().getImageLoader();
     }
 
     @Override
@@ -88,10 +86,10 @@ public class AdvertsRVA extends RecyclerView.Adapter<AdvertsRVA.ViewHolder>
         });
         // ad image
         String url_post_image=ad_image_url+String.valueOf(holder.mItem.getId())+String.valueOf(holder.mItem.getImageType());
-        holder.mImageView.setImageUrl(url_post_image, imageLoader);
+        Glide.with(mContext).load(url_post_image).into(holder.mImageView);
         //seller image
         String url_seller_image= seller_image_url+String.valueOf(holder.mItem.getSeller_id())+'_'+holder.mItem.getSellerImageType();
-        holder.mImageSellerView.setImageUrl(url_seller_image,imageLoader);
+        Glide.with(mContext).load(url_seller_image).into(holder.mImageSellerView);
     }
 
     @Override
@@ -104,8 +102,8 @@ public class AdvertsRVA extends RecyclerView.Adapter<AdvertsRVA.ViewHolder>
     {
         public final View mView;
         public final TextView mTitleView;
-        public final NetworkImageView mImageView;
-        public final NetworkImageView mImageSellerView;
+        public final ImageView mImageView;
+        public final ImageView mImageSellerView;
         public final TextView mSellerView;
         public final TextView mViewsView;
         public final TextView mLikesView;

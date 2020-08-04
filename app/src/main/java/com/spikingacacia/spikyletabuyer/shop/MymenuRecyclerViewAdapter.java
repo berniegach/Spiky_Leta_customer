@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.fragment.app.DialogFragment;
@@ -16,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
+import com.bumptech.glide.Glide;
 import com.spikingacacia.spikyletabuyer.AppController;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.database.DMenu;
@@ -85,8 +87,8 @@ public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecycl
         });
 
         // image
-        String url=image_url+String.valueOf(mValues.get(position).getId())+'_'+String.valueOf(mValues.get(position).getImageType());
-        holder.image.setImageUrl(url, imageLoader);
+        final String url=image_url+String.valueOf(mValues.get(position).getId())+'_'+String.valueOf(mValues.get(position).getImageType());
+        Glide.with(context).load(url).into(holder.image);
         holder.mView.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -117,7 +119,7 @@ public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecycl
     public class ViewHolder extends RecyclerView.ViewHolder
     {
         public final View mView;
-        public final NetworkImageView image;
+        public final ImageView image;
         public final TextView mItemView;
         public final TextView mDescriptionView;
         public final TextView mPriceView;

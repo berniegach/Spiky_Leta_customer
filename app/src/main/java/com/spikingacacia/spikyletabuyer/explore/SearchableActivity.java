@@ -10,6 +10,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -17,6 +18,7 @@ import android.widget.Toast;
 
 import com.android.volley.toolbox.ImageLoader;
 import com.android.volley.toolbox.NetworkImageView;
+import com.bumptech.glide.Glide;
 import com.spikingacacia.spikyletabuyer.AppController;
 import com.spikingacacia.spikyletabuyer.LoginA;
 import com.spikingacacia.spikyletabuyer.R;
@@ -86,7 +88,8 @@ public class SearchableActivity extends AppCompatActivity
             }
         });
         String url= LoginA.base_url+"src/sellers_pics/"+ restaurants.getId()+'_'+restaurants.getImage_type();
-        ((NetworkImageView)layoutSingle.findViewById(R.id.image)).setImageUrl(url,imageLoader);
+        //((ImageView)layoutSingle.findViewById(R.id.image)).setImageUrl(url,imageLoader);
+        Glide.with(getBaseContext()).load(url).into((ImageView)layoutSingle.findViewById(R.id.image));
     }
     public void gotoRestaurant(Restaurants item)
     {
