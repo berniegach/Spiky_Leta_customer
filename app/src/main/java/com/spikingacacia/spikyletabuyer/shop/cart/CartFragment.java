@@ -15,7 +15,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.spikingacacia.spikyletabuyer.R;
+import com.spikingacacia.spikyletabuyer.main.MainActivity;
 import com.spikingacacia.spikyletabuyer.shop.ShopA;
+
+import java.util.Currency;
+import java.util.Locale;
 
 
 /**
@@ -74,7 +78,12 @@ public class CartFragment extends Fragment
         RecyclerView recyclerView=view.findViewById(R.id.list);
         TextView textViewTotal = view.findViewById(R.id.total);
         Button proceed = view.findViewById(R.id.proceed);
-        textViewTotal.setText("Ksh. "+ ShopA.tempTotal.intValue());
+        String location = MainActivity.myLocation;
+        String[] location_pieces = location.split(":");
+        if(location_pieces.length==3)
+            textViewTotal.setText(getCurrencyCode(location_pieces[2])+" "+ ShopA.tempTotal.intValue());
+        else
+            textViewTotal.setText( ShopA.tempTotal.intValue());
         if (mColumnCount <= 1)
         {
             recyclerView.setLayoutManager(new LinearLayoutManager(context));
@@ -125,5 +134,14 @@ public class CartFragment extends Fragment
         void onListFragmentInteraction(CartContent.CartItem item);
         void onProceed();
         void totalItemsChanged();
+    }
+    //to retrieve currency code
+    private String getCurrencyCode(String countryCode) {
+        return Currency.getInstance(new Locale("", countryCode)).getCurrencyCode();
+    }
+
+    //to retrieve currency symbol
+    private String getCurrencySymbol(String countryCode) {
+        return Currency.getInstance(new Locale("", countryCode)).getSymbol();
     }
 }

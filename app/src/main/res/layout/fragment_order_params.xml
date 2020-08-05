@@ -149,7 +149,7 @@
                         android:id="@+id/edit_delivery_mobile"
                         android:layout_width="250dp"
                         android:layout_height="wrap_content"
-                        android:hint="2547********"
+                        android:hint="+2547********"
                         android:inputType="phone"
                         android:layout_gravity="center" />
                 </LinearLayout>

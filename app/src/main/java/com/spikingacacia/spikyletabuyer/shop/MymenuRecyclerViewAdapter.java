@@ -21,12 +21,15 @@ import com.bumptech.glide.Glide;
 import com.spikingacacia.spikyletabuyer.AppController;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.database.DMenu;
+import com.spikingacacia.spikyletabuyer.main.MainActivity;
 import com.spikingacacia.spikyletabuyer.shop.menuFragment.OnListFragmentInteractionListener;
 
 
 import java.util.ArrayList;
+import java.util.Currency;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 
 import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
 
@@ -72,7 +75,12 @@ public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecycl
         String sizePrice="";
         for(int c=0; c<sizes.length; c++)
         {
-            sizePrice+=" "+sizes[c]+" @ "+prices[c];
+            String location = MainActivity.myLocation;
+            String[] location_pieces = location.split(":");
+            if(location_pieces.length==3)
+                sizePrice+=" "+sizes[c]+" @ "+getCurrencyCode(location_pieces[2])+" "+prices[c];
+            else
+                sizePrice+=" "+sizes[c]+" @ "+prices[c];
         }
         holder.mPriceView.setText(sizePrice);
         holder.mAddButton.setOnClickListener(new View.OnClickListener()
@@ -108,6 +116,15 @@ public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecycl
                 }
             }
         });
+    }
+    //to retrieve currency code
+    private String getCurrencyCode(String countryCode) {
+        return Currency.getInstance(new Locale("", countryCode)).getCurrencyCode();
+    }
+
+    //to retrieve currency symbol
+    private String getCurrencySymbol(String countryCode) {
+        return Currency.getInstance(new Locale("", countryCode)).getSymbol();
     }
 
     @Override
