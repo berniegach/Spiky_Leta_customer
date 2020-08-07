@@ -1,13 +1,19 @@
 package com.spikingacacia.spikyletabuyer;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -51,6 +57,8 @@ public class LoginA extends AppCompatActivity implements View.OnClickListener
     public static GoogleSignInClient mGoogleSignInClient;
     private int RC_SIGN_IN = 21;
     static public GoogleSignInAccount account;
+    private ProgressBar progressBar;
+    private View mainView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -66,6 +74,11 @@ public class LoginA extends AppCompatActivity implements View.OnClickListener
         super.onCreate(savedInstanceState);
         setContentView(R.layout.a_login);
         setTitle("Login");
+
+
+        progressBar = findViewById(R.id.progress);
+        mainView = findViewById(R.id.container);
+        showProgress(true);
 
         // Set the dimensions of the sign-in button.
         SignInButton signInButton = findViewById(R.id.sign_in_button);
@@ -92,14 +105,48 @@ public class LoginA extends AppCompatActivity implements View.OnClickListener
     {
 
         super.onStart();
-        // Check for existing Google Sign In account, if the user is already signed in
-        // the GoogleSignInAccount will be non-null.
-        account = GoogleSignIn.getLastSignedInAccount(this);
-        //proceed to sign in
-        if(account!=null)
+        //check internet connection
+        if(isNetworkAvailable())
         {
-            proceedToLogin();
+            // Check for existing Google Sign In account, if the user is already signed in
+            // the GoogleSignInAccount will be non-null.
+            account = GoogleSignIn.getLastSignedInAccount(this);
+            //proceed to sign in
+            if(account!=null)
+            {
+                Intent intent = new Intent(this, OrdersService.class);
+                startService(intent);
+                proceedToLogin();
+            }
+            else
+            {
+                showProgress(false);
+                Log.d(TAG,"email null");
+            }
         }
+        else
+        {
+            new AlertDialog.Builder(LoginA.this)
+                    .setTitle("Error")
+                    .setMessage("There is not internet connection")
+                    /*.setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which)
+                        {
+                            dialog.dismiss();
+                        }
+                    })*/
+                    .setPositiveButton("Ok", new DialogInterface.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which)
+                        {
+                            finishAffinity();
+                        }
+                    }).create().show();
+        }
+
 
     }
     @Override
@@ -147,12 +194,19 @@ public class LoginA extends AppCompatActivity implements View.OnClickListener
     }
     private void proceedToLogin()
     {
-        Intent intent=new Intent(LoginA.this, MainActivity.class);
-        //prevent this activity from flickering as we call the next one
-        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-        startActivity(intent);
         //get the account details
         new LoginTask(account.getEmail()).execute((Void)null);
+    }
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+    void showProgress(boolean show)
+    {
+        progressBar.setVisibility(show? View.VISIBLE : View.GONE);
+        mainView.setVisibility( show? View.INVISIBLE :View.VISIBLE);
     }
     public class LoginTask extends AsyncTask<Void, Void, Boolean>
     {
@@ -218,11 +272,16 @@ public class LoginA extends AppCompatActivity implements View.OnClickListener
         protected void onPostExecute(final Boolean successful) {
 
 
-            if (successful) {
-
+            if (successful)
+            {
+                Intent intent=new Intent(LoginA.this, MainActivity.class);
+                //prevent this activity from flickering as we call the next one
+                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                startActivity(intent);
             }
             else
             {
+                showProgress(false);
                 Toast.makeText(getBaseContext(), "Sign in failed", Toast.LENGTH_SHORT).show();
                 mGoogleSignInClient.signOut().addOnCompleteListener(LoginA.this, new OnCompleteListener<Void>()
                 {

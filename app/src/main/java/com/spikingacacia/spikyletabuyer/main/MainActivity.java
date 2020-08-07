@@ -1,15 +1,18 @@
 package com.spikingacacia.spikyletabuyer.main;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -40,6 +43,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.spikingacacia.spikyletabuyer.JSONParser;
 import com.spikingacacia.spikyletabuyer.database.MpesaRequests;
+import com.spikingacacia.spikyletabuyer.explore.ExploreActivity;
 import com.spikingacacia.spikyletabuyer.explore.MapsExploreActivity;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.SettingsActivity;
@@ -52,6 +56,7 @@ import com.spikingacacia.spikyletabuyer.main.order.OrderSearchFragment;
 import com.spikingacacia.spikyletabuyer.main.orders_list.OrdersFragment;
 import com.spikingacacia.spikyletabuyer.orders.OrdersActivity;
 import com.spikingacacia.spikyletabuyer.restaurants.SRRestaurantsA;
+import com.spikingacacia.spikyletabuyer.shop.ShopA;
 import com.spikingacacia.spikyletabuyer.util.Mpesa;
 
 import org.apache.http.NameValuePair;
@@ -170,6 +175,7 @@ public class MainActivity extends AppCompatActivity implements
                 }
             }
         };
+        checkIfLocationEnabled();
         getCurrentLocation();
         restaurantsList =new LinkedList<>();
         mpesaRequestsList = new ArrayList<>();
@@ -263,6 +269,36 @@ public class MainActivity extends AppCompatActivity implements
     {
         showProgress(true);
         getCurrentLocation(barcode);
+    }
+    private boolean checkIfLocationEnabled()
+    {
+        LocationManager lm = (LocationManager)getBaseContext().getSystemService(Context.LOCATION_SERVICE);
+        boolean gps_enabled = false;
+        boolean network_enabled = false;
+
+        try {
+            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        }
+        catch(Exception ex) {}
+
+        try {
+            network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        } catch(Exception ex) {}
+
+        if(!gps_enabled && !network_enabled) {
+            // notify user
+            new AlertDialog.Builder(this)
+                    .setMessage("Location is not enabled")
+                    .setPositiveButton("Enable", new DialogInterface.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                            startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                        }
+                    }).setNegativeButton("Cancel",null)
+                            .show();
+        }
+        return gps_enabled && network_enabled;
     }
     private void getCurrentLocation(final Barcode barcode)
     {
@@ -374,7 +410,7 @@ public class MainActivity extends AppCompatActivity implements
         }
 
     }
-    private void showRestaurants()
+    private void showRestaurants(boolean scan ,Restaurants item)
     {
         Log.d(TAG," GOT THE RESTRAUNTS");
 
@@ -393,10 +429,30 @@ public class MainActivity extends AppCompatActivity implements
                     });
             return;
         }
-        Intent intent=new Intent(this, SRRestaurantsA.class);
-        //prevent this activity from flickering as we call the next one
-        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-        startActivity(intent);
+        if(scan)
+        {
+            boolean has_payment = true;
+            if( item.getmCode().contentEquals("") ||  item.getmCode().contentEquals("null") || item.getmCode().contentEquals("NULL"))
+                has_payment = false;
+            Intent intent=new Intent(this, ShopA.class);
+            intent.putExtra("seller_email",item.getEmail());
+            intent.putExtra("order_radius",item.getRadius());
+            intent.putExtra("buyer_distance",item.getDistance());
+            intent.putExtra("number_of_tables",item.getNumberOfTables());
+            intent.putExtra("table_number",item.getTableNumber());
+            intent.putExtra("has_payment", has_payment);
+            intent.putExtra("m_code", has_payment ? item.getmCode() : "");
+            startActivity(intent);
+        }
+        else
+        {
+            Intent intent=new Intent(this, SRRestaurantsA.class);
+            //prevent this activity from flickering as we call the next one
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            startActivity(intent);
+        }
+
+
     }
 
 
@@ -439,7 +495,8 @@ public class MainActivity extends AppCompatActivity implements
         }
         else if( id == 3)
         {
-            Intent intent = new Intent(this, MapsExploreActivity.class);
+            //Intent intent = new Intent(this, MapsExploreActivity.class);
+            Intent intent = new Intent(this, ExploreActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
             startActivity(intent);
         }
@@ -560,7 +617,7 @@ implementation of OrdersFragment.java
             showProgress(false);
             if (successful)
             {
-                showRestaurants();
+                showRestaurants(false, null);
             }
             else
             {
@@ -652,7 +709,7 @@ implementation of OrdersFragment.java
             useQrCode = false;
             if (successful)
             {
-                showRestaurants();
+                showRestaurants(true, restaurantsList.get(0));
             }
             else
             {
