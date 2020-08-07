@@ -9,6 +9,8 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -36,6 +38,7 @@ import androidx.navigation.ui.NavigationUI;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.vision.barcode.Barcode;
@@ -285,7 +288,7 @@ public class MainActivity extends AppCompatActivity implements
             network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
         } catch(Exception ex) {}
 
-        if(!gps_enabled && !network_enabled) {
+        if(!gps_enabled) {
             // notify user
             new AlertDialog.Builder(this)
                     .setMessage("Location is not enabled")
@@ -298,10 +301,44 @@ public class MainActivity extends AppCompatActivity implements
                     }).setNegativeButton("Cancel",null)
                             .show();
         }
+        if(!network_enabled)
+        {
+            new AlertDialog.Builder(this)
+                    .setMessage("Internet is not enabled")
+                    .setPositiveButton("Ok", new DialogInterface.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                            ;//startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                        }
+                    })
+                    .show();
+        }
+        if(!isNetworkAvailable())
+        {
+            new AlertDialog.Builder(this)
+                    .setMessage("No internet")
+                    .setPositiveButton("Ok", new DialogInterface.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                            ;//startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+                        }
+                    })
+                    .show();
+            network_enabled = false;
+        }
         return gps_enabled && network_enabled;
+    }
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
     private void getCurrentLocation(final Barcode barcode)
     {
+        checkIfLocationEnabled();
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
         {
             //get the users location
@@ -340,7 +377,15 @@ public class MainActivity extends AppCompatActivity implements
                             }
 
                         }
-                    });
+                    }).addOnFailureListener(this, new OnFailureListener()
+            {
+                @Override
+                public void onFailure(@NonNull Exception e)
+                {
+                    showProgress(false);
+                    Log.e(TAG,"location failed");
+                }
+            });
         }
         //request the permission
         else
@@ -351,6 +396,7 @@ public class MainActivity extends AppCompatActivity implements
     }
     private void getCurrentLocation()
     {
+        checkIfLocationEnabled();
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
         {
             //get the users location
@@ -401,7 +447,15 @@ public class MainActivity extends AppCompatActivity implements
                             }
 
                         }
-                    });
+                    }).addOnFailureListener(this, new OnFailureListener()
+            {
+                @Override
+                public void onFailure(@NonNull Exception e)
+                {
+                    showProgress(false);
+                    Log.e(TAG,"location failed");
+                }
+            });
         }
         //request the permission
         else
@@ -496,9 +550,13 @@ public class MainActivity extends AppCompatActivity implements
         else if( id == 3)
         {
             //Intent intent = new Intent(this, MapsExploreActivity.class);
-            Intent intent = new Intent(this, ExploreActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-            startActivity(intent);
+            if(checkIfLocationEnabled())
+            {
+                Intent intent = new Intent(this, ExploreActivity.class);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                startActivity(intent);
+            }
+
         }
     }
 

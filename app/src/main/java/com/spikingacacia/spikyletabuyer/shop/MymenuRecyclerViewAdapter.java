@@ -194,6 +194,8 @@ public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecycl
 
         if(links.length==1 && links[0].contentEquals("null"))
             links[0]="-1";
+        else if(links.length==1 && links[0].contentEquals(""))
+            links[0]="-1";
         int itemsCount = 0;
         for(int c=0; c<items.length; c++)
         {

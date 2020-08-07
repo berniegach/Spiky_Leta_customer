@@ -209,7 +209,6 @@ public class ShopA extends AppCompatActivity
         for( int index=0; index< dMenuList.size(); index++)
         {
             final DMenu item = dMenuList.get(index);
-            Log.d(TAG,"NAME "+item.getItem());
             cartLinkedHashMap.put(item.getId(),1);
             //display a list of different sizes and prices for the customer to choose
             String[] sizes = item.getSizes().split(":");
