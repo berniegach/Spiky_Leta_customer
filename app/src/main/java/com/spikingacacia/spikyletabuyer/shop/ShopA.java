@@ -86,9 +86,9 @@ public class ShopA extends AppCompatActivity
     public static List<String>names;
     public static List<Double>price;
     Preferences preferences;
-    public static LinkedHashMap<Integer,Integer> cartLinkedHashMap;
-    public static LinkedHashMap<Integer,Integer> tempCartLinkedHashMap;
-    public static LinkedHashMap<Integer,Integer> itemPriceSizeLinkedHashMap;
+    public static LinkedHashMap<String,Integer> cartLinkedHashMap;
+    public static LinkedHashMap<String,Integer> tempCartLinkedHashMap;
+    public static LinkedHashMap<String,Integer> itemPriceSizeLinkedHashMap;
     public static Double tempTotal =0.0;
     private boolean hasPayment = false;
     private boolean preOrder = false;
@@ -209,12 +209,17 @@ public class ShopA extends AppCompatActivity
         for( int index=0; index< dMenuList.size(); index++)
         {
             final DMenu item = dMenuList.get(index);
-            cartLinkedHashMap.put(item.getId(),1);
+            //cartLinkedHashMap.put(item.getId(),1);
             //display a list of different sizes and prices for the customer to choose
             String[] sizes = item.getSizes().split(":");
             String[] prices = item.getPrices().split(":");
             if(sizes.length == 1)
-                itemPriceSizeLinkedHashMap.put(item.getId(), 0);
+            {
+                //there is only one size
+                itemPriceSizeLinkedHashMap.put(item.getId()+":"+0, 0);
+                cartLinkedHashMap.put(item.getId()+":"+0,1);
+                updateFab();
+            }
             else
             {
                 String[] sizesPrices = new String[sizes.length];
@@ -227,31 +232,45 @@ public class ShopA extends AppCompatActivity
                             @Override
                             public void onClick(DialogInterface dialog, int which)
                             {
-                                itemPriceSizeLinkedHashMap.put(item.getId(), which);
-                                //animate the fab button
+                                itemPriceSizeLinkedHashMap.put(item.getId()+":"+which, which);
+                                cartLinkedHashMap.put(item.getId()+":"+which,1);
+                                updateFab();
+                                /*//animate the fab button
                                 final Animation myAnim = AnimationUtils.loadAnimation(getBaseContext(), R.anim.bounce);
                                 // Use bounce interpolator with amplitude 0.2 and frequency 20
                                 MyBounceInterpolator interpolator = new MyBounceInterpolator(0.2, 20);
                                 myAnim.setInterpolator(interpolator);
-                                fab.startAnimation(myAnim);
+                                fab.startAnimation(myAnim);*/
+                            }
+                        })
+                        .setNegativeButton("No Thanks!!!", new DialogInterface.OnClickListener()
+                        {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which)
+                            {
+                                dialog.dismiss();
                             }
                         })
                         .setCancelable(false)
                         .create().show();
             }
-            if(getCartCount()>0)
-                fab.setVisibility(View.VISIBLE);
-            fab.setText(Integer.toString(getCartCount()));
-            //animate the fab button
-            final Animation myAnim = AnimationUtils.loadAnimation(this, R.anim.bounce);
-            // Use bounce interpolator with amplitude 0.2 and frequency 20
-            MyBounceInterpolator interpolator = new MyBounceInterpolator(0.2, 20);
-            myAnim.setInterpolator(interpolator);
-            fab.startAnimation(myAnim);
-            vibrate_on_click();
+
             //play_notification();
         }
 
+    }
+    private void updateFab()
+    {
+        if(getCartCount()>0)
+            fab.setVisibility(View.VISIBLE);
+        fab.setText(Integer.toString(getCartCount()));
+        //animate the fab button
+        final Animation myAnim = AnimationUtils.loadAnimation(this, R.anim.bounce);
+        // Use bounce interpolator with amplitude 0.2 and frequency 20
+        MyBounceInterpolator interpolator = new MyBounceInterpolator(0.2, 20);
+        myAnim.setInterpolator(interpolator);
+        fab.startAnimation(myAnim);
+        vibrate_on_click();
     }
     /*************************************************************************************************************************************************************************************
      * implementation of CartFragment.java
@@ -342,10 +361,11 @@ public class ShopA extends AppCompatActivity
         Iterator iterator = cartLinkedHashMap.entrySet().iterator();
         while(iterator.hasNext())
         {
-            LinkedHashMap.Entry<Integer, Integer>set = (LinkedHashMap.Entry<Integer, Integer>) iterator.next();
+            LinkedHashMap.Entry<String, Integer>set = (LinkedHashMap.Entry<String, Integer>) iterator.next();
             int count = set.getValue();
             total_count += count;
         }
+        Log.d(TAG,"CART COUNT "+total_count);
         return total_count;
     }
     private void getTotal()
@@ -354,12 +374,14 @@ public class ShopA extends AppCompatActivity
         Double total=0.0;
         while(iterator.hasNext())
         {
-            LinkedHashMap.Entry<Integer, Integer>set = (LinkedHashMap.Entry<Integer, Integer>) iterator.next();
-            int id=set.getKey();
+            LinkedHashMap.Entry<String, Integer>set = (LinkedHashMap.Entry<String, Integer>) iterator.next();
+            String id_size = set.getKey();
+            String[] id_size_pieces = id_size.split(":");
+            int id=Integer.parseInt(id_size_pieces[0]);
             int count=set.getValue();
             DMenu inv = menuLinkedHashMap.get(id);
 
-            int pos = itemPriceSizeLinkedHashMap.get(id);
+            int pos = itemPriceSizeLinkedHashMap.get(id_size);
             String priceString = inv.getPrices();
            final String[] prices = priceString.split(":");
             Double price = Double.parseDouble( prices[pos].contentEquals("null")?"0":prices[pos]);
@@ -534,12 +556,14 @@ public class ShopA extends AppCompatActivity
             Iterator iterator= ShopA.tempCartLinkedHashMap.entrySet().iterator();
             while(iterator.hasNext())
             {
-                LinkedHashMap.Entry<Integer, Integer>set = (LinkedHashMap.Entry<Integer, Integer>) iterator.next();
-                int id=set.getKey();
+                LinkedHashMap.Entry<String, Integer>set = (LinkedHashMap.Entry<String, Integer>) iterator.next();
+                String id_size = set.getKey();
+                String[] id_size_pieces = id_size.split(":");
+                int id=Integer.parseInt(id_size_pieces[0]);
                 DMenu inv = menuLinkedHashMap.get(id);
                 int quantity = set.getValue();
 
-                int pos = itemPriceSizeLinkedHashMap.get(id);
+                int pos = itemPriceSizeLinkedHashMap.get(id_size);
                 String priceString = inv.getPrices();
                 final String[] prices = priceString.split(":");
                 String[] sizes = inv.getSizes().split(":");

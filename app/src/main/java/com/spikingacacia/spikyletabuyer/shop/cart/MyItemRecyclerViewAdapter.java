@@ -79,7 +79,7 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
                 int count2= count + 1;
                 holder.mItem.count=count2;
                 ShopA.tempTotal+=holder.mItem.price;
-                new CountTask(count2,  Integer.parseInt(mValues.get(position).id), position).execute((Void)null);
+                new CountTask(count2,  mValues.get(position).id, position).execute((Void)null);
             }
         });
         holder.mMinusView.setOnClickListener(new View.OnClickListener()
@@ -90,7 +90,7 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
                 int count2= count - 1;
                 holder.mItem.count=count2;
                 ShopA.tempTotal-=holder.mItem.price;
-               new CountTask(count2,  Integer.parseInt(mValues.get(position).id), position).execute((Void)null);
+               new CountTask(count2,  mValues.get(position).id, position).execute((Void)null);
             }
         });
         // thumbnail image
@@ -139,9 +139,9 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
     private class CountTask extends AsyncTask<Void, Void, Boolean>
     {
         private int count;
-        private int id;
+        private String id;
         private int position;
-        public CountTask(int count, int id, int position)
+        public CountTask(int count, String id, int position)
         {
             this.count=count;
             this.id=id;

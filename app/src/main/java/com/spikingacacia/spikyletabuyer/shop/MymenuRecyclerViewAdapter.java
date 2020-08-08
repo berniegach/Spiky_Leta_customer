@@ -261,7 +261,9 @@ public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecycl
                             dMenuList.add(dMenu);
                             mListener.onMenuItemInteraction(dMenuList);
                         }
-                    }).create().show();
+                    })
+                    .setCancelable(false)
+                    .create().show();
         }
 
 

@@ -28,15 +28,17 @@ public class CartContent
         Iterator iterator= ShopA.tempCartLinkedHashMap.entrySet().iterator();
         while(iterator.hasNext())
         {
-            LinkedHashMap.Entry<Integer, Integer>set = (LinkedHashMap.Entry<Integer, Integer>) iterator.next();
-            int id=set.getKey();
+            LinkedHashMap.Entry<String, Integer>set = (LinkedHashMap.Entry<String, Integer>) iterator.next();
+            String id_size = set.getKey();
+            String[] id_size_pieces = id_size.split(":");
+            int id=Integer.parseInt(id_size_pieces[0]);
             int count=set.getValue();
             DMenu inv = ShopA.menuLinkedHashMap.get(id);
             int serverInvId = inv.getId();
             String name = inv.getItem();
             String imageType = inv.getImageType();
 
-            int pos = ShopA.itemPriceSizeLinkedHashMap.get(id);
+            int pos = ShopA.itemPriceSizeLinkedHashMap.get(id_size);
             String priceString = inv.getPrices();
             final String[] prices = priceString.split(":");
             String[] sizes = inv.getSizes().split(":");
@@ -44,7 +46,7 @@ public class CartContent
             String size = sizes[pos];
             String description = inv.getDescription();
 
-            addItem(createItem(id,serverInvId, name,price,size,description,imageType,count));
+            addItem(createItem(id_size,serverInvId, name,price,size,description,imageType,count));
         }
     }
     private void addItem(CartItem item)
@@ -53,7 +55,7 @@ public class CartContent
         ITEM_MAP.put(item.id, item);
     }
 
-    private CartItem createItem(int id, int serverInvId, String name, Double price, String size, String description,  String imageType,int count)
+    private CartItem createItem(String id, int serverInvId, String name, Double price, String size, String description,  String imageType,int count)
     {
         return new CartItem(id, serverInvId, name, price, size, description, imageType, count);
     }
@@ -69,9 +71,9 @@ public class CartContent
         public final String imageType;
         public int count;
 
-        public CartItem(int id, int serverInvId, String name, Double price, String size, String description, String imageType, int count)
+        public CartItem(String id, int serverInvId, String name, Double price, String size, String description, String imageType, int count)
         {
-            this.id = String.valueOf(id);
+            this.id = id;
             inventoryId = serverInvId;
             this.name = name;
             this.price = price;
