@@ -46,7 +46,7 @@ import static java.lang.Thread.sleep;
 public class LoginA extends AppCompatActivity implements View.OnClickListener
 {
     //REMEMBER TO CHANGE THIS WHEN CHANGING BETWEEN ONLINE AND LOCALHOST
-    public static final String base_url="http://ec2-18-189-193-108.us-east-2.compute.amazonaws.com/order/"; //online
+    public static final String base_url="https://3.20.17.200/order/"; //online
     //public static final String base_url="http://10.0.2.2/leta_project/android/"; //localhost no connection for testing user accounts coz it doesnt require subscription checking
     private String TAG="LoginA";
     //buyers

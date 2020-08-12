@@ -31,9 +31,12 @@ public class SRRestaurantsA extends AppCompatActivity
     @Override
     public void onItemClicked(Restaurants item)
     {
-        boolean has_payment = true;
-        if( item.getmCode().contentEquals("") ||  item.getmCode().contentEquals("null") || item.getmCode().contentEquals("NULL"))
-            has_payment = false;
+        //if the location of the hotel is kenya then we ask for mpesa payment
+        boolean has_payment = false;
+            /*if( item.getmCode().contentEquals("") ||  item.getmCode().contentEquals("null") || item.getmCode().contentEquals("NULL"))
+                has_payment = false;*/
+        if(item.getCountryCode().contentEquals("KE"))
+            has_payment = true;
         Intent intent=new Intent(this, ShopA.class);
          intent.putExtra("seller_email",item.getEmail());
          intent.putExtra("order_radius",item.getRadius());

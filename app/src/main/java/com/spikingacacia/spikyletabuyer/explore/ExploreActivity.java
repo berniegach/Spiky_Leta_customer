@@ -137,9 +137,12 @@ public class ExploreActivity extends AppCompatActivity implements
     }
     public void gotoRestaurant(Restaurants item)
     {
-        boolean has_payment = true;
-        if( item.getmCode().contentEquals("") ||  item.getmCode().contentEquals("null") || item.getmCode().contentEquals("NULL"))
-            has_payment = false;
+        //if the location of the hotel is kenya then we ask for mpesa payment
+        boolean has_payment = false;
+            /*if( item.getmCode().contentEquals("") ||  item.getmCode().contentEquals("null") || item.getmCode().contentEquals("NULL"))
+                has_payment = false;*/
+        if(item.getCountryCode().contentEquals("KE"))
+            has_payment = true;
         Intent intent=new Intent(this, ShopA.class);
         intent.putExtra("which",2);
         intent.putExtra("seller_email",item.getEmail());
@@ -224,6 +227,7 @@ public class ExploreActivity extends AppCompatActivity implements
                         double latitude=jsonObject_restaurants.getDouble("latitude");
                         double longitude=jsonObject_restaurants.getDouble("longitude");
                         String locality=jsonObject_restaurants.getString("locality");
+                        String country_code = jsonObject_restaurants.getString("country_code");
                         int order_radius=jsonObject_restaurants.getInt("order_radius");
                         int number_of_tables=jsonObject_restaurants.getInt("number_of_tables");
                         String image_type=jsonObject_restaurants.getString("image_type");
@@ -231,7 +235,7 @@ public class ExploreActivity extends AppCompatActivity implements
                         String m_code = jsonObject_restaurants.getString("m_code");
 
 
-                        Restaurants restaurants =new Restaurants(id,email,names,distance,latitude,longitude,locality, order_radius, number_of_tables, image_type, table_number, m_code);
+                        Restaurants restaurants =new Restaurants(id,email,names,distance,latitude,longitude,locality,country_code, order_radius, number_of_tables, image_type, table_number, m_code);
                         restaurantsList.add(restaurants);
                     }
                     return true;

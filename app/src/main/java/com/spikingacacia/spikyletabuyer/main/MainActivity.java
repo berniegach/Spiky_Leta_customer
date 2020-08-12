@@ -15,6 +15,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
+import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -69,7 +70,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -485,9 +489,12 @@ public class MainActivity extends AppCompatActivity implements
         }
         if(scan)
         {
-            boolean has_payment = true;
-            if( item.getmCode().contentEquals("") ||  item.getmCode().contentEquals("null") || item.getmCode().contentEquals("NULL"))
-                has_payment = false;
+            //if the location of the hotel is kenya then we ask for mpesa payment
+            boolean has_payment = false;
+            /*if( item.getmCode().contentEquals("") ||  item.getmCode().contentEquals("null") || item.getmCode().contentEquals("NULL"))
+                has_payment = false;*/
+            if(item.getCountryCode().contentEquals("KE"))
+                has_payment = true;
             Intent intent=new Intent(this, ShopA.class);
             intent.putExtra("seller_email",item.getEmail());
             intent.putExtra("order_radius",item.getRadius());
@@ -645,13 +652,14 @@ implementation of OrdersFragment.java
                         double latitude=jsonObject_restaurants.getDouble("latitude");
                         double longitude=jsonObject_restaurants.getDouble("longitude");
                         String locality=jsonObject_restaurants.getString("locality");
+                        String country_code = jsonObject_restaurants.getString("country_code");
                         int order_radius=jsonObject_restaurants.getInt("order_radius");
                         int tables = jsonObject_restaurants.getInt("number_of_tables");
                         String image_type=jsonObject_restaurants.getString("image_type");
                         int table_number = jsonObject_restaurants.getInt("table_number");
                         String m_code = jsonObject_restaurants.getString("m_code");
 
-                        Restaurants restaurants =new Restaurants(id, email, names,distance,latitude,longitude,locality,order_radius, tables, image_type, table_number, m_code);
+                        Restaurants restaurants =new Restaurants(id, email, names,distance,latitude,longitude,locality,country_code,order_radius, tables, image_type, table_number, m_code);
                         restaurantsList.add(restaurants);
                     }
                     return true;
@@ -736,13 +744,14 @@ implementation of OrdersFragment.java
                     double latitude=jsonObject_restaurants.getDouble("latitude");
                     double longitude=jsonObject_restaurants.getDouble("longitude");
                     String locality=jsonObject_restaurants.getString("locality");
+                    String country_code = jsonObject_restaurants.getString("country_code");
                     int order_radius=jsonObject_restaurants.getInt("order_radius");
                     int tables = jsonObject_restaurants.getInt("number_of_tables");
                     String image_type=jsonObject_restaurants.getString("image_type");
                     int table_number = jsonObject_restaurants.getInt("table_number");
                     String m_code = jsonObject_restaurants.getString("m_code");
 
-                    Restaurants restaurants =new Restaurants(id, email, names,distance,latitude,longitude,locality,order_radius, tables, image_type, table_number, m_code);
+                    Restaurants restaurants =new Restaurants(id, email, names,distance,latitude,longitude,locality,country_code, order_radius, tables, image_type, table_number, m_code);
                     restaurantsList.add(restaurants);
                     return true;
                 }
@@ -852,7 +861,7 @@ implementation of OrdersFragment.java
                 {
                     MpesaRequests mpesaRequests = mpesaRequestsList.get(c);
                     new MpesaCheckPayStatus(mpesaRequests.getSeller_email(),mpesaRequests.getBusiness_shortcode(),mpesaRequests.getPassword(),mpesaRequests.getTimestamp(),
-                            mpesaRequests.getChequeout_request_id(), mpesaRequests.getOrder_number(), mpesaRequests.getDate_added()).execute((Void)null);
+                            mpesaRequests.getChequeout_request_id(), mpesaRequests.getOrder_number(), mpesaRequests.getDate_added(), c).execute((Void)null);
                 }
 
             }
@@ -869,7 +878,8 @@ implementation of OrdersFragment.java
         private String dateAdded;
         private String storeEmail;
         private boolean orderPaymentCancelled;
-        public MpesaCheckPayStatus(String storeEmail,String businessShortCode, String password, String timestamp, String checkoutRequestID, String orderNumber, String dateAdded)
+        private int m_index;
+        public MpesaCheckPayStatus(String storeEmail,String businessShortCode, String password, String timestamp, String checkoutRequestID, String orderNumber, String dateAdded, int m_index)
         {
             this.businessShortCode = businessShortCode;
             this.password = password;
@@ -878,6 +888,7 @@ implementation of OrdersFragment.java
             this.orderNumber = orderNumber;
             this.dateAdded = dateAdded;
             this.storeEmail = storeEmail;
+            this.m_index = m_index;
         }
 
         @Override
@@ -887,7 +898,7 @@ implementation of OrdersFragment.java
             {
                 JSONObject jsonObject = Mpesa.STKPushTransactionStatus(businessShortCode,password,timestamp,checkoutRequestID);
 
-                //Log.d(TAG,"JSON"+jsonObject.toString());
+                Log.d(TAG,"JSON"+jsonObject.toString());
                 String  ResponseCode = jsonObject.getString("ResponseCode");
                 if(ResponseCode.contentEquals("0"))
                 {
@@ -898,9 +909,9 @@ implementation of OrdersFragment.java
                     if(ResultCode.contentEquals("1032"))
                         return false;// the result was cancelled by the user
                     else if(ResultCode.contentEquals("1037"))
-                        return false;// DS timeout
-                    else if(ResultCode.contentEquals("1037"))
-                        return false; //wrong password for the customer
+                        return false;// DS timeout //wrong password for the customer
+                    else if(ResultCode.contentEquals("2028"))
+                        return false; //The request is not permitted according to product assignment
                     else if(ResultCode.contentEquals("0"))
                         return true; // paid
 
@@ -909,8 +920,8 @@ implementation of OrdersFragment.java
             }
             catch (IOException | JSONException e)
             {
-                Log.e(TAG," "+e.getMessage());
-                e.printStackTrace();
+                //Log.e(TAG," "+e.getMessage());
+                //e.printStackTrace();
                 return false;
             }
 
@@ -919,17 +930,18 @@ implementation of OrdersFragment.java
         @Override
         protected void onPostExecute(final Boolean successful)
         {
-
             if (successful)
             {
-                //check the status
-                new UpdateOrderTask(storeEmail,orderNumber, dateAdded,"-1").execute((Void)null);
+                //the customer did pay with m-pesa
+                //now proceed to push the funds from our mpesa till number to restaurants till number
+                new UpdateOrderTask(storeEmail,orderNumber, dateAdded,"-1","1", m_index).execute((Void)null);
             }
             else
                 ;//Log.e(TAG,"mp check pay status failed");
 
         }
     }
+
     private class UpdateOrderTask extends AsyncTask<Void, Void, Boolean>
     {
         private String url_update=base_url+"update_seller_order.php";
@@ -939,14 +951,18 @@ implementation of OrdersFragment.java
         final private String orderNumber;
         private final String dateAdded;
         private final String orderStatus;
+        private final String updateSellerTotal;
         private final String sellerEmail;
+        private final int m_index;
 
-        public  UpdateOrderTask(String sellerEmail, String orderNumber, String dateAdded, String orderStatus)
+        public  UpdateOrderTask(String sellerEmail, String orderNumber, String dateAdded, String orderStatus, String updateSellerTotal, int m_index)
         {
             this.sellerEmail = sellerEmail;
             this.orderNumber = orderNumber;
             this.dateAdded = dateAdded;
             this.orderStatus = orderStatus; // order status for unpaid order is -1, delete is 0 and for a succesful order is 1
+            this.updateSellerTotal = updateSellerTotal;
+            this.m_index = m_index;
             jsonParser = new JSONParser();
         }
         @Override
@@ -959,10 +975,12 @@ implementation of OrdersFragment.java
             info.add(new BasicNameValuePair("waiter_email", "unavailable"));
             info.add(new BasicNameValuePair("order_number",orderNumber));
             info.add(new BasicNameValuePair("status",orderStatus));
+            info.add(new BasicNameValuePair("update_seller_total",updateSellerTotal));
             info.add(new BasicNameValuePair("date_added",dateAdded));
 
             // making HTTP request
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_update,"POST",info);
+            Log.d(TAG,jsonObject.toString());
             try
             {
                 int success=jsonObject.getInt(TAG_SUCCESS);
@@ -988,6 +1006,8 @@ implementation of OrdersFragment.java
         {
             if (successful )
             {
+                Log.d(TAG,"order update succesful");
+                mpesaRequestsList.remove(m_index);
             }
             else
             {

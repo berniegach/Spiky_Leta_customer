@@ -21,6 +21,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -33,23 +34,31 @@ public class Mpesa
 {
     private static String TAG ="Mpesa_utils";
     private static String appKey = "858k13Aj5t0TcmbvFGeGEj9gAeh1AJdC";
+    private static String appKeyProduction = "l0upnc3ttaM3WiG4ZMBV1pAr3dGRJnBB";
     private static String appSecret = "AiTMXerYWa093iF6";
+    private static String appSecretProduction = "0GYr5l2UkAlSYO0y";
     private static String accessToken;
+    private static String urlOAuth2Token =  "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
+    private static String urlOAuth2TokenProduction =  "https://api.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials";
+    private static String urlSTKPush = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest";
+    private static String urlSTKPushProduction = "https://api.safaricom.co.ke/mpesa/stkpush/v1/processrequest";
+    private static String urlSTKPushQueryProduction = "https://api.safaricom.co.ke/mpesa/stkpushquery/v1/query";
+    private static String urlSTKPushQuery = "https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query";
     public Mpesa(){
     }
 
     private static String authenticate() throws IOException, JSONException
     {
 
-        String appKeySecret = appKey + ":" + appSecret;
-        byte[] bytes = appKeySecret.getBytes("ISO-8859-1");
+        String appKeySecret = appKeyProduction + ":" + appSecretProduction;
+        byte[] bytes = appKeySecret.getBytes(StandardCharsets.ISO_8859_1);
         String encoded = Base64.encodeToString(bytes, Base64.NO_WRAP | Base64.URL_SAFE);
 
 
         OkHttpClient client = new OkHttpClient();
 
         Request request = new Request.Builder()
-                .url("https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials")
+                .url(urlOAuth2TokenProduction)
                 .get()
                 .addHeader("authorization", "Basic "+encoded)
                 .addHeader("cache-control", "no-cache")
@@ -133,7 +142,7 @@ public class Mpesa
         return response.body().toString();
     }
 
-    public static String B2BRequest( String initiatorName, String accountReference,String securityCredential,String commandID, String senderIdentifierType,String receiverIdentifierType,float  amount, String partyA,String partyB, String remarks, String queueTimeOutURL, String resultURL, String occassion) throws IOException, JSONException
+    public static JSONObject B2BRequest( String initiatorName, String accountReference,String securityCredential,String commandID, String senderIdentifierType,String receiverIdentifierType,float  amount, String partyA,String partyB, String remarks, String queueTimeOutURL, String resultURL) throws IOException, JSONException
     {
         JSONArray jsonArray=new JSONArray();
         JSONObject jsonObject=new JSONObject();
@@ -173,7 +182,8 @@ public class Mpesa
         Response response = client.newCall(request).execute();
         if (!response.isSuccessful())
             throw new IOException("Unexpected code " + response);
-        return response.body().string();
+        String jsonData = response.body().string();
+        return new JSONObject(jsonData);
 
     }
     public static JSONObject STKPushSimulation(String businessShortCode, String password, String timestamp,String transactionType, String amount, String phoneNumber, String partyA, String partyB,
@@ -203,7 +213,7 @@ public class Mpesa
         //Log.d(TAG,"REQUEST JSON"+requestJson);
 
         OkHttpClient client = new OkHttpClient();
-        String url="https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest";
+        String url=urlSTKPushProduction;
         MediaType mediaType = MediaType.parse("application/json");
         RequestBody body = RequestBody.create(mediaType, requestJson);
         Request request = new Request.Builder()
@@ -243,7 +253,7 @@ public class Mpesa
         MediaType mediaType = MediaType.parse("application/json");
         RequestBody body = RequestBody.create(mediaType, requestJson);
         Request request = new Request.Builder()
-                .url("https://sandbox.safaricom.co.ke/mpesa/stkpushquery/v1/query")
+                .url(urlSTKPushQueryProduction)
                 .post(body)
                 .addHeader("authorization", "Bearer "+authenticate())
                 .addHeader("content-type", "application/json")
@@ -336,7 +346,7 @@ public class Mpesa
             throw new IOException("Unexpected code " + response);
         return response.body().string();
     }
-    public  static String registerURL(String shortCode, String responseType, String confirmationURL, String validationURL) throws IOException, JSONException
+    public  static JSONObject registerURL(String shortCode, String responseType, String confirmationURL, String validationURL) throws IOException, JSONException
     {
         JSONArray jsonArray=new JSONArray();
         JSONObject jsonObject=new JSONObject();
@@ -368,7 +378,8 @@ public class Mpesa
         Response response = client.newCall(request).execute();
         if (!response.isSuccessful())
             throw new IOException("Unexpected code " + response);
-        return response.body().string();
+        String jsonData = response.body().string();
+        return new JSONObject(jsonData);
     }
 
 }

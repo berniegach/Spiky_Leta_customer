@@ -375,6 +375,7 @@ public class MapsFragment extends Fragment implements  ActivityCompat.OnRequestP
                         double latitude=jsonObject_restaurants.getDouble("latitude");
                         double longitude=jsonObject_restaurants.getDouble("longitude");
                         String locality=jsonObject_restaurants.getString("locality");
+                        String country_code = jsonObject_restaurants.getString("country_code");
                         int order_radius=jsonObject_restaurants.getInt("order_radius");
                         int number_of_tables=jsonObject_restaurants.getInt("number_of_tables");
                         String image_type=jsonObject_restaurants.getString("image_type");
@@ -382,7 +383,7 @@ public class MapsFragment extends Fragment implements  ActivityCompat.OnRequestP
                         String m_code = jsonObject_restaurants.getString("m_code");
 
 
-                        Restaurants restaurants =new Restaurants(id,email,names,distance,latitude,longitude,locality, order_radius, number_of_tables, image_type, table_number, m_code);
+                        Restaurants restaurants =new Restaurants(id,email,names,distance,latitude,longitude,locality,country_code, order_radius, number_of_tables, image_type, table_number, m_code);
                         restaurantsList.add(restaurants);
                     }
                     return true;

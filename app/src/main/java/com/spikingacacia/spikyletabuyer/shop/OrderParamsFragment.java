@@ -15,6 +15,7 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.TimePicker;
 
+import com.spikingacacia.spikyletabuyer.Preferences;
 import com.spikingacacia.spikyletabuyer.R;
 
 /**
@@ -34,6 +35,7 @@ public class OrderParamsFragment extends Fragment
     private String mobile_mpesa = "";
     private String mobile_delivery = "";
     private String instructions = "";
+    private Preferences preferences;
 
     public OrderParamsFragment()
     {
@@ -68,6 +70,7 @@ public class OrderParamsFragment extends Fragment
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_order_params, container, false);
 
+        preferences = new Preferences(getContext());
         final TimePicker timePicker = view.findViewById(R.id.time_picker);
         RadioGroup radioGroup_order_type = view.findViewById(R.id.radio_order_type);
         final CardView c_deliver_to_my_location = view.findViewById(R.id.cardview_deliver_to_my_location);
@@ -79,6 +82,8 @@ public class OrderParamsFragment extends Fragment
         final TextView t_mobile_delivery = view.findViewById(R.id.edit_delivery_mobile);
         Button b_order = view.findViewById(R.id.button_order);
 
+        if(preferences.getMpesa_mobile()!=null)
+            t_m_pesa_mobile.setText(preferences.getMpesa_mobile());
 
         if(!showMpesa)
             c_mpesa.setVisibility(View.GONE);
@@ -101,7 +106,7 @@ public class OrderParamsFragment extends Fragment
                 if(checkedId == R.id.radio_sit_in)
                 {
                     timePicker.setVisibility(View.VISIBLE);
-                    t_m_pesa_mobile.setEnabled(false);
+                    //t_m_pesa_mobile.setEnabled(false);
                     t_mobile_delivery.setEnabled(false);
                     c_delivery_mobile.setVisibility(View.GONE);
                     c_instructions.setVisibility(View.GONE);
@@ -111,7 +116,7 @@ public class OrderParamsFragment extends Fragment
                 else if(checkedId == R.id.radio_take_away)
                 {
                     timePicker.setVisibility(View.VISIBLE);
-                    t_m_pesa_mobile.setEnabled(false);
+                    //t_m_pesa_mobile.setEnabled(false);
                     t_mobile_delivery.setEnabled(false);
                     c_delivery_mobile.setVisibility(View.GONE);
                     c_instructions.setVisibility(View.GONE);
@@ -137,6 +142,7 @@ public class OrderParamsFragment extends Fragment
             {
                 if(which == 2)
                 {
+                    //delivery only
                     String msisdn = t_m_pesa_mobile.getText().toString();
                     if(showMpesa)
                     {
@@ -163,8 +169,31 @@ public class OrderParamsFragment extends Fragment
 
 
                 }
+                else
+                {
+                    //sit in and pick up
+                    String msisdn = t_m_pesa_mobile.getText().toString();
+                    if(showMpesa)
+                    {
+                        if(TextUtils.isEmpty(msisdn))
+                        {
+                            t_m_pesa_mobile.setError("Please enter a mobile number");
+                            return;
+                        }
+                    }
+                    if(msisdn.contains("+254") || msisdn.startsWith("07") )
+                    {
+                        t_m_pesa_mobile.setError("The number should begin with 254");
+                        return;
+                    }
+                    mobile_mpesa = msisdn;
+                }
                 if(mListener!=null)
+                {
+                    if(!mobile_mpesa.contentEquals(""))
+                        preferences.setMpesa_mobile(mobile_mpesa);
                     mListener.onPlacePreOrder(which,time,mobile_mpesa,mobile_delivery,instructions);
+                }
 
             }
         });

@@ -9,6 +9,7 @@ public class Restaurants
     private double latitude;
     private double longitude;
     private String locality;
+    private String countryCode;
     private int radius;
     private int numberOfTables;
     private String image_type;
@@ -17,7 +18,7 @@ public class Restaurants
 
 
 
-    public Restaurants(int id, String email, String names, double distance, double latitude, double longitude, String locality, int radius, int numberOfTables, String image_type, int tableNumber,  String mCode)
+    public Restaurants(int id, String email, String names, double distance, double latitude, double longitude, String locality, String countryCode, int radius, int numberOfTables, String image_type, int tableNumber,  String mCode)
     {
         this.id = id;
         this.email = email;
@@ -26,6 +27,7 @@ public class Restaurants
         this.latitude = latitude;
         this.longitude = longitude;
         this.locality = locality;
+        this.countryCode = countryCode;
         this.radius=radius;
         this.numberOfTables=numberOfTables;
         this.image_type = image_type;
@@ -99,6 +101,16 @@ public class Restaurants
     public void setLocality(String locality)
     {
         this.locality = locality;
+    }
+
+    public String getCountryCode()
+    {
+        return countryCode;
+    }
+
+    public void setCountryCode(String countryCode)
+    {
+        this.countryCode = countryCode;
     }
 
     public int getRadius()
