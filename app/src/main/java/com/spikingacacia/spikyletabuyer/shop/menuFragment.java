@@ -62,8 +62,8 @@ public class menuFragment extends Fragment
 
     private static final String ARG_COLUMN_COUNT = "column-count";
     private RecyclerView recyclerViewCategories;
-    private RecyclerView recyclerViewMenu;
-    private MymenuRecyclerViewAdapter mymenuRecyclerViewAdapter;
+    private  RecyclerView recyclerViewMenu;
+    public static MymenuRecyclerViewAdapter mymenuRecyclerViewAdapter;
     private MymenuCategoryRecyclerViewAdapter mymenuCategoryRecyclerViewAdapter;
     private OnListFragmentInteractionListener mListener;
     public static int itemIdToEdit;

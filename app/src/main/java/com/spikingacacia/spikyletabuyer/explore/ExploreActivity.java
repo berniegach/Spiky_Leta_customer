@@ -152,6 +152,7 @@ public class ExploreActivity extends AppCompatActivity implements
         intent.putExtra("table_number",item.getTableNumber());
         intent.putExtra("has_payment", has_payment);
         intent.putExtra("m_code", has_payment ? item.getmCode() : "");
+        intent.putExtra("dining_options", item.getDiningOptions());
         startActivity(intent);
     }
 /*
@@ -233,9 +234,10 @@ public class ExploreActivity extends AppCompatActivity implements
                         String image_type=jsonObject_restaurants.getString("image_type");
                         int table_number = jsonObject_restaurants.getInt("table_number");
                         String m_code = jsonObject_restaurants.getString("m_code");
+                        String dining_options = jsonObject_restaurants.getString("dining_options");
 
 
-                        Restaurants restaurants =new Restaurants(id,email,names,distance,latitude,longitude,locality,country_code, order_radius, number_of_tables, image_type, table_number, m_code);
+                        Restaurants restaurants =new Restaurants(id,email,names,distance,latitude,longitude,locality,country_code, order_radius, number_of_tables, image_type, table_number, m_code, dining_options);
                         restaurantsList.add(restaurants);
                     }
                     return true;

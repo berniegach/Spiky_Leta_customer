@@ -45,6 +45,7 @@ public class SRRestaurantsA extends AppCompatActivity
         intent.putExtra("table_number",item.getTableNumber());
         intent.putExtra("has_payment", has_payment);
         intent.putExtra("m_code", has_payment ? item.getmCode() : "");
+        intent.putExtra("dining_options", item.getDiningOptions());
         startActivity(intent);
     }
 }

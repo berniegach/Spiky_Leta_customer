@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -73,6 +74,9 @@ public class OrderParamsFragment extends Fragment
         preferences = new Preferences(getContext());
         final TimePicker timePicker = view.findViewById(R.id.time_picker);
         RadioGroup radioGroup_order_type = view.findViewById(R.id.radio_order_type);
+        RadioButton radio_sit_in = ((RadioButton)view.findViewById(R.id.radio_sit_in));
+        RadioButton radio_take_away = ((RadioButton)view.findViewById(R.id.radio_take_away));
+        RadioButton radio_delivery = ((RadioButton)view.findViewById(R.id.radio_delivery));
         final CardView c_deliver_to_my_location = view.findViewById(R.id.cardview_deliver_to_my_location);
         final CardView c_instructions = view.findViewById(R.id.cardview_instructions);
         final TextView t_order_delivery_info = view.findViewById(R.id.t_order_info);
@@ -98,6 +102,7 @@ public class OrderParamsFragment extends Fragment
                     time = hourOfDay>12? String.format("%d:%d pm",hourOfDay - 12, minute) : String.format("%d:%d am",hourOfDay, minute);
             }
         });
+
         radioGroup_order_type.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener()
         {
             @Override
@@ -135,6 +140,39 @@ public class OrderParamsFragment extends Fragment
                 }
             }
         });
+        //check dining options
+        String[] s_dining_options = ShopA.diningOptions.split(":");
+        if(s_dining_options.length==1 || s_dining_options.length==0)
+            s_dining_options = new String[]{"1","1","1"};
+        int[] dining_options = new int[]{Integer.parseInt(s_dining_options[0]), Integer.parseInt(s_dining_options[1]), Integer.parseInt(s_dining_options[2])};
+        radio_sit_in.setEnabled(dining_options[0] == 1);
+        radio_take_away.setEnabled(dining_options[1] == 1);
+        radio_delivery.setEnabled(dining_options[2] == 1);
+
+
+        if(dining_options[0] == 0)
+        {
+            //sit in disabled
+            if(dining_options[1] == 0)
+                radio_delivery.setChecked(true);
+            else
+                radio_take_away.setChecked(true);
+        }
+        else if(dining_options[1] == 0)
+        {
+            //take away disabled
+            if(dining_options[0] == 0)
+                radio_delivery.setChecked(true);
+            else
+                radio_sit_in.setChecked(true);
+        }
+        else if(dining_options[2] == 0)
+        {
+            if(dining_options[0] == 0)
+                radio_take_away.setChecked(true);
+            else
+                radio_sit_in.setChecked(true);
+        }
         b_order.setOnClickListener(new View.OnClickListener()
         {
             @Override

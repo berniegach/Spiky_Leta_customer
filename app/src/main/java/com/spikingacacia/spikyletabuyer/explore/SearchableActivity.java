@@ -107,6 +107,7 @@ public class SearchableActivity extends AppCompatActivity
         intent.putExtra("number_of_tables",item.getNumberOfTables());
         intent.putExtra("table_number",item.getTableNumber());
         intent.putExtra("has_payment", has_payment);
+        intent.putExtra("dining_options", item.getDiningOptions());
         intent.putExtra("m_code", has_payment ? item.getmCode() : "");
         startActivity(intent);
     }

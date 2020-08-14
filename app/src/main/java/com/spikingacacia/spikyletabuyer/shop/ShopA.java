@@ -76,6 +76,7 @@ public class ShopA extends AppCompatActivity
     private int numberOfTables=10;
     private int tableNumber;
     public static int which; // which can either be 1 for normal ordering in a restaurant or 2 for pre ordering
+    public static String diningOptions;
     private int backgroundTasksProgress=0;
     private final int finalProgressCount=3;
     int whichFragment=1;
@@ -116,6 +117,7 @@ public class ShopA extends AppCompatActivity
         tableNumber=getIntent().getIntExtra("table_number",-1);
         hasPayment =  getIntent().getBooleanExtra("has_payment",false);
         mPesaTillNumber = getIntent().getStringExtra("m_code");
+        diningOptions = getIntent().getStringExtra("dining_options");
         if(which == 1)
             setTitle("Menu");
         else if(which == 2)

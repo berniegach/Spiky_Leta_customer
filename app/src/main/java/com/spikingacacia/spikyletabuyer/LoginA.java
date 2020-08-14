@@ -184,7 +184,6 @@ public class LoginA extends AppCompatActivity implements View.OnClickListener
             {
                 proceedToLogin();
                 Log.d(TAG, "email: " + account.getEmail());
-                new RegisterTask(account.getEmail(),"null").execute((Void)null);
             }
         } catch (ApiException e) {
             // The ApiException status code indicates the detailed failure reason.
@@ -282,15 +281,39 @@ public class LoginA extends AppCompatActivity implements View.OnClickListener
             else
             {
                 showProgress(false);
-                Toast.makeText(getBaseContext(), "Sign in failed", Toast.LENGTH_SHORT).show();
-                mGoogleSignInClient.signOut().addOnCompleteListener(LoginA.this, new OnCompleteListener<Void>()
+                if(success==-2)
                 {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task)
-                    {
-                        Log.d(TAG,"gmail signed out");
-                    }
-                });
+                    //the email is not registered
+                    new AlertDialog.Builder(LoginA.this)
+                            .setTitle("No account")
+                            .setMessage("Would you like to create a new account with the email?")
+                            .setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+                            {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which)
+                                {
+                                    Toast.makeText(getBaseContext(), "Sign in failed", Toast.LENGTH_SHORT).show();
+                                    mGoogleSignInClient.signOut().addOnCompleteListener(LoginA.this, new OnCompleteListener<Void>()
+                                    {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task)
+                                        {
+                                            Log.d(TAG,"gmail signed out");
+                                        }
+                                    });
+                                    dialog.dismiss();
+                                }
+                            })
+                            .setPositiveButton("Ok", new DialogInterface.OnClickListener()
+                            {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which)
+                                {
+                                    new RegisterTask(account.getEmail(),"null").execute((Void)null);
+                                }
+                            }).create().show();
+                }
+
             }
         }
 
@@ -352,11 +375,13 @@ public class LoginA extends AppCompatActivity implements View.OnClickListener
             if (successful)
             {
                 Toast.makeText(getBaseContext(), "Successfully registered", Toast.LENGTH_SHORT).show();
+                proceedToLogin();
             }
             else if(success==-1)
             {
                 //email already there do nothing
                 Log.d(TAG,"email already there");
+                proceedToLogin();
             }
             else
             {
