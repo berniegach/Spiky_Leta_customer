@@ -260,7 +260,7 @@ public class LoginA extends AppCompatActivity implements View.OnClickListener
                     return false;
                 }
             }
-            catch (JSONException e)
+            catch (JSONException | NullPointerException e)
             {
                 Log.e("JSON",""+e.getMessage());
                 return false;

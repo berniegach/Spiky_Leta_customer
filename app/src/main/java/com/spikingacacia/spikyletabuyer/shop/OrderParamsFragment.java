@@ -88,6 +88,10 @@ public class OrderParamsFragment extends Fragment
 
         if(preferences.getMpesa_mobile()!=null)
             t_m_pesa_mobile.setText(preferences.getMpesa_mobile());
+        if(preferences.getDelivery_mobile()!=null)
+            t_mobile_delivery.setText(preferences.getDelivery_mobile());
+        if(preferences.getOrder_instructions()!=null)
+            t_order_delivery_info.setText(preferences.getOrder_instructions());
 
         if(!showMpesa)
             c_mpesa.setVisibility(View.GONE);
@@ -230,6 +234,10 @@ public class OrderParamsFragment extends Fragment
                 {
                     if(!mobile_mpesa.contentEquals(""))
                         preferences.setMpesa_mobile(mobile_mpesa);
+                    if(!mobile_delivery.contentEquals(""))
+                        preferences.setDelivery_mobile(mobile_delivery);
+                    if(!instructions.contentEquals(""))
+                        preferences.setOrder_instructions(instructions);
                     mListener.onPlacePreOrder(which,time,mobile_mpesa,mobile_delivery,instructions);
                 }
 

@@ -1,9 +1,11 @@
 package com.spikingacacia.spikyletabuyer.explore;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.Manifest;
@@ -131,9 +133,10 @@ public class ExploreActivity extends AppCompatActivity implements
     {
         ((ProgressBar)findViewById(R.id.progress)).setVisibility(View.GONE);
         Fragment fragment = RestaurantsFragment.newInstance(1);
-        FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
-        transaction.add(R.id.base,fragment,"restaurant");
-        transaction.commit();
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction()
+        .add(R.id.base,fragment,"restaurant").commitAllowingStateLoss();
+        //when calling commit() it would cause IllegalStateException so i changed to commitAllowingStateLoss()
     }
     public void gotoRestaurant(Restaurants item)
     {

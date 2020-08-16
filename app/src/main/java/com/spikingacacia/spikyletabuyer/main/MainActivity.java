@@ -102,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements
     public static  List<Restaurants> restaurantsList;
     private static boolean useQrCode = false;
     private List<MpesaRequests> mpesaRequestsList;
+    private boolean mpesaOrderUpdateInprogress;
     private Thread thread;
     ActivityResultLauncher<Intent> mGetBarcode = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             new ActivityResultCallback<ActivityResult>() {
@@ -882,6 +883,7 @@ implementation of OrdersFragment.java
         private String storeEmail;
         private boolean orderPaymentCancelled;
         private int m_index;
+        private String resultCode = "";
         public MpesaCheckPayStatus(String storeEmail,String businessShortCode, String password, String timestamp, String checkoutRequestID, String orderNumber, String dateAdded, int m_index)
         {
             this.businessShortCode = businessShortCode;
@@ -907,15 +909,15 @@ implementation of OrdersFragment.java
                 {
                     String ResponseDescription = jsonObject.getString("ResponseDescription");
                     String MerchantRequestID = jsonObject.getString("MerchantRequestID");
-                    String ResultCode = jsonObject.getString("ResultCode");
+                    resultCode = jsonObject.getString("ResultCode");
                     String ResultDesc = jsonObject.getString("ResultDesc");
-                    if(ResultCode.contentEquals("1032"))
+                    if(resultCode.contentEquals("1032"))
                         return false;// the result was cancelled by the user
-                    else if(ResultCode.contentEquals("1037"))
+                    else if(resultCode.contentEquals("1037"))
                         return false;// DS timeout //wrong password for the customer
-                    else if(ResultCode.contentEquals("2028"))
+                    else if(resultCode.contentEquals("2028"))
                         return false; //The request is not permitted according to product assignment
-                    else if(ResultCode.contentEquals("0"))
+                    else if(resultCode.contentEquals("0"))
                         return true; // paid
 
                     return false;
@@ -937,10 +939,17 @@ implementation of OrdersFragment.java
             {
                 //the customer did pay with m-pesa
                 //now proceed to push the funds from our mpesa till number to restaurants till number
-                new UpdateOrderTask(storeEmail,orderNumber, dateAdded,"-1","1", m_index).execute((Void)null);
+                new UpdateOrderTask(storeEmail,orderNumber, dateAdded,"-1","1", m_index, "").execute((Void)null);
             }
             else
-                ;//Log.e(TAG,"mp check pay status failed");
+            {
+                String message = "";
+                if(resultCode.contentEquals("1032") || resultCode.contentEquals("1037") || resultCode.contentEquals("2028") )
+                {
+                    message = "Payment failed";
+                    new UpdateOrderTask(storeEmail,orderNumber, dateAdded,"-3","0", m_index, message).execute((Void)null);
+                }
+            }
 
         }
     }
@@ -957,8 +966,9 @@ implementation of OrdersFragment.java
         private final String updateSellerTotal;
         private final String sellerEmail;
         private final int m_index;
+        private String mpesaMessage;
 
-        public  UpdateOrderTask(String sellerEmail, String orderNumber, String dateAdded, String orderStatus, String updateSellerTotal, int m_index)
+        public  UpdateOrderTask(String sellerEmail, String orderNumber, String dateAdded, String orderStatus, String updateSellerTotal, int m_index, String mpesaMessage)
         {
             this.sellerEmail = sellerEmail;
             this.orderNumber = orderNumber;
@@ -966,6 +976,7 @@ implementation of OrdersFragment.java
             this.orderStatus = orderStatus; // order status for unpaid order is -1, delete is 0 and for a succesful order is 1
             this.updateSellerTotal = updateSellerTotal;
             this.m_index = m_index;
+            this.mpesaMessage = mpesaMessage;
             jsonParser = new JSONParser();
         }
         @Override
@@ -979,6 +990,7 @@ implementation of OrdersFragment.java
             info.add(new BasicNameValuePair("order_number",orderNumber));
             info.add(new BasicNameValuePair("status",orderStatus));
             info.add(new BasicNameValuePair("update_seller_total",updateSellerTotal));
+            info.add(new BasicNameValuePair("m_message",mpesaMessage));
             info.add(new BasicNameValuePair("date_added",dateAdded));
 
             // making HTTP request
@@ -1010,7 +1022,23 @@ implementation of OrdersFragment.java
             if (successful )
             {
                 Log.d(TAG,"order update succesful");
-                mpesaRequestsList.remove(m_index);
+                //since there can be multiple asyntasks running at the same time m_index may generate IndexOutOfBoundsException
+                try
+                {
+                    for(int c=0; c<mpesaRequestsList.size(); c++)
+                    {
+                        MpesaRequests mpesaRequests = mpesaRequestsList.get(c);
+                        if(mpesaRequests.getSeller_email().contentEquals(sellerEmail) &&  mpesaRequests.getOrder_number().contentEquals(orderNumber)&&  mpesaRequests.getDate_added().contentEquals(dateAdded))
+                        {
+                            mpesaRequestsList.remove(c);
+                            Log.d(TAG,"m_request removed");
+                        }
+                    }
+                }
+                catch(IndexOutOfBoundsException e)
+                {
+                    Log.e(TAG,""+e.getMessage());
+                }
             }
             else
             {

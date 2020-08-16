@@ -119,7 +119,7 @@ public class OrdersService extends Service
 
     @Override
     public void onDestroy() {
-        Toast.makeText(this, "You won't get orders notification anymore", Toast.LENGTH_SHORT).show();
+        //Toast.makeText(this, "You won't get orders notification anymore", Toast.LENGTH_SHORT).show();
     }
     private void play_notification(String message)
     {
@@ -135,7 +135,14 @@ public class OrdersService extends Service
         createNotificationChannel();
         Uri alarmSound =  RingtoneManager. getDefaultUri (RingtoneManager. TYPE_NOTIFICATION );
         MediaPlayer mp = MediaPlayer. create (this, alarmSound);
-        mp.start();
+        try
+        {
+            mp.start();
+        }
+        catch (NullPointerException e)
+        {
+            Log.e(TAG,""+e.getMessage());
+        }
         vibrate_on_click();
 
         NotificationCompat.Builder mBuilder =
@@ -205,9 +212,13 @@ public class OrdersService extends Service
                         int count = jsonObjectNotis.getInt("count");
                         String message;
                         boolean show = false;
-                        //-2 = unpaid, -1 = paid, 0 = deleted, 1 = pending, 2 = ..... until 5 = finished
+                        //-3 mpesa request went through but failed -2 = unpaid, -1 = paid, 0 = deleted, 1 = pending, 2 = ..... until 5 = finished
                         switch(order_status)
                         {
+                            case -3:
+                                //this are orders whose payment went through but failed
+                                message="";
+                                break;
                             case -2:
                                 message = "There is a new order that requires payment";
                                 if(preferences.getUnpaid_count()!=count)

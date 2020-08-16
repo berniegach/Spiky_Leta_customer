@@ -13,6 +13,7 @@ public class Orders
     private String size;
     private double price;
     private int sellerId;
+    private String sellerEmail;
     private String sellerImageType;
     private String sellerNames;
     private String waiterNames;
@@ -21,9 +22,10 @@ public class Orders
     private int preOrder;
     private String collectTime;
     private int orderType;
+    private String mpesaMessage;
 
-    public Orders(int id, String waiterEmail, int itemId, int orderNumber, int orderStatus, String dateAdded, String dateChanged, String item, String size, double price, int sellerId, String sellerImageType,
-                  String sellerNames, String waiterNames, int orderFormat, int tableNumber, int preOrder, String collectTime, int order_type)
+    public Orders(int id, String waiterEmail, int itemId, int orderNumber, int orderStatus, String dateAdded, String dateChanged, String item, String size, double price, int sellerId, String sellerEmail, String sellerImageType,
+                  String sellerNames, String waiterNames, int orderFormat, int tableNumber, int preOrder, String collectTime, int order_type, String mpesaMessage)
     {
         this.id = id;
         this.waiterEmail = waiterEmail;
@@ -36,6 +38,7 @@ public class Orders
         this.size = size;
         this.price = price;
         this.sellerId = sellerId;
+        this.sellerEmail = sellerEmail;
         this.sellerImageType = sellerImageType;
         this.sellerNames = sellerNames;
         this.waiterNames = waiterNames;
@@ -44,6 +47,7 @@ public class Orders
         this.preOrder = preOrder;
         this.collectTime = collectTime;
         this.orderType = order_type;
+        this.mpesaMessage = mpesaMessage;
     }
 
     public int getId()
@@ -155,6 +159,15 @@ public class Orders
     {
         this.sellerId = sellerId;
     }
+    public String getSellerEmail()
+    {
+        return sellerEmail;
+    }
+
+    public void setSellerEmail(String sellerEmail)
+    {
+        this.sellerEmail = sellerEmail;
+    }
     public String getSellerImageType()
     {
         return sellerImageType;
@@ -233,5 +246,13 @@ public class Orders
     {
         this.orderType = orderType;
     }
+    public String getMpesaMessage()
+    {
+        return mpesaMessage;
+    }
 
+    public void setMpesaMessage(String mpesaMessage)
+    {
+        this.mpesaMessage = mpesaMessage;
+    }
 }

@@ -742,6 +742,7 @@ public class ShopA extends AppCompatActivity
             info.add(new BasicNameValuePair("order_number",orderNumber));
             info.add(new BasicNameValuePair("status",orderStatus));
             info.add(new BasicNameValuePair("update_seller_total",updateSellerTotal));
+            info.add(new BasicNameValuePair("m_message",""));
             info.add(new BasicNameValuePair("date_added",dateAdded));
             // making HTTP request
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_update,"POST",info);

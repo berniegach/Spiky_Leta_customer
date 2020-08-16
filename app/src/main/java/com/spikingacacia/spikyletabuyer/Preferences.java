@@ -30,8 +30,10 @@ public class Preferences
     int in_progress_count;
     int delivery_count;
     int finished_count;
-    //
+    // order info to remember
     private String mpesa_mobile;
+    private String delivery_mobile;
+    private String order_instructions;
     public Preferences(Context context)
     {
         shared_preferences=context.getSharedPreferences("loginPrefs",MODE_PRIVATE);
@@ -57,6 +59,8 @@ public class Preferences
         delivery_count = shared_preferences.getInt("delivery_count",0);
         finished_count = shared_preferences.getInt("finished_count",0);
         mpesa_mobile = shared_preferences.getString("mpesa_mobile",null);
+        delivery_mobile = shared_preferences.getString("delivery_mobile",null);
+        order_instructions = shared_preferences.getString("order_instructions",null);
     }
     public boolean isDark_theme_enabled()
     {
@@ -290,6 +294,32 @@ public class Preferences
         preferences_editor.putString("mpesa_mobile", mpesa_mobile);
         preferences_editor.commit();
     }
+
+
+    public String getDelivery_mobile()
+    {
+        return delivery_mobile;
+    }
+
+    public void setDelivery_mobile(String delivery_mobile)
+    {
+        this.delivery_mobile = delivery_mobile;
+        preferences_editor.putString("delivery_mobile", delivery_mobile);
+        preferences_editor.commit();
+    }
+
+    public String getOrder_instructions()
+    {
+        return order_instructions;
+    }
+
+    public void setOrder_instructions(String order_instructions)
+    {
+        this.order_instructions = order_instructions;
+        preferences_editor.putString("order_instructions", order_instructions);
+        preferences_editor.commit();
+    }
+
 
 
 }
