@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements
     private static boolean useQrCode = false;
     private List<MpesaRequests> mpesaRequestsList;
     private boolean mpesaOrderUpdateInprogress;
-    private Thread thread;
+    //private Thread thread;
     ActivityResultLauncher<Intent> mGetBarcode = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             new ActivityResultCallback<ActivityResult>() {
                 @Override
@@ -163,7 +163,7 @@ public class MainActivity extends AppCompatActivity implements
                 //if something changed so something
             }
         };
-        thread=new Thread()
+        /*thread=new Thread()
         {
             @Override
             public void run()
@@ -172,8 +172,8 @@ public class MainActivity extends AppCompatActivity implements
                 {
                     while(true)
                     {
-                        new MpesaGetPayStatus().execute((Void)null);
-                        handler.post(runnable);
+                        //new MpesaGetPayStatus().execute((Void)null);
+                        //handler.post(runnable);
                         sleep(60000);
                     }
                 }
@@ -182,7 +182,7 @@ public class MainActivity extends AppCompatActivity implements
                     Log.e(TAG,"error sleeping "+e.getMessage());
                 }
             }
-        };
+        };*/
         checkIfLocationEnabled();
         getCurrentLocation();
         restaurantsList =new LinkedList<>();
@@ -358,8 +358,13 @@ public class MainActivity extends AppCompatActivity implements
                             {
                                 double latitude=location.getLatitude();
                                 double longitude=location.getLongitude();
+                                //myLocation = String.valueOf(latitude)+":"+String.valueOf(longitude)+":"+"null";
+                                if(useQrCode)
+                                    new RestaurantQRTask(String.valueOf(latitude),String.valueOf(longitude),"null",barcode.displayValue).execute((Void)null);
+                                else
+                                    new RestaurantsTask(String.valueOf(latitude),String.valueOf(longitude),"null").execute((Void)null);
                                 //get addresses
-                                Geocoder geocoder=new Geocoder(MainActivity.this, Locale.getDefault());
+                               /* Geocoder geocoder=new Geocoder(MainActivity.this, Locale.getDefault());
                                 List<Address> addresses;
                                 try
                                 {
@@ -378,7 +383,7 @@ public class MainActivity extends AppCompatActivity implements
                                     showProgress(false);
                                     Snackbar.make(getWindow().getDecorView().getRootView(),"Error getting your location.\nPlease try again.", Snackbar.LENGTH_SHORT).show();
                                     Log.e("address",""+e.getMessage());
-                                }
+                                }*/
                             }
 
                         }
@@ -416,6 +421,8 @@ public class MainActivity extends AppCompatActivity implements
                             {
                                 final double latitude=location.getLatitude();
                                 final double longitude=location.getLongitude();
+
+                                myLocation = String.valueOf(latitude)+":"+String.valueOf(longitude)+":"+"null";
                                 Thread thread_location=new Thread()
                                 {
                                     @Override
@@ -428,8 +435,8 @@ public class MainActivity extends AppCompatActivity implements
                                         {
                                             addresses=geocoder.getFromLocation(latitude,longitude,10);
                                             myLocation = String.valueOf(latitude)+":"+String.valueOf(longitude)+":"+addresses.get(0).getCountryCode();
-                                            if(addresses.get(0).getCountryCode().contentEquals("KE"))
-                                                thread.start();
+                                            //if(addresses.get(0).getCountryCode().contentEquals("KE"))
+                                                //thread.start();
                                         }
                                         catch (IOException e)
                                         {

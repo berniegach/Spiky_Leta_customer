@@ -94,8 +94,9 @@ public class ExploreActivity extends AppCompatActivity implements
                                 //Get last known location. In some rare situations this can be null
                                 final double latitude=location.getLatitude();
                                 final double longitude=location.getLongitude();
+                                new RestaurantsTask(String.valueOf(latitude),String.valueOf(longitude),"null").execute((Void)null);
 
-                                Thread thread=new Thread()
+                                /*Thread thread=new Thread()
                                 {
                                     @Override
                                     public void run()
@@ -116,7 +117,7 @@ public class ExploreActivity extends AppCompatActivity implements
                                         }
                                     }
                                 };
-                                thread.start();
+                                thread.start();*/
 
                             }
 
