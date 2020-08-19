@@ -18,10 +18,7 @@ import java.util.List;
 
 import static com.spikingacacia.spikyletabuyer.explore.RestaurantsFragment.*;
 
-/**
- * {@link RecyclerView.Adapter} that can display a {@link DummyItem}.
- * TODO: Replace the implementation with code for your data type.
- */
+
 public class MyRestaurantsRecyclerViewAdapter extends RecyclerView.Adapter<MyRestaurantsRecyclerViewAdapter.ViewHolder>
 {
     private final OnListFragmentInteractionListener mListener;

@@ -2,10 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:visible="false"
-        android:id="@+id/navigation_home"
+        android:id="@+id/navigation_tasty_board"
         android:icon="@drawable/ic_home_black_24dp"
-        android:title="@string/title_home"/>
+        android:title="Tasty Board"/>
     <item
         android:id="@+id/navigation_order"
         android:icon="@drawable/ic_restaurant"

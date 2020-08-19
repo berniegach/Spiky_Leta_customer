@@ -1,7 +1,6 @@
 package com.spikingacacia.spikyletabuyer.main.board;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,10 +10,7 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 
 
-import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.NetworkImageView;
 import com.bumptech.glide.Glide;
-import com.spikingacacia.spikyletabuyer.AppController;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.database.Adverts;
 import com.spikingacacia.spikyletabuyer.main.board.AdvertsFragment.OnListFragmentInteractionListener;
@@ -121,7 +117,7 @@ public class AdvertsRVA extends RecyclerView.Adapter<AdvertsRVA.ViewHolder>
             mSellerView = (TextView) view.findViewById(R.id.seller);
             mViewsView = (TextView) view.findViewById(R.id.views);
             mLikesView = (TextView) view.findViewById(R.id.likes);
-            mCommentsView = (TextView) view.findViewById(R.id.comments);
+            mCommentsView = (TextView) view.findViewById(R.id.discount);
             mDateView = (TextView) view.findViewById(R.id.date);
         }
 

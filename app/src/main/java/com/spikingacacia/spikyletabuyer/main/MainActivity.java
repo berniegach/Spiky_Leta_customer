@@ -47,6 +47,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.spikingacacia.spikyletabuyer.JSONParser;
 import com.spikingacacia.spikyletabuyer.database.MpesaRequests;
+import com.spikingacacia.spikyletabuyer.database.TastyBoard;
 import com.spikingacacia.spikyletabuyer.explore.ExploreActivity;
 import com.spikingacacia.spikyletabuyer.explore.MapsExploreActivity;
 import com.spikingacacia.spikyletabuyer.R;
@@ -58,6 +59,8 @@ import com.spikingacacia.spikyletabuyer.database.Orders;
 import com.spikingacacia.spikyletabuyer.main.board.AdvertsFragment;
 import com.spikingacacia.spikyletabuyer.main.order.OrderSearchFragment;
 import com.spikingacacia.spikyletabuyer.main.orders_list.OrdersFragment;
+import com.spikingacacia.spikyletabuyer.main.tasty.TastyBoardActivity;
+import com.spikingacacia.spikyletabuyer.main.tasty.TastyBoardFragment;
 import com.spikingacacia.spikyletabuyer.orders.OrdersActivity;
 import com.spikingacacia.spikyletabuyer.restaurants.SRRestaurantsA;
 import com.spikingacacia.spikyletabuyer.shop.ShopA;
@@ -90,7 +93,7 @@ import static com.spikingacacia.spikyletabuyer.LoginA.serverAccount;
 
 public class MainActivity extends AppCompatActivity implements
         OrderSearchFragment.OnFragmentInteractionListener, AdvertsFragment.OnListFragmentInteractionListener,
-         OrdersFragment.OnListFragmentInteractionListener
+         OrdersFragment.OnListFragmentInteractionListener, TastyBoardFragment.OnListFragmentInteractionListener
 {
     private static final int PERMISSION_REQUEST_INTERNET=2;
     private FusedLocationProviderClient fusedLocationProviderClient;
@@ -135,7 +138,7 @@ public class MainActivity extends AppCompatActivity implements
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_home, R.id.navigation_order, R.id.navigation_orders, R.id.navigation_messages)
+                 R.id.navigation_tasty_board, R.id.navigation_order, R.id.navigation_orders, R.id.navigation_messages)
                 .build();
         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
@@ -601,6 +604,18 @@ implementation of OrdersFragment.java
         startActivity(intent);
     }
 
+    /*
+     * implementation of TastyBoardFragment.java
+     */
+    @Override
+    public void onTastyBoardItemClicked(TastyBoard tastyBoard)
+    {
+        Intent intent=new Intent(MainActivity.this, TastyBoardActivity.class);
+        //prevent this activity from flickering as we call the next one
+        intent.putExtra("tasty_board",tastyBoard);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        startActivity(intent);
+    }
 
     private class RestaurantsTask extends AsyncTask<Void, Void, Boolean>
     {

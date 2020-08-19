@@ -24,7 +24,6 @@ import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.Volley;
 import com.spikingacacia.spikyletabuyer.JSONParser;
 import com.spikingacacia.spikyletabuyer.LoginA;
-import com.spikingacacia.spikyletabuyer.Preferences;
 import com.spikingacacia.spikyletabuyer.R;
 
 import org.apache.http.NameValuePair;
@@ -148,7 +147,7 @@ public class AdOverviewF extends Fragment
         ((TextView)view.findViewById(R.id.content)).setText(content);
         ((TextView)view.findViewById(R.id.views)).setText(String.valueOf(views)+" views");
         ((TextView)view.findViewById(R.id.likes)).setText(String.valueOf(likes)+" likes");
-        ((TextView)view.findViewById(R.id.comments)).setText(String.valueOf(comments+ "comments"));
+        ((TextView)view.findViewById(R.id.discount)).setText(String.valueOf(comments+ "comments"));
         ((TextView)view.findViewById(R.id.date)).setText(date);
         ((TextView)view.findViewById(R.id.likes)).setOnClickListener(new View.OnClickListener()
         {
@@ -187,6 +186,10 @@ public class AdOverviewF extends Fragment
     }
     private class AdsTask extends AsyncTask<Void, Void, Boolean>
     {
+        private String url_update_advert= base_url+"update_ad_views_and_likes.php";
+        private JSONParser jsonParser;
+        private String TAG_SUCCESS="success";
+        private String TAG_MESSAGE="message";
         final String ad_id;
         final int which;
 
@@ -194,6 +197,7 @@ public class AdOverviewF extends Fragment
         protected void onPreExecute()
         {
             Log.d("SCATEGORIES: ","starting....");
+            jsonParser = new JSONParser();
             super.onPreExecute();
         }
         public AdsTask(String ad_id ,int which)
