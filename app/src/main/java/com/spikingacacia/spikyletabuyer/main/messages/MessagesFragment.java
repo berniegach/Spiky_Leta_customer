@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.spikingacacia.spikyletabuyer.JSONParser;
+import com.spikingacacia.spikyletabuyer.LoginA;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.database.Messages;
 
@@ -28,7 +29,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
-import static com.spikingacacia.spikyletabuyer.LoginA.serverAccount;
 
 /**
  * A fragment representing a list of Items.
@@ -101,7 +101,7 @@ public class MessagesFragment extends Fragment
         {
             //getting columns list
             List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
-            info.add(new BasicNameValuePair("email",serverAccount.getEmail()));
+            info.add(new BasicNameValuePair("email", LoginA.getServerAccount().getEmail()));
 
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_b_notifications,"POST",info);
             Log.d("bNotis",""+jsonObject.toString());

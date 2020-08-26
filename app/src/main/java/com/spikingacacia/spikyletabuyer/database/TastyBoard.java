@@ -25,10 +25,14 @@ public class TastyBoard implements Serializable
     private double distance;
     private String location;
     private String country;
+    private String diningOptions;
+    //item info
+    private String itemNames;
 
     public TastyBoard(int id, String sellerId, String sellerEmail, String title, String description, int linkedItemId, String sizeAndPrice, String discountPrice, String expiryDate, String imageType,
                       int views, int likes, int comments, int orders, String dateAdded,
-                      String sellerNames, String sellerImageType, double distance, String location, String country)
+                      String sellerNames, String sellerImageType, double distance, String location, String country, String diningOptions,
+                      String itemNames)
     {
         this.id = id;
         this.sellerId = sellerId;
@@ -50,6 +54,8 @@ public class TastyBoard implements Serializable
         this.distance = distance;
         this.location = location;
         this.country = country;
+        this.diningOptions = diningOptions;
+        this.itemNames = itemNames;
     }
 
     public int getId()
@@ -245,10 +251,27 @@ public class TastyBoard implements Serializable
     {
         return country;
     }
+    public String getDiningOptions()
+    {
+        return diningOptions;
+    }
 
+    public void setDiningOptions(String diningOptions)
+    {
+        this.diningOptions = diningOptions;
+    }
     public void setCountry(String country)
     {
         this.country = country;
+    }
+    public String getItemNames()
+    {
+        return itemNames;
+    }
+
+    public void setItemNames(String itemNames)
+    {
+        this.itemNames = itemNames;
     }
 
 }

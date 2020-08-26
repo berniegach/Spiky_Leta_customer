@@ -43,7 +43,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import static android.app.Activity.RESULT_OK;
-import static com.spikingacacia.spikyletabuyer.LoginA.serverAccount;
 
 
 
@@ -89,7 +88,7 @@ public class BPreferencePic extends Preference
         imageView=(ImageView)view.findViewById(R.id.image);
         //get the profile pic
         // thumbnail image
-        String url=image_url+String.valueOf(serverAccount.getId())+'_'+String.valueOf(serverAccount.getImageType());
+        String url=image_url+String.valueOf(LoginA.getServerAccount().getId())+'_'+String.valueOf(LoginA.getServerAccount().getImageType());
         Glide.with(context).load(url).into(imageView);
         view.findViewById(R.id.edit).setOnClickListener(new View.OnClickListener()
         {
@@ -210,7 +209,7 @@ public class BPreferencePic extends Preference
                         public void onResponse(NetworkResponse response)
                         {
                             int statusCode = response.statusCode;
-                            serverAccount.setImageType(".jpg");
+                            LoginA.getServerAccount().setImageType(".jpg");
                             SettingsActivity.updateSettings();
                             Toast.makeText(context, "Profile pic changed", Toast.LENGTH_SHORT).show();
                         }
@@ -239,7 +238,7 @@ public class BPreferencePic extends Preference
                 {
                     Map<String , String >params = new HashMap<>();
                     params.put("name", "name"); //Adding text parameter to the request
-                    params.put("id",String.valueOf(serverAccount.getId()));
+                    params.put("id",String.valueOf(LoginA.getServerAccount().getId()));
                     return params;
                 }
             };

@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.spikingacacia.spikyletabuyer.JSONParser;
+import com.spikingacacia.spikyletabuyer.LoginA;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.database.Orders;
 import com.spikingacacia.spikyletabuyer.orders.MyOrderRecyclerViewAdapter;
@@ -30,9 +31,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 
-import static com.spikingacacia.spikyletabuyer.LoginA.bMessagesList;
 import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
-import static com.spikingacacia.spikyletabuyer.LoginA.serverAccount;
 
 /**
  * A fragment representing a list of Items.
@@ -192,7 +191,7 @@ public class OrdersFragment extends Fragment
         {
             //getting columns list
             List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
-            info.add(new BasicNameValuePair("email",serverAccount.getEmail()));
+            info.add(new BasicNameValuePair("email", LoginA.getServerAccount().getEmail()));
             // making HTTP request
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_b_orders,"POST",info);
             //Log.d("sItems",""+jsonObject.toString());

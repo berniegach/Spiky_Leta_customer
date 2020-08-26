@@ -11,12 +11,8 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.NetworkImageView;
 import com.bumptech.glide.Glide;
-import com.spikingacacia.spikyletabuyer.AppController;
 import com.spikingacacia.spikyletabuyer.R;
-import com.spikingacacia.spikyletabuyer.shop.ShopA;
 import com.spikingacacia.spikyletabuyer.shop.cart.CartContent.CartItem;
 
 
@@ -58,19 +54,6 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
         holder.mCountView.setText(Integer.toString(count));
         holder.mSizeView.setText(mValues.get(position).size);
 
-        holder.mView.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                if (null != mListener)
-                {
-                    // Notify the active callbacks interface (the activity, if the
-                    // fragment is attached to one) that an item has been selected.
-                    mListener.onListFragmentInteraction(holder.mItem);
-                }
-            }
-        });
         holder.mPlusView.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -78,7 +61,7 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
             {
                 int count2= count + 1;
                 holder.mItem.count=count2;
-                ShopA.tempTotal+=holder.mItem.price;
+                CartFragment.addToTempTotal(holder.mItem.price);
                 new CountTask(count2,  mValues.get(position).id, position).execute((Void)null);
             }
         });
@@ -89,7 +72,7 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
             {
                 int count2= count - 1;
                 holder.mItem.count=count2;
-                ShopA.tempTotal-=holder.mItem.price;
+                CartFragment.removeFromTempTotal(holder.mItem.price);
                new CountTask(count2,  mValues.get(position).id, position).execute((Void)null);
             }
         });
@@ -153,11 +136,11 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
             if(count==0)
             {
                 mValues.remove(position);
-                ShopA.tempCartLinkedHashMap.remove(id);
+                CartFragment.cartRemove(id);
             }
             else
             {
-                ShopA.tempCartLinkedHashMap.put(id, count);
+                CartFragment.putIntoCart(id, count);
             }
             return null;
         }
@@ -170,9 +153,9 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
             else
             {
                 notifyItemChanged(position);
-                textViewTotal.setText("Ksh. "+ ShopA.tempTotal.intValue());
+                textViewTotal.setText("Ksh. "+ CartFragment.getmTempTotal().intValue());
             }
-            mListener.totalItemsChanged();
+            mListener.totalItemsChanged(CartFragment.getmCartLinkedHashMap());
         }
     }
 }

@@ -27,9 +27,9 @@ import com.spikingacacia.spikyletabuyer.R;
 public class OrderParamsFragment extends Fragment
 {
     private static final String ARG_SHOW_MPESA = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private static final String ARG_DINING_OPTIONS = "param2";
     private boolean showMpesa;
-    private String mParam2;
+    private String mDiningOptions;
     private OnFragmentInteractionListener mListener;
     private int which = 2;
     private String time;
@@ -48,7 +48,7 @@ public class OrderParamsFragment extends Fragment
         OrderParamsFragment fragment = new OrderParamsFragment();
         Bundle args = new Bundle();
         args.putBoolean(ARG_SHOW_MPESA, showMpesa);
-        args.putString(ARG_PARAM2, param2);
+        args.putString(ARG_DINING_OPTIONS, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -60,7 +60,7 @@ public class OrderParamsFragment extends Fragment
         if (getArguments() != null)
         {
             showMpesa = getArguments().getBoolean(ARG_SHOW_MPESA);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            mDiningOptions = getArguments().getString(ARG_DINING_OPTIONS);
         }
     }
 
@@ -145,7 +145,7 @@ public class OrderParamsFragment extends Fragment
             }
         });
         //check dining options
-        String[] s_dining_options = ShopA.diningOptions.split(":");
+        String[] s_dining_options = mDiningOptions.split(":");
         if(s_dining_options.length==1 || s_dining_options.length==0)
             s_dining_options = new String[]{"1","1","1"};
         int[] dining_options = new int[]{Integer.parseInt(s_dining_options[0]), Integer.parseInt(s_dining_options[1]), Integer.parseInt(s_dining_options[2])};
@@ -256,10 +256,11 @@ public class OrderParamsFragment extends Fragment
     public void onAttach(Context context)
     {
         super.onAttach(context);
-        if (context instanceof menuFragment.OnListFragmentInteractionListener)
+        if (context instanceof OnFragmentInteractionListener)
         {
             mListener = (OnFragmentInteractionListener) context;
-        } else
+        }
+        else
         {
             throw new RuntimeException(context.toString()
                     + " must implement OnListFragmentInteractionListener");

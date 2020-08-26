@@ -2,13 +2,13 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/navigation_tasty_board"
-        android:icon="@drawable/ic_home_black_24dp"
-        android:title="Tasty Board"/>
-    <item
         android:id="@+id/navigation_order"
         android:icon="@drawable/ic_restaurant"
         android:title="Menu"/>
+    <item
+        android:id="@+id/navigation_tasty_board"
+        android:icon="@drawable/ic_baseline_cake_b"
+        android:title="Tasty Board"/>
     <item
         android:visible="false"
         android:id="@+id/navigation_explore"

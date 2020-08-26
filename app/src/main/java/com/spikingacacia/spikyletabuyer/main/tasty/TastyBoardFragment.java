@@ -30,7 +30,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
-import static com.spikingacacia.spikyletabuyer.LoginA.serverAccount;
 
 /**
  * A fragment representing a list of Items.
@@ -194,7 +193,7 @@ public class TastyBoardFragment extends Fragment
 
             // making HTTP request
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_items,"POST",info);
-            //Log.d("sItems",""+jsonObject.toString());
+            Log.d("sItems",""+jsonObject.toString());
             try
             {
                 JSONArray itemsArrayList=null;
@@ -226,10 +225,12 @@ public class TastyBoardFragment extends Fragment
                         double distance = jsonObjectNotis.getDouble("distance");
                         String location = jsonObjectNotis.getString("location");
                         String country = jsonObjectNotis.getString("country");
+                        String dining_options = jsonObjectNotis.getString("dining_options");
+                        String item_names = jsonObjectNotis.getString("item_names");
                         lastTastyBoardId = id;
 
                         TastyBoard tastyBoard = new TastyBoard(id, seller_id, seller_email, title, description, linked_item_id, size_and_price, discount_price,expiry,image_type,
-                                views,likes,comments,orders,date_added, seller_names, seller_image_type, distance, location, country);
+                                views,likes,comments,orders,date_added, seller_names, seller_image_type, distance, location, country,dining_options, item_names);
                         localList.add(tastyBoard);
                     }
                     return true;

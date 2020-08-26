@@ -3,18 +3,18 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/mobile_navigation"
-    app:startDestination="@+id/navigation_tasty_board">
+    app:startDestination="@+id/navigation_order">
 
-    <fragment
-        android:id="@+id/navigation_tasty_board"
-        android:name="com.spikingacacia.spikyletabuyer.main.tasty.TastyBoardFragment"
-        android:label="Menu"
-        tools:layout="@layout/fragment_tasty_board_list" />
     <fragment
         android:id="@+id/navigation_order"
         android:name="com.spikingacacia.spikyletabuyer.main.order.OrderSearchFragment"
         android:label="Menu"
         tools:layout="@layout/fragment_order_search" />
+    <fragment
+        android:id="@+id/navigation_tasty_board"
+        android:name="com.spikingacacia.spikyletabuyer.main.tasty.TastyBoardFragment"
+        android:label="Menu"
+        tools:layout="@layout/fragment_tasty_board_list" />
     <fragment
         android:id="@+id/navigation_explore"
         android:name="com.spikingacacia.spikyletabuyer.main.map.MapsFragment"

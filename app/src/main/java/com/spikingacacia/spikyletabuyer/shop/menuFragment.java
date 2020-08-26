@@ -48,6 +48,7 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -60,28 +61,25 @@ import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
 public class menuFragment extends Fragment
 {
 
-    private static final String ARG_COLUMN_COUNT = "column-count";
+    private static final String ARG_SELLER_EMAIL = "seller-email";
+    private String mSellerEmail;
     private RecyclerView recyclerViewCategories;
     private  RecyclerView recyclerViewMenu;
     public static MymenuRecyclerViewAdapter mymenuRecyclerViewAdapter;
     private MymenuCategoryRecyclerViewAdapter mymenuCategoryRecyclerViewAdapter;
     private OnListFragmentInteractionListener mListener;
-    public static int itemIdToEdit;
-    public static int newCategoryId;
-    public static String newItem;
-    public static String newDescription;
-    public static String newSellingPrice;
     private String TAG = "menuF";
 
     public menuFragment()
     {
     }
 
-    // TODO: Customize parameter initialization
-    @SuppressWarnings("unused")
-    public static menuFragment newInstance()
+    public static menuFragment newInstance(String mSellerEmail)
     {
         menuFragment fragment = new menuFragment();
+        Bundle args = new Bundle();
+        args.putString(ARG_SELLER_EMAIL, mSellerEmail);
+        fragment.setArguments(args);
         return fragment;
     }
 
@@ -90,6 +88,10 @@ public class menuFragment extends Fragment
     {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        if (getArguments() != null)
+        {
+            mSellerEmail = getArguments().getString(ARG_SELLER_EMAIL);
+        }
     }
 
     @Override
@@ -246,7 +248,7 @@ public class menuFragment extends Fragment
         {
             //getting columns list
             List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
-            info.add(new BasicNameValuePair("email",ShopA.sellerEmail));
+            info.add(new BasicNameValuePair("email",mSellerEmail));
             // making HTTP request
             String url_get_s_categories = base_url + "get_categories.php";
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_s_categories,"POST",info);
@@ -270,7 +272,6 @@ public class menuFragment extends Fragment
 
                         Categories categories =new Categories(id,title,description,image_type,date_added,date_changed);
                         list.add(categories);
-                        ShopA.categoriesLinkedHashMap.put(id,categories);
                     }
                     return true;
                 }
@@ -320,7 +321,7 @@ public class menuFragment extends Fragment
         {
             //getting columns list
             List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
-            info.add(new BasicNameValuePair("email",ShopA.sellerEmail));
+            info.add(new BasicNameValuePair("email",mSellerEmail));
             // making HTTP request
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_s_items,"POST",info);
             Log.d("sItems",""+jsonObject.toString());
@@ -356,8 +357,7 @@ public class menuFragment extends Fragment
 
                         DMenu dMenu =new DMenu(id,category_id,group_id,linked_items,item,description,sizes, prices,image_type,date_added,date_changed);
                         list.add(dMenu);
-                        ShopA.menuLinkedHashMap.put(id,dMenu);
-
+                        ShopA.putIntoMenu(id,dMenu);
                     }
                     return true;
                 }

@@ -40,16 +40,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".main.board.AdvertsActivity" />
         <activity android:name=".orders.OrdersActivity" />
         <activity android:name=".shop.ShopA" />
         <activity android:name=".restaurants.SRRestaurantsA" />
         <activity
             android:name=".barcode.BarcodeCaptureActivity"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".BSettingsA"
-            android:label="@string/title_activity_settings" />
         <activity
             android:name=".BMapsA"
             android:label="@string/title_activity_maps" />

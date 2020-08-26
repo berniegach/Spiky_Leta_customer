@@ -178,7 +178,7 @@ public class MyTastyBoardRecyclerViewAdapter extends RecyclerView.Adapter<Recycl
         holder.mTitleView.setText(mValues.get(position).getTitle());
         holder.mRestaurant.setText(String.valueOf(mValues.get(position).getSellerNames()));
         String s_distance = "location not found";
-        Double distance = mValues.get(position).getDistance();
+        double distance = mValues.get(position).getDistance();
         if(distance!=-1)
             s_distance = distance<1000? String.format("%s %.0f m",mValues.get(position).getLocation(),distance) : String.format("%s %.0f km", mValues.get(position).getLocation(),distance/1000);
         holder.mLocation.setText(s_distance);

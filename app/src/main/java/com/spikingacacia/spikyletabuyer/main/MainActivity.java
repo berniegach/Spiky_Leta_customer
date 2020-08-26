@@ -15,7 +15,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
-import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -29,6 +28,10 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.core.provider.FontRequest;
+import androidx.emoji.bundled.BundledEmojiCompatConfig;
+import androidx.emoji.text.EmojiCompat;
+import androidx.emoji.text.FontRequestEmojiCompatConfig;
 import androidx.navigation.NavController;
 import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
@@ -46,17 +49,15 @@ import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
 import com.spikingacacia.spikyletabuyer.JSONParser;
+import com.spikingacacia.spikyletabuyer.LoginA;
 import com.spikingacacia.spikyletabuyer.database.MpesaRequests;
 import com.spikingacacia.spikyletabuyer.database.TastyBoard;
 import com.spikingacacia.spikyletabuyer.explore.ExploreActivity;
-import com.spikingacacia.spikyletabuyer.explore.MapsExploreActivity;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.SettingsActivity;
 import com.spikingacacia.spikyletabuyer.barcode.BarcodeCaptureActivity;
-import com.spikingacacia.spikyletabuyer.database.Adverts;
 import com.spikingacacia.spikyletabuyer.database.Restaurants;
 import com.spikingacacia.spikyletabuyer.database.Orders;
-import com.spikingacacia.spikyletabuyer.main.board.AdvertsFragment;
 import com.spikingacacia.spikyletabuyer.main.order.OrderSearchFragment;
 import com.spikingacacia.spikyletabuyer.main.orders_list.OrdersFragment;
 import com.spikingacacia.spikyletabuyer.main.tasty.TastyBoardActivity;
@@ -73,10 +74,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -88,13 +88,14 @@ import androidx.activity.result.contract.ActivityResultContracts;
 
 import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
 import static com.spikingacacia.spikyletabuyer.LoginA.mGoogleSignInClient;
-import static com.spikingacacia.spikyletabuyer.LoginA.serverAccount;
 
 
 public class MainActivity extends AppCompatActivity implements
-        OrderSearchFragment.OnFragmentInteractionListener, AdvertsFragment.OnListFragmentInteractionListener,
+        OrderSearchFragment.OnFragmentInteractionListener,
          OrdersFragment.OnListFragmentInteractionListener, TastyBoardFragment.OnListFragmentInteractionListener
 {
+    /** Change this to {@code false} when you want to use the downloadable Emoji font. */
+    private static final boolean USE_BUNDLED_EMOJI = true;
     private static final int PERMISSION_REQUEST_INTERNET=2;
     private FusedLocationProviderClient fusedLocationProviderClient;
     private NavController navController;
@@ -133,12 +134,13 @@ public class MainActivity extends AppCompatActivity implements
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        initEmojiCompat();
 
         BottomNavigationView navView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         appBarConfiguration = new AppBarConfiguration.Builder(
-                 R.id.navigation_tasty_board, R.id.navigation_order, R.id.navigation_orders, R.id.navigation_messages)
+                 R.id.navigation_order,  R.id.navigation_tasty_board, R.id.navigation_orders, R.id.navigation_messages)
                 .build();
         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
@@ -579,11 +581,6 @@ public class MainActivity extends AppCompatActivity implements
         }
     }
 
-    @Override
-    public void onAdClicked(Adverts item)
-    {
-
-    }
 
 /*
 implementation of OrdersFragment.java
@@ -610,11 +607,50 @@ implementation of OrdersFragment.java
     @Override
     public void onTastyBoardItemClicked(TastyBoard tastyBoard)
     {
+        //if the location of the hotel is kenya then we ask for mpesa payment
+        boolean has_payment = false;
+            /*if( item.getmCode().contentEquals("") ||  item.getmCode().contentEquals("null") || item.getmCode().contentEquals("NULL"))
+                has_payment = false;*/
+        if(tastyBoard.getCountry().contentEquals("KE"))
+            has_payment = true;
         Intent intent=new Intent(MainActivity.this, TastyBoardActivity.class);
         //prevent this activity from flickering as we call the next one
         intent.putExtra("tasty_board",tastyBoard);
+        intent.putExtra("has_payment", has_payment);
         intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
         startActivity(intent);
+    }
+    private void initEmojiCompat() {
+        final EmojiCompat.Config config;
+        if (USE_BUNDLED_EMOJI) {
+            // Use the bundled font for EmojiCompat
+            config = new BundledEmojiCompatConfig(getApplicationContext());
+        }
+        else
+            {
+            // Use a downloadable font for EmojiCompat
+            final FontRequest fontRequest = new FontRequest(
+                    "com.google.android.gms.fonts",
+                    "com.google.android.gms",
+                    "Noto Color Emoji Compat",
+                    R.array.com_google_android_gms_fonts_certs);
+            config = new FontRequestEmojiCompatConfig(getApplicationContext(), fontRequest);
+        }
+
+        config.setReplaceAll(true)
+                .registerInitCallback(new EmojiCompat.InitCallback() {
+                    @Override
+                    public void onInitialized() {
+                        Log.d(TAG, "EmojiCompat initialized");
+                    }
+
+                    @Override
+                    public void onFailed(@Nullable Throwable throwable) {
+                        Log.e(TAG, "EmojiCompat initialization failed", throwable);
+                    }
+                });
+
+        EmojiCompat.init(config);
     }
 
     private class RestaurantsTask extends AsyncTask<Void, Void, Boolean>
@@ -655,9 +691,10 @@ implementation of OrdersFragment.java
             info.add(new BasicNameValuePair("longitude",longitude));
             info.add(new BasicNameValuePair("location",location));
             info.add(new BasicNameValuePair("which","2"));
+            Log.d(TAG,info.toString());
             // making HTTP request
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_restaurants,"POST",info);
-            //Log.d("cTasks",""+jsonObject.toString());
+            Log.d("cTasks",""+jsonObject.toString());
             try
             {
                 JSONArray restArrayList=null;
@@ -708,6 +745,18 @@ implementation of OrdersFragment.java
             showProgress(false);
             if (successful)
             {
+                Collections.sort(restaurantsList, new Comparator<Restaurants>(){
+                    public int compare(Restaurants obj1, Restaurants obj2) {
+                        // ## Ascending order
+                        //return obj1.firstName.compareToIgnoreCase(obj2.firstName); // To compare string values
+                        // return Integer.valueOf(obj1.empId).compareTo(Integer.valueOf(obj2.empId)); // To compare integer values
+                        return Double.compare(obj1.getDistance(), obj2.getDistance());
+
+                        // ## Descending order
+                        // return obj2.firstName.compareToIgnoreCase(obj1.firstName); // To compare string values
+                        // return Integer.valueOf(obj2.empId).compareTo(Integer.valueOf(obj1.empId)); // To compare integer values
+                    }
+                });
                 showRestaurants(false, null);
             }
             else
@@ -833,7 +882,7 @@ implementation of OrdersFragment.java
         {
             //getting columns list
             List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
-            info.add(new BasicNameValuePair("user_email",serverAccount.getEmail()));
+            info.add(new BasicNameValuePair("user_email",LoginA.getServerAccount().getEmail()));
 
             // making HTTP request
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_status,"POST",info);
@@ -1007,7 +1056,7 @@ implementation of OrdersFragment.java
             //getting columns list
             List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
             info.add(new BasicNameValuePair("seller_email", sellerEmail));
-            info.add(new BasicNameValuePair("buyer_email",serverAccount.getEmail()));
+            info.add(new BasicNameValuePair("buyer_email", LoginA.getServerAccount().getEmail()));
             info.add(new BasicNameValuePair("waiter_email", "unavailable"));
             info.add(new BasicNameValuePair("order_number",orderNumber));
             info.add(new BasicNameValuePair("status",orderStatus));

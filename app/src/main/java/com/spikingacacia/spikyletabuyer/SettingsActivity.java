@@ -34,7 +34,7 @@ public class SettingsActivity extends AppCompatActivity
     public static boolean settingsChange;
     // public static boolean permissionsChanged;
     static private Context context;
-    public static ServerAccount tempServerAccount;
+    private static ServerAccount tempServerAccount;
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -50,7 +50,7 @@ public class SettingsActivity extends AppCompatActivity
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
         tempServerAccount =new ServerAccount();
-        tempServerAccount =LoginA.serverAccount;
+        tempServerAccount =LoginA.getServerAccount();
         updateTask=new UpdateAccount();
         context = getBaseContext();
     }
@@ -79,7 +79,7 @@ public class SettingsActivity extends AppCompatActivity
 
             //username
             EditTextPreference preference_est=findPreference("username");
-            preference_est.setText(LoginA.serverAccount.getUsername());
+            preference_est.setText(LoginA.getServerAccount().getUsername());
             preference_est.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
             {
                 @Override
@@ -96,10 +96,10 @@ public class SettingsActivity extends AppCompatActivity
 
             //you cannot change the email
             EditTextPreference preference_est_type=findPreference("email");
-            preference_est_type.setText(LoginA.serverAccount.getEmail());
+            preference_est_type.setText(LoginA.getServerAccount().getEmail());
 
             //location
-            //String[] pos=LoginA.serverAccount.getLocation().split(",");
+            //String[] pos=LoginA.getServerAccount().getLocation().split(",");
             //final Preference pref_location=findPreference("location");
             //pref_location.setSummary(pos.length==3?pos[2]:"Please set your location");
         }
@@ -142,6 +142,10 @@ public class SettingsActivity extends AppCompatActivity
             setPreferencesFromResource(R.xml.pref_privacy_policy,rootKey);
         }
 
+    }
+    public static void setTempServerAccountLocation(String location)
+    {
+        tempServerAccount.setLocation(location);
     }
     public static void updateSettings()
     {
@@ -197,7 +201,7 @@ public class SettingsActivity extends AppCompatActivity
             if(success)
             {
                 Log.d("settings", "update done");
-                LoginA.serverAccount = tempServerAccount;
+                LoginA.setServerAccount(tempServerAccount);
                 //settingsChanged=false;
             }
             else
@@ -225,7 +229,7 @@ public class SettingsActivity extends AppCompatActivity
         {
             //building parameters
             List<NameValuePair>info=new ArrayList<NameValuePair>();
-            info.add(new BasicNameValuePair("id",String.valueOf(LoginA.serverAccount.getId())));
+            info.add(new BasicNameValuePair("id",String.valueOf(LoginA.getServerAccount().getId())));
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_delete_account,"POST",info);
             Log.d("jsonaccountdelete",jsonObject.toString());
             try

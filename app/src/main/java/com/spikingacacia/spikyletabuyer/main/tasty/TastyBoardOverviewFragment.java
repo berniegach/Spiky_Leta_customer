@@ -9,12 +9,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
+import androidx.emoji.widget.EmojiEditText;
+import androidx.emoji.widget.EmojiTextView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import android.text.TextUtils;
+import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -40,6 +43,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.ocpsoft.prettytime.PrettyTime;
 
+import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -49,7 +53,6 @@ import java.util.List;
 import java.util.Locale;
 
 import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
-import static com.spikingacacia.spikyletabuyer.LoginA.serverAccount;
 
 public class TastyBoardOverviewFragment extends Fragment
 {
@@ -109,9 +112,9 @@ public class TastyBoardOverviewFragment extends Fragment
         t_title.setText(tastyBoard.getTitle());
         t_restaurant.setText(tastyBoard.getSellerNames());
         String s_distance = "location not found";
-        Double distance = tastyBoard.getDistance();
+        double distance = tastyBoard.getDistance();
         if(distance!=-1)
-            s_distance = distance<1000? String.format("%s %.0f m",tastyBoard.getLocation(),distance) : String.format("%s %.0f km", tastyBoard.getLocation(),distance/1000);
+            s_distance = distance<1000.0? String.format("%s %.0f m",tastyBoard.getLocation(),distance) : String.format("%s %.0f km", tastyBoard.getLocation(),(distance/1000));
         t_location.setText(s_distance);
 
         String image_url= base_url+"src/tasty_board_pics/";
@@ -265,17 +268,18 @@ public class TastyBoardOverviewFragment extends Fragment
                 @Override
                 public void onClick(View v)
                 {
-                    final EditText editText = new EditText(context);
-                    editText.setBackground(ContextCompat.getDrawable(context, R.drawable.edittext_border));
+                    final EmojiEditText emojiEditText = new EmojiEditText(context);
+                    //final EditText editText = new EditText(context);
+                    emojiEditText.setBackground(ContextCompat.getDrawable(context, R.drawable.edittext_border));
                     LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                             ViewGroup.LayoutParams.WRAP_CONTENT,
                             ViewGroup.LayoutParams.WRAP_CONTENT
                     );
                     params.setMargins(10, 10, 10, 10);
-                    editText.setLayoutParams(params);
+                    emojiEditText.setLayoutParams(params);
                     new AlertDialog.Builder(context)
                             .setTitle("New Comment")
-                            .setView(editText)
+                            .setView(emojiEditText)
                             .setNegativeButton("Cancel", new DialogInterface.OnClickListener()
                             {
                                 @Override
@@ -289,11 +293,21 @@ public class TastyBoardOverviewFragment extends Fragment
                                 @Override
                                 public void onClick(DialogInterface dialog, int which)
                                 {
-                                    String post_comment = editText.getText().toString();
-                                    if(!TextUtils.isEmpty(post_comment))
+                                    String post_comment = emojiEditText.getText().toString();
+                                    byte[] data = new byte[0];
+                                    try
                                     {
-                                        new AddCommentTask(post_comment).execute((Void)null);
+                                        data = emojiEditText.getText().toString().getBytes("UTF-8");
+                                        String base64String = Base64.encodeToString(data, Base64.DEFAULT);
+                                        if(!TextUtils.isEmpty(post_comment))
+                                        {
+                                            new AddCommentTask(base64String).execute((Void)null);
+                                        }
+                                    } catch (UnsupportedEncodingException e)
+                                    {
+                                        e.printStackTrace();
                                     }
+
 
                                 }
                             }).create().show();
@@ -388,10 +402,22 @@ public class TastyBoardOverviewFragment extends Fragment
                 ImageView imageView = view.findViewById(R.id.image);
                 TextView t_names = view.findViewById(R.id.names);
                 TextView t_time = view.findViewById(R.id.time);
-                TextView t_comment = view.findViewById(R.id.comment);
+                EmojiTextView t_comment = view.findViewById(R.id.comment);
 
                 t_names.setText(comments.names);
-                t_comment.setText(comments.comment);
+
+                try
+                {
+                    byte[] data = Base64.decode(comments.comment, Base64.DEFAULT);
+                    String newStringWithEmojis = new String(data, "UTF-8");
+                    t_comment.setText(newStringWithEmojis);
+
+                } catch (UnsupportedEncodingException e)
+                {
+                    e.printStackTrace();
+                    t_comment.setText(comments.comment);
+                }
+
                 SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:mm");
                 PrettyTime p = new PrettyTime();
                 try
@@ -449,7 +475,7 @@ public class TastyBoardOverviewFragment extends Fragment
                 //getting columns list
                 List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
                 info.add(new BasicNameValuePair("tasty_board_id",String.valueOf(tastyBoard.getId())));
-                info.add(new BasicNameValuePair("buyer_email",serverAccount.getEmail()));
+                info.add(new BasicNameValuePair("buyer_email",LoginA.getServerAccount().getEmail()));
                 info.add(new BasicNameValuePair("comment",comment));
                 // making HTTP request
                 JSONObject jsonObject= jsonParser.makeHttpRequest(url_add_comment,"POST",info);
@@ -478,7 +504,7 @@ public class TastyBoardOverviewFragment extends Fragment
 
                 if (successful)
                 {
-                    Comments comments = new Comments(-1,serverAccount.getId(),serverAccount.getEmail(),comment,"Me","",serverAccount.getImageType());
+                    Comments comments = new Comments(-1,LoginA.getServerAccount().getId(),LoginA.getServerAccount().getEmail(),comment,"Me","",LoginA.getServerAccount().getImageType());
                     addNewLayout(comments);
                 }
                 else
@@ -492,10 +518,20 @@ public class TastyBoardOverviewFragment extends Fragment
                 ImageView imageView = view.findViewById(R.id.image);
                 TextView t_names = view.findViewById(R.id.names);
                 TextView t_time = view.findViewById(R.id.time);
-                TextView t_comment = view.findViewById(R.id.comment);
+                EmojiTextView t_comment = view.findViewById(R.id.comment);
 
                 t_names.setText(comments.names);
-                t_comment.setText(comments.comment);
+                try
+                {
+                    byte[] data = Base64.decode(comments.comment, Base64.DEFAULT);
+                    String newStringWithEmojis = new String(data, "UTF-8");
+                    t_comment.setText(newStringWithEmojis);
+
+                } catch (UnsupportedEncodingException e)
+                {
+                    e.printStackTrace();
+                    t_comment.setText(comments.comment);
+                }
                 t_time.setText("now");
                 String url_seller= LoginA.base_url+"src/buyers_pics/"+ comments.buyer_id+'_'+comments.buyer_image_type;
                 Glide.with(context).load(url_seller).into(imageView);
@@ -530,7 +566,7 @@ public class TastyBoardOverviewFragment extends Fragment
             //getting columns list
             List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
             info.add(new BasicNameValuePair("tasty_board_id",String.valueOf(tastyBoard.getId())));
-            info.add(new BasicNameValuePair("buyer_email",serverAccount.getEmail()));
+            info.add(new BasicNameValuePair("buyer_email",LoginA.getServerAccount().getEmail()));
             info.add(new BasicNameValuePair("which",Integer.toString(which)));
             // making HTTP request
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_update,"POST",info);

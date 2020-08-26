@@ -1,7 +1,6 @@
 package com.spikingacacia.spikyletabuyer.shop.cart;
 
 import com.spikingacacia.spikyletabuyer.database.DMenu;
-import com.spikingacacia.spikyletabuyer.shop.ShopA;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,12 +9,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Helper class for providing sample content for user interfaces created by
- * Android template wizards.
- * <p>
- * TODO: Replace all uses of this class before publishing your app.
- */
 public class CartContent
 {
     public final List<CartItem> ITEMS = new ArrayList<CartItem>();
@@ -25,7 +18,7 @@ public class CartContent
 
     public CartContent()
     {
-        Iterator iterator= ShopA.tempCartLinkedHashMap.entrySet().iterator();
+        Iterator iterator= CartFragment.getmCartLinkedHashMap().entrySet().iterator();
         while(iterator.hasNext())
         {
             LinkedHashMap.Entry<String, Integer>set = (LinkedHashMap.Entry<String, Integer>) iterator.next();
@@ -33,12 +26,12 @@ public class CartContent
             String[] id_size_pieces = id_size.split(":");
             int id=Integer.parseInt(id_size_pieces[0]);
             int count=set.getValue();
-            DMenu inv = ShopA.menuLinkedHashMap.get(id);
+            DMenu inv = CartFragment.getmMenuLinkedHashMap().get(id);
             int serverInvId = inv.getId();
             String name = inv.getItem();
             String imageType = inv.getImageType();
 
-            int pos = ShopA.itemPriceSizeLinkedHashMap.get(id_size);
+            int pos = CartFragment.getmItemPriceSizeLinkedHashMap().get(id_size);
             String priceString = inv.getPrices();
             final String[] prices = priceString.split(":");
             String[] sizes = inv.getSizes().split(":");

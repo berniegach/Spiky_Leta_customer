@@ -30,6 +30,7 @@ import android.widget.Toast;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+import com.spikingacacia.spikyletabuyer.LoginA;
 import com.spikingacacia.spikyletabuyer.MyBounceInterpolator;
 import com.spikingacacia.spikyletabuyer.Preferences;
 import com.spikingacacia.spikyletabuyer.R;
@@ -57,41 +58,37 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
-import static com.spikingacacia.spikyletabuyer.LoginA.serverAccount;
 
 public class ShopA extends AppCompatActivity
         implements
-        BSOrderFragment.OnFragmentInteractionListener,
         menuFragment.OnListFragmentInteractionListener,
         CartFragment.OnListFragmentInteractionListener,
         OrderParamsFragment.OnFragmentInteractionListener
 {
-    public static LinkedHashMap<Integer, Categories> categoriesLinkedHashMap;
-    public static LinkedHashMap<Integer, DMenu> menuLinkedHashMap;
+    private static LinkedHashMap<Integer, DMenu> menuLinkedHashMap;
     private String TAG="ShopA";
     private JSONParser jsonParser;
-    public static String sellerEmail;
+    private String sellerEmail;
     private int sellerOrderRadius=2;
     private double buyerDistance=0;
     private int numberOfTables=10;
     private int tableNumber;
-    public static int which; // which can either be 1 for normal ordering in a restaurant or 2 for pre ordering
-    public static String diningOptions;
+    private  int which; // which can either be 1 for normal ordering in a restaurant or 2 for pre ordering
+    private  String diningOptions;
     private int backgroundTasksProgress=0;
     private final int finalProgressCount=3;
     int whichFragment=1;
     String previousTitle[]=new String[2];
-    public static int cartCount=0;
-    public static  double totalPrice=0;
+    private int cartCount=0;
+    private  double totalPrice=0;
     private  ExtendedFloatingActionButton fab;
-    public static List<Integer>items;
-    public static List<String>names;
-    public static List<Double>price;
-    Preferences preferences;
-    public static LinkedHashMap<String,Integer> cartLinkedHashMap;
-    public static LinkedHashMap<String,Integer> tempCartLinkedHashMap;
-    public static LinkedHashMap<String,Integer> itemPriceSizeLinkedHashMap;
-    public static Double tempTotal =0.0;
+    private  List<Integer>items;
+    private  List<String>names;
+    private  List<Double>price;
+    private Preferences preferences;
+    private LinkedHashMap<String,Integer> cartLinkedHashMap;
+    private LinkedHashMap<String,Integer> itemPriceSizeLinkedHashMap;
+    private Double tempTotal =0.0;
     private boolean hasPayment = false;
     private boolean preOrder = false;
     private String mPesaTillNumber;
@@ -126,7 +123,7 @@ public class ShopA extends AppCompatActivity
             preOrder = true;
         }
 
-        Fragment fragment= menuFragment.newInstance();
+        Fragment fragment= menuFragment.newInstance(sellerEmail);
         FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.base,fragment,"menu");
         transaction.commit();
@@ -140,7 +137,6 @@ public class ShopA extends AppCompatActivity
             }
         });
         jsonParser=new JSONParser();
-        categoriesLinkedHashMap = new LinkedHashMap<>();
         menuLinkedHashMap = new LinkedHashMap<>();
         items=new ArrayList<>();
         names=new ArrayList<>();
@@ -148,7 +144,6 @@ public class ShopA extends AppCompatActivity
         cartCount=0;
         totalPrice=0;
         cartLinkedHashMap = new LinkedHashMap<>();
-        tempCartLinkedHashMap = new LinkedHashMap<>();
         itemPriceSizeLinkedHashMap = new LinkedHashMap<>();
     }
     @Override
@@ -164,6 +159,10 @@ public class ShopA extends AppCompatActivity
             }
         }
     }
+    static void putIntoMenu(int id, DMenu dMenu)
+    {
+        menuLinkedHashMap.put(id,dMenu);
+    }
     void cartClicked()
     {
         if(cartLinkedHashMap.size()<=0)
@@ -172,9 +171,8 @@ public class ShopA extends AppCompatActivity
             return;
         }
         fab.hide();
-        tempCartLinkedHashMap=cartLinkedHashMap;
         getTotal();
-        Fragment fragment= CartFragment.newInstance(1);
+        Fragment fragment= CartFragment.newInstance(tempTotal, cartLinkedHashMap, itemPriceSizeLinkedHashMap, menuLinkedHashMap);
         FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.base,fragment,"cart");
         transaction.addToBackStack("cart");
@@ -184,21 +182,13 @@ public class ShopA extends AppCompatActivity
     {
         fab.hide();
         getSupportFragmentManager().popBackStack();
-        Fragment fragment= OrderParamsFragment.newInstance(hasPayment,"");
+        Fragment fragment= OrderParamsFragment.newInstance(hasPayment,diningOptions);
         FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.base,fragment,"order");
         transaction.addToBackStack("order");
         transaction.commit();
     }
 
-
-    /**
-     * implementation of BSOrderFragment.java*/
-    @Override
-    public void onOrderItems()
-    {
-
-    }
 
     @Override
     public void onMenuItemInteraction(final List<DMenu> dMenuList)
@@ -278,13 +268,6 @@ public class ShopA extends AppCompatActivity
      * implementation of CartFragment.java
      * ************************************************************************************************************************************************************************************/
     @Override
-    public void onListFragmentInteraction(CartContent.CartItem item)
-    {
-
-    }
-
-
-    @Override
     public void onProceed()
     {
         //first check if the the location is within the restaurants range
@@ -347,8 +330,9 @@ public class ShopA extends AppCompatActivity
     }
 
     @Override
-    public void totalItemsChanged()
+    public void totalItemsChanged( LinkedHashMap<String,Integer> cartLinkedHashMap)
     {
+        this.cartLinkedHashMap = cartLinkedHashMap;
         fab.setText(Integer.toString(getCartCount()));
         if(getCartCount()>0)
             fab.setVisibility(View.VISIBLE);
@@ -372,7 +356,7 @@ public class ShopA extends AppCompatActivity
     }
     private void getTotal()
     {
-        Iterator iterator= tempCartLinkedHashMap.entrySet().iterator();
+        Iterator iterator= cartLinkedHashMap.entrySet().iterator();
         Double total=0.0;
         while(iterator.hasNext())
         {
@@ -487,7 +471,7 @@ public class ShopA extends AppCompatActivity
             //getting columns list
             List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
             info.add(new BasicNameValuePair("seller_email",sellerEmail));
-            info.add(new BasicNameValuePair("user_email",serverAccount.getEmail()));
+            info.add(new BasicNameValuePair("user_email", LoginA.getServerAccount().getEmail()));
             info.add(new BasicNameValuePair("items_ids",itemsIds));
             info.add(new BasicNameValuePair("items_sizes",itemSizes));
             info.add(new BasicNameValuePair("items_prices",itemPrices));
@@ -541,7 +525,6 @@ public class ShopA extends AppCompatActivity
                     showProgress(false);
                     Snackbar.make(fab,"Order Placed",Snackbar.LENGTH_LONG).show();
                     cartLinkedHashMap.clear();
-                    tempCartLinkedHashMap.clear();
                     tempTotal = 0.0;
                     fab.setText(Integer.toString(getCartCount()));
                     fab.setVisibility(View.GONE);
@@ -556,7 +539,7 @@ public class ShopA extends AppCompatActivity
         }
         void  formData()
         {
-            Iterator iterator= ShopA.tempCartLinkedHashMap.entrySet().iterator();
+            Iterator iterator= cartLinkedHashMap.entrySet().iterator();
             while(iterator.hasNext())
             {
                 LinkedHashMap.Entry<String, Integer>set = (LinkedHashMap.Entry<String, Integer>) iterator.next();
@@ -737,7 +720,7 @@ public class ShopA extends AppCompatActivity
             //getting columns list
             List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
             info.add(new BasicNameValuePair("seller_email",sellerEmail));
-            info.add(new BasicNameValuePair("buyer_email",serverAccount.getEmail()));
+            info.add(new BasicNameValuePair("buyer_email",LoginA.getServerAccount().getEmail()));
             info.add(new BasicNameValuePair("waiter_email", "unavailable"));
             info.add(new BasicNameValuePair("order_number",orderNumber));
             info.add(new BasicNameValuePair("status",orderStatus));
@@ -775,7 +758,6 @@ public class ShopA extends AppCompatActivity
             {
                 Snackbar.make(fab,"Order Placed",Snackbar.LENGTH_LONG).show();
                 cartLinkedHashMap.clear();;
-                tempCartLinkedHashMap.clear();
                 tempTotal = 0.0;
                 fab.setText(Integer.toString(getCartCount()));
                 fab.setVisibility(View.GONE);
@@ -815,7 +797,7 @@ public class ShopA extends AppCompatActivity
         {
             //getting columns list
             List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
-            info.add(new BasicNameValuePair("user_email",serverAccount.getEmail()));
+            info.add(new BasicNameValuePair("user_email",LoginA.getServerAccount().getEmail()));
             info.add(new BasicNameValuePair("seller_email",sellerEmail));
             info.add(new BasicNameValuePair("order_number", orderNumber));
             info.add(new BasicNameValuePair("order_date_added",dateAdded));
@@ -855,7 +837,6 @@ public class ShopA extends AppCompatActivity
             {
                 Snackbar.make(fab,"Order Placed",Snackbar.LENGTH_LONG).show();
                 cartLinkedHashMap.clear();;
-                tempCartLinkedHashMap.clear();
                 tempTotal = 0.0;
                 fab.setText(Integer.toString(getCartCount()));
                 fab.setVisibility(View.GONE);

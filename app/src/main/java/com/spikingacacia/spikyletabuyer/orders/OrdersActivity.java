@@ -17,6 +17,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
+import com.spikingacacia.spikyletabuyer.LoginA;
 import com.spikingacacia.spikyletabuyer.Preferences;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.JSONParser;
@@ -38,7 +39,6 @@ import java.util.Date;
 import java.util.List;
 
 import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
-import static com.spikingacacia.spikyletabuyer.LoginA.serverAccount;
 
 
 public class OrdersActivity extends AppCompatActivity
@@ -225,7 +225,7 @@ public class OrdersActivity extends AppCompatActivity
             //getting columns list
             List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
             info.add(new BasicNameValuePair("seller_email",sellerEmail));
-            info.add(new BasicNameValuePair("buyer_email",serverAccount.getEmail()));
+            info.add(new BasicNameValuePair("buyer_email",LoginA.getServerAccount().getEmail()));
             info.add(new BasicNameValuePair("waiter_email", "unavailable"));
             info.add(new BasicNameValuePair("order_number",orderNumber));
             info.add(new BasicNameValuePair("status",orderStatus));
@@ -298,7 +298,7 @@ public class OrdersActivity extends AppCompatActivity
         {
             //getting columns list
             List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
-            info.add(new BasicNameValuePair("user_email",serverAccount.getEmail()));
+            info.add(new BasicNameValuePair("user_email", LoginA.getServerAccount().getEmail()));
             info.add(new BasicNameValuePair("seller_email",sellerEmail));
             info.add(new BasicNameValuePair("order_number", orderNumber));
             info.add(new BasicNameValuePair("order_date_added",dateAdded));

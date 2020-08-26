@@ -41,7 +41,6 @@ import java.util.List;
 
 import static android.app.Notification.EXTRA_NOTIFICATION_ID;
 import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
-import static com.spikingacacia.spikyletabuyer.LoginA.serverAccount;
 
 public class OrdersService extends Service
 {
@@ -194,7 +193,7 @@ public class OrdersService extends Service
         {
             //getting columns list
             List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
-            info.add(new BasicNameValuePair("email",serverAccount.getEmail()));
+            info.add(new BasicNameValuePair("email",LoginA.getServerAccount().getEmail()));
             // making HTTP request
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_b_orders,"POST",info);
             //Log.d("sItems",""+jsonObject.toString());

@@ -17,6 +17,7 @@ import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 
 import com.spikingacacia.spikyletabuyer.JSONParser;
+import com.spikingacacia.spikyletabuyer.LoginA;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.database.Orders;
 import com.spikingacacia.spikyletabuyer.main.orders_list.OrdersFragment;
@@ -33,7 +34,6 @@ import java.util.List;
 import java.util.Objects;
 
 import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
-import static com.spikingacacia.spikyletabuyer.LoginA.serverAccount;
 
 /**
  * A placeholder fragment containing a simple view.
@@ -284,7 +284,7 @@ public class OneOrderFragment extends Fragment
             //getting columns list
             List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
             info.add(new BasicNameValuePair("seller_email", sellerEmail));
-            info.add(new BasicNameValuePair("buyer_email",serverAccount.getEmail()));
+            info.add(new BasicNameValuePair("buyer_email", LoginA.getServerAccount().getEmail()));
             info.add(new BasicNameValuePair("waiter_email", "unavailable"));
             info.add(new BasicNameValuePair("order_number",orderNumber));
             info.add(new BasicNameValuePair("status",orderStatus));
