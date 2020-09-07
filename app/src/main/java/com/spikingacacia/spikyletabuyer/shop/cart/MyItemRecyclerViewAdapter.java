@@ -86,6 +86,11 @@ public class MyItemRecyclerViewAdapter extends RecyclerView.Adapter<MyItemRecycl
     {
         return mValues.size();
     }
+    public interface OnTotalChanged
+    {
+        void onTotalPriceChanged();
+    }
+
 
     public class ViewHolder extends RecyclerView.ViewHolder
     {

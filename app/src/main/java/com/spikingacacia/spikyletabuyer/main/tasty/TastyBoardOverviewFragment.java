@@ -8,6 +8,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.emoji.widget.EmojiEditText;
 import androidx.emoji.widget.EmojiTextView;
@@ -17,6 +18,7 @@ import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
 import android.text.TextUtils;
+import android.text.format.DateUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -35,6 +37,7 @@ import com.spikingacacia.spikyletabuyer.JSONParser;
 import com.spikingacacia.spikyletabuyer.LoginA;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.database.TastyBoard;
+import com.spikingacacia.spikyletabuyer.util.Utils;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -47,7 +50,9 @@ import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Currency;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -95,6 +100,7 @@ public class TastyBoardOverviewFragment extends Fragment
         // Inflate the layout for this fragment
         View view =  inflater.inflate(R.layout.fragment_tasty_board_overview, container, false);
         context = getContext();
+        ConstraintLayout l_less = view.findViewById(R.id.layout_less);
         ImageView imageView = view.findViewById(R.id.image);
         TextView t_title = view.findViewById(R.id.title);
         TextView t_restaurant = (TextView) view.findViewById(R.id.restaurant);
@@ -108,6 +114,34 @@ public class TastyBoardOverviewFragment extends Fragment
         viewPager.setAdapter(demoCollectionPagerAdapter);
         TabLayout tabLayout = view.findViewById(R.id.tab_layout);
         tabLayout.setupWithViewPager(viewPager);
+
+        ImageButton b_expand_less = view.findViewById(R.id.expand_less);
+        ImageButton b_expand_more = view.findViewById(R.id.expand_more);
+        Utils.collapse(viewPager);
+        b_expand_more.setVisibility(View.GONE);
+
+        b_expand_less.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                v.setVisibility(View.GONE);
+                b_expand_more.setVisibility(View.VISIBLE);
+                Utils.collapse(l_less);
+                Utils.expand(viewPager);
+            }
+        });
+        b_expand_more.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                v.setVisibility(View.GONE);
+                b_expand_less.setVisibility(View.VISIBLE);
+                Utils.collapse(viewPager);
+                Utils.expand(l_less);
+            }
+        });
 
         t_title.setText(tastyBoard.getTitle());
         t_restaurant.setText(tastyBoard.getSellerNames());
@@ -172,6 +206,19 @@ public class TastyBoardOverviewFragment extends Fragment
                     mListener.onGotoMenu();
             }
         });
+        SimpleDateFormat formatter=new SimpleDateFormat("EEE MMM d HH:mm:ss z yyyy");
+        try
+        {
+            Date date=formatter.parse(tastyBoard.getExpiryDate());
+            Date date_now = Calendar.getInstance().getTime();
+            if(date_now.after(date))
+            {
+                b_pre_order.setVisibility(View.INVISIBLE);
+            }
+        } catch (ParseException e)
+        {
+            Log.e(TAG," "+e.getMessage());
+        }
 
 
         new UpdateTastyBoardTask(1).execute((Void)null);

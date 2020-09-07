@@ -17,7 +17,6 @@
             android:layout_height="100dp"
             android:src="@drawable/ic_baseline_local_dining"
             android:layout_margin="5dp"
-            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -25,31 +24,29 @@
             android:id="@+id/names"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="1dp"
             android:text="Restaurant"
             android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/image" />
+            app:layout_constraintStart_toEndOf="@id/image"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_margin="10dp"/>
 
         <TextView
             android:id="@+id/distance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="0.0 m"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/image"
             app:layout_constraintTop_toBottomOf="@+id/names"
-            android:layout_marginTop="5dp"
-            android:layout_marginStart="5dp"/>
+            android:layout_marginStart="10dp"/>
 
         <TextView
             android:id="@+id/locality"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Locality"
-            app:layout_constraintStart_toEndOf="@+id/distance"
-            app:layout_constraintTop_toBottomOf="@+id/names"
-            android:padding="5dp"/>
+            app:layout_constraintStart_toEndOf="@id/image"
+            app:layout_constraintTop_toBottomOf="@+id/distance"
+            android:layout_marginStart="10dp" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

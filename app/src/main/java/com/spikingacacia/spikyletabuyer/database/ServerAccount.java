@@ -1,6 +1,8 @@
 package com.spikingacacia.spikyletabuyer.database;
 
-public class ServerAccount
+import java.io.Serializable;
+
+public class ServerAccount implements Serializable
 {
     private int id;
     private String email;
@@ -8,18 +10,20 @@ public class ServerAccount
     private String username;
     private String location;
     private String imageType;
+    private double wallet;
     private String dateadded;
     private String datechanged;
 
     public ServerAccount(){}
 
-    public ServerAccount(int id, String email, String password, String username, String location, String imageType, String dateadded, String datechanged) {
+    public ServerAccount(int id, String email, String password, String username, String location, String imageType, double wallet, String dateadded, String datechanged) {
         this.id = id;
         this.email = email;
         this.password = password;
         this.username = username;
         this.location = location;
         this.imageType = imageType;
+        this.wallet = wallet;
         this.dateadded = dateadded;
         this.datechanged = datechanged;
     }
@@ -73,6 +77,16 @@ public class ServerAccount
     public void setImageType(String imageType)
     {
         this.imageType = imageType;
+    }
+
+    public double getWallet()
+    {
+        return wallet;
+    }
+
+    public void setWallet(double wallet)
+    {
+        this.wallet = wallet;
     }
 
     public String getDateadded() {

@@ -51,6 +51,7 @@ import com.google.android.material.snackbar.Snackbar;
 import com.spikingacacia.spikyletabuyer.JSONParser;
 import com.spikingacacia.spikyletabuyer.LoginA;
 import com.spikingacacia.spikyletabuyer.database.MpesaRequests;
+import com.spikingacacia.spikyletabuyer.database.ServerAccount;
 import com.spikingacacia.spikyletabuyer.database.TastyBoard;
 import com.spikingacacia.spikyletabuyer.explore.ExploreActivity;
 import com.spikingacacia.spikyletabuyer.R;
@@ -66,6 +67,7 @@ import com.spikingacacia.spikyletabuyer.orders.OrdersActivity;
 import com.spikingacacia.spikyletabuyer.restaurants.SRRestaurantsA;
 import com.spikingacacia.spikyletabuyer.shop.ShopA;
 import com.spikingacacia.spikyletabuyer.util.Mpesa;
+import com.spikingacacia.spikyletabuyer.wallet.WalletActivity;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -159,40 +161,30 @@ public class MainActivity extends AppCompatActivity implements
 
         fusedLocationProviderClient= LocationServices.getFusedLocationProviderClient(this);
         start_background_tasks();
-        final Handler handler=new Handler();
-        final Runnable runnable = new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                //if something changed so something
-            }
-        };
-        /*thread=new Thread()
-        {
-            @Override
-            public void run()
-            {
-                try
-                {
-                    while(true)
-                    {
-                        //new MpesaGetPayStatus().execute((Void)null);
-                        //handler.post(runnable);
-                        sleep(60000);
-                    }
-                }
-                catch (InterruptedException e)
-                {
-                    Log.e(TAG,"error sleeping "+e.getMessage());
-                }
-            }
-        };*/
         checkIfLocationEnabled();
         getCurrentLocation();
         restaurantsList =new LinkedList<>();
         mpesaRequestsList = new ArrayList<>();
 
+    }
+    // This callback is called only when there is a saved instance that is previously saved by using
+// onSaveInstanceState(). We restore some state in onCreate(), while we can optionally restore
+// other state here, possibly usable after onStart() has completed.
+// The savedInstanceState Bundle is same as the one used in onCreate().
+    @Override
+    public void onRestoreInstanceState(Bundle savedInstanceState)
+    {
+        LoginA.setServerAccount((ServerAccount) savedInstanceState.getSerializable(LoginA.SAVE_INSTANCE_SERVER_ACCOUNT));
+        Log.d(TAG,"main_a has been recreated therefoew we restore server account");
+    }
+    // invoked when the activity may be temporarily destroyed, save the instance state here
+    @Override
+    public void onSaveInstanceState(Bundle outState)
+    {
+        outState.putSerializable(LoginA.SAVE_INSTANCE_SERVER_ACCOUNT,LoginA.getServerAccount());
+        Log.e(TAG,"main_a is been destroyed threfore we call onsaved instance");
+        // call superclass to save any view hierarchy
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -210,8 +202,14 @@ public class MainActivity extends AppCompatActivity implements
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
+        if( id == R.id.action_wallet)
+        {
+            Intent intent=new Intent(MainActivity.this, WalletActivity.class);
+            //prevent this activity from flickering as we call the next one
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            startActivity(intent);
+        }
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings)
         {
             proceedToSettings();
@@ -440,6 +438,7 @@ public class MainActivity extends AppCompatActivity implements
                                         {
                                             addresses=geocoder.getFromLocation(latitude,longitude,10);
                                             myLocation = String.valueOf(latitude)+":"+String.valueOf(longitude)+":"+addresses.get(0).getCountryCode();
+                                            new UpdateLastKnownLocationTask().execute((Void)null);
                                             //if(addresses.get(0).getCountryCode().contentEquals("KE"))
                                                 //thread.start();
                                         }
@@ -866,210 +865,29 @@ implementation of OrdersFragment.java
             }
         }
     }
-    private class MpesaGetPayStatus extends AsyncTask<Void, Void, Boolean>
+
+    private class UpdateLastKnownLocationTask extends AsyncTask<Void, Void, Boolean>
     {
-        private String url_get_status=base_url+"get_m_requests.php";
+        private String url_update_item = base_url+"update_buyer_last_location.php";
         private String TAG_SUCCESS="success";
         private String TAG_MESSAGE="message";
         private JSONParser jsonParser;
-        public MpesaGetPayStatus()
+        private int success;
+        UpdateLastKnownLocationTask()
         {
-            jsonParser = new JSONParser();
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... voids)
-        {
-            //getting columns list
-            List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
-            info.add(new BasicNameValuePair("user_email",LoginA.getServerAccount().getEmail()));
-
-            // making HTTP request
-            JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_status,"POST",info);
-            try
-            {
-                int success=jsonObject.getInt(TAG_SUCCESS);
-                JSONArray jsonArray=null;
-                if(success==1)
-                {
-                    jsonArray = jsonObject.getJSONArray("items");
-                    //Log.d(TAG,jsonArray.toString());
-                    for (int count = 0; count < jsonArray.length(); count += 1)
-                    {
-                        JSONObject jsonObjectItems = jsonArray.getJSONObject(count);
-                        int id = jsonObjectItems.getInt("id");
-                        String seller_email = jsonObjectItems.getString("seller_email");
-                        String order_number = jsonObjectItems.getString("order_number");
-                        String date_added = jsonObjectItems.getString("date_added");
-                        String business_shortcode = jsonObjectItems.getString("business_shortcode");
-                        String password = jsonObjectItems.getString("password");
-                        String timestamp = jsonObjectItems.getString("timestamp");
-                        String chequeout_request_id = jsonObjectItems.getString("chequeout_request_id");
-
-                        MpesaRequests mpesaRequests = new MpesaRequests(id,seller_email,order_number,date_added,business_shortcode,password,timestamp,chequeout_request_id);
-                        mpesaRequestsList.add(mpesaRequests);
-                    }
-                    return true;
-                }
-                else
-                {
-                    String message=jsonObject.getString(TAG_MESSAGE);
-                    Log.e(TAG_MESSAGE,""+message);
-                    return false;
-                }
-            }
-            catch (JSONException e)
-            {
-                Log.e("JSON",""+e.getMessage());
-                return false;
-            }
-        }
-        @Override
-        protected void onPostExecute(final Boolean successful)
-        {
-
-            if (successful)
-            {
-                //we have the mpesa ststaus now
-                //proceed to check the mpesa status
-                for(int c=0; c<mpesaRequestsList.size(); c++)
-                {
-                    MpesaRequests mpesaRequests = mpesaRequestsList.get(c);
-                    new MpesaCheckPayStatus(mpesaRequests.getSeller_email(),mpesaRequests.getBusiness_shortcode(),mpesaRequests.getPassword(),mpesaRequests.getTimestamp(),
-                            mpesaRequests.getChequeout_request_id(), mpesaRequests.getOrder_number(), mpesaRequests.getDate_added(), c).execute((Void)null);
-                }
-
-            }
-
-        }
-    }
-    private class MpesaCheckPayStatus extends AsyncTask<Void, Void, Boolean>
-    {
-        String businessShortCode;
-        String password;
-        String timestamp;
-        String checkoutRequestID;
-        private String orderNumber;
-        private String dateAdded;
-        private String storeEmail;
-        private boolean orderPaymentCancelled;
-        private int m_index;
-        private String resultCode = "";
-        public MpesaCheckPayStatus(String storeEmail,String businessShortCode, String password, String timestamp, String checkoutRequestID, String orderNumber, String dateAdded, int m_index)
-        {
-            this.businessShortCode = businessShortCode;
-            this.password = password;
-            this.timestamp = timestamp;
-            this.checkoutRequestID = checkoutRequestID;
-            this.orderNumber = orderNumber;
-            this.dateAdded = dateAdded;
-            this.storeEmail = storeEmail;
-            this.m_index = m_index;
-        }
-
-        @Override
-        protected Boolean doInBackground(Void... voids)
-        {
-            try
-            {
-                JSONObject jsonObject = Mpesa.STKPushTransactionStatus(businessShortCode,password,timestamp,checkoutRequestID);
-
-                Log.d(TAG,"JSON"+jsonObject.toString());
-                String  ResponseCode = jsonObject.getString("ResponseCode");
-                if(ResponseCode.contentEquals("0"))
-                {
-                    String ResponseDescription = jsonObject.getString("ResponseDescription");
-                    String MerchantRequestID = jsonObject.getString("MerchantRequestID");
-                    resultCode = jsonObject.getString("ResultCode");
-                    String ResultDesc = jsonObject.getString("ResultDesc");
-                    if(resultCode.contentEquals("1032"))
-                        return false;// the result was cancelled by the user
-                    else if(resultCode.contentEquals("1037"))
-                        return false;// DS timeout //wrong password for the customer
-                    else if(resultCode.contentEquals("2028"))
-                        return false; //The request is not permitted according to product assignment
-                    else if(resultCode.contentEquals("0"))
-                        return true; // paid
-
-                    return false;
-                }
-            }
-            catch (IOException | JSONException e)
-            {
-                //Log.e(TAG," "+e.getMessage());
-                //e.printStackTrace();
-                return false;
-            }
-
-            return false;
-        }
-        @Override
-        protected void onPostExecute(final Boolean successful)
-        {
-            if (successful)
-            {
-                //the customer did pay with m-pesa
-                //now proceed to push the funds from our mpesa till number to restaurants till number
-                new UpdateOrderTask(storeEmail,orderNumber, dateAdded,"-1","1", m_index, "").execute((Void)null);
-            }
-            else
-            {
-                String message = "";
-                if(resultCode.contentEquals("1032") || resultCode.contentEquals("1037") || resultCode.contentEquals("2028") )
-                {
-                    message = "Payment failed";
-                    new UpdateOrderTask(storeEmail,orderNumber, dateAdded,"-3","0", m_index, message).execute((Void)null);
-                }
-            }
-
-        }
-    }
-
-    private class UpdateOrderTask extends AsyncTask<Void, Void, Boolean>
-    {
-        private String url_update=base_url+"update_seller_order.php";
-        private String TAG_SUCCESS="success";
-        private String TAG_MESSAGE="message";
-        private JSONParser jsonParser;
-        final private String orderNumber;
-        private final String dateAdded;
-        private final String orderStatus;
-        private final String updateSellerTotal;
-        private final String sellerEmail;
-        private final int m_index;
-        private String mpesaMessage;
-
-        public  UpdateOrderTask(String sellerEmail, String orderNumber, String dateAdded, String orderStatus, String updateSellerTotal, int m_index, String mpesaMessage)
-        {
-            this.sellerEmail = sellerEmail;
-            this.orderNumber = orderNumber;
-            this.dateAdded = dateAdded;
-            this.orderStatus = orderStatus; // order status for unpaid order is -1, delete is 0 and for a succesful order is 1
-            this.updateSellerTotal = updateSellerTotal;
-            this.m_index = m_index;
-            this.mpesaMessage = mpesaMessage;
             jsonParser = new JSONParser();
         }
         @Override
         protected Boolean doInBackground(Void... params)
         {
-            //getting columns list
-            List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
-            info.add(new BasicNameValuePair("seller_email", sellerEmail));
-            info.add(new BasicNameValuePair("buyer_email", LoginA.getServerAccount().getEmail()));
-            info.add(new BasicNameValuePair("waiter_email", "unavailable"));
-            info.add(new BasicNameValuePair("order_number",orderNumber));
-            info.add(new BasicNameValuePair("status",orderStatus));
-            info.add(new BasicNameValuePair("update_seller_total",updateSellerTotal));
-            info.add(new BasicNameValuePair("m_message",mpesaMessage));
-            info.add(new BasicNameValuePair("date_added",dateAdded));
-
-            // making HTTP request
-            JSONObject jsonObject= jsonParser.makeHttpRequest(url_update,"POST",info);
-            Log.d(TAG,jsonObject.toString());
+            //building parameters
+            List<NameValuePair> info=new ArrayList<NameValuePair>();
+            info.add(new BasicNameValuePair("email", LoginA.getServerAccount().getEmail()));
+            info.add(new BasicNameValuePair("location",myLocation));
+            JSONObject jsonObject= jsonParser.makeHttpRequest(url_update_item,"POST",info);
             try
             {
-                int success=jsonObject.getInt(TAG_SUCCESS);
+                success=jsonObject.getInt(TAG_SUCCESS);
                 if(success==1)
                 {
                     return true;
@@ -1090,31 +908,16 @@ implementation of OrdersFragment.java
         @Override
         protected void onPostExecute(final Boolean successful)
         {
-            if (successful )
+            if(successful)
             {
-                Log.d(TAG,"order update succesful");
-                //since there can be multiple asyntasks running at the same time m_index may generate IndexOutOfBoundsException
-                try
-                {
-                    for(int c=0; c<mpesaRequestsList.size(); c++)
-                    {
-                        MpesaRequests mpesaRequests = mpesaRequestsList.get(c);
-                        if(mpesaRequests.getSeller_email().contentEquals(sellerEmail) &&  mpesaRequests.getOrder_number().contentEquals(orderNumber)&&  mpesaRequests.getDate_added().contentEquals(dateAdded))
-                        {
-                            mpesaRequestsList.remove(c);
-                            Log.d(TAG,"m_request removed");
-                        }
-                    }
-                }
-                catch(IndexOutOfBoundsException e)
-                {
-                    Log.e(TAG,""+e.getMessage());
-                }
+
+
             }
             else
             {
-                Log.e(TAG,"update order failed");
+                Log.e(TAG, "updating last known location");
             }
+
         }
     }
 }

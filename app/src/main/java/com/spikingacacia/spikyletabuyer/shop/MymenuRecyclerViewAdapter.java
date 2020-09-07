@@ -23,6 +23,7 @@ import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.database.DMenu;
 import com.spikingacacia.spikyletabuyer.main.MainActivity;
 import com.spikingacacia.spikyletabuyer.shop.menuFragment.OnListFragmentInteractionListener;
+import com.spikingacacia.spikyletabuyer.util.Utils;
 
 
 import java.util.ArrayList;
@@ -78,11 +79,15 @@ public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecycl
             String location = MainActivity.myLocation;
             String[] location_pieces = location.split(":");
             if(location_pieces.length==3)
-                sizePrice+=" "+sizes[c]+" @ "+getCurrencyCode(location_pieces[2])+" "+prices[c];
+                sizePrice+=" "+sizes[c]+" @ "+ Utils.getCurrencyCode(location_pieces[2])+" "+prices[c];
             else
                 sizePrice+=" "+sizes[c]+" @ "+prices[c];
         }
         holder.mPriceView.setText(sizePrice);
+        if(holder.mItem.isAvailable())
+            holder.mAddButton.setVisibility(View.VISIBLE);
+        else
+            holder.mAddButton.setVisibility(View.GONE);
         holder.mAddButton.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -117,16 +122,6 @@ public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecycl
             }
         });
     }
-    //to retrieve currency code
-    private String getCurrencyCode(String countryCode) {
-        return Currency.getInstance(new Locale("", countryCode)).getCurrencyCode();
-    }
-
-    //to retrieve currency symbol
-    private String getCurrencySymbol(String countryCode) {
-        return Currency.getInstance(new Locale("", countryCode)).getSymbol();
-    }
-
     @Override
     public int getItemCount()
     {

@@ -61,6 +61,7 @@ public class TastyBoardActivity extends AppCompatActivity implements
     private LinkedHashMap<String,Integer> cartLinkedHashMap = new LinkedHashMap<>();
     private LinkedHashMap<String,Integer> itemPriceSizeLinkedHashMap = new LinkedHashMap<>();
     private Double total = 0.0;
+    private Double deliveryCharge = 0.0;
     private String diningOptions="1:1:1";
     private String sellerEmail="";
     private int taskCounter = 0; //counter for updating order and adding a new mpesa response request in the database
@@ -106,7 +107,7 @@ public class TastyBoardActivity extends AppCompatActivity implements
             total += Double.parseDouble(discount_prices[c]);
         }
         DMenu dMenu = new DMenu(tastyBoard.getLinkedItemId(),-1,-1,"null",tastyBoard.getItemNames(),"",sizes,tastyBoard.getDiscountPrice(),
-                ".jpg","","");
+                ".jpg",true,"","");
         menuLinkedHashMap.put(tastyBoard.getLinkedItemId(),dMenu);
         //add the cart
 
@@ -175,9 +176,10 @@ public class TastyBoardActivity extends AppCompatActivity implements
 * implementation of CartFragment.java
  */
     @Override
-    public void onProceed()
+    public void onProceed(double new_total)
     {
-        Fragment fragment= OrderParamsFragment.newInstance(hasPayment,diningOptions);
+        total = new_total;
+        Fragment fragment= OrderParamsFragment.newInstance(hasPayment,diningOptions, deliveryCharge, total);
         FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.base,fragment,"order");
         transaction.addToBackStack("order");
@@ -345,6 +347,7 @@ public class TastyBoardActivity extends AppCompatActivity implements
             info.add(new BasicNameValuePair("delivery_mobile", deliveryMobile));
             info.add(new BasicNameValuePair("delivery_instructions", deliveryInstructions));
             info.add(new BasicNameValuePair("delivery_location", MainActivity.myLocation));
+            info.add(new BasicNameValuePair("delivery_charge", String.valueOf(deliveryCharge.intValue())));
             // making HTTP request
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_place_order,"POST",info);
             Log.d("sItems",""+jsonObject.toString());

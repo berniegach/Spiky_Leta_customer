@@ -104,7 +104,7 @@ public class MessagesFragment extends Fragment
             info.add(new BasicNameValuePair("email", LoginA.getServerAccount().getEmail()));
 
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_b_notifications,"POST",info);
-            Log.d("bNotis",""+jsonObject.toString());
+            //Log.d("bNotis",""+jsonObject.toString());
             try
             {
                 JSONArray notisArrayList=null;

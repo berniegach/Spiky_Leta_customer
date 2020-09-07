@@ -28,8 +28,12 @@ public class OrderParamsFragment extends Fragment
 {
     private static final String ARG_SHOW_MPESA = "param1";
     private static final String ARG_DINING_OPTIONS = "param2";
+    private static final String ARG_DELIVERY_CHARGE = "param3";
+    private static final String ARG_SUB_TOTAL = "param4";
     private boolean showMpesa;
     private String mDiningOptions;
+    private Double mDeliveryCharge;
+    private Double mSubTotal;
     private OnFragmentInteractionListener mListener;
     private int which = 2;
     private String time;
@@ -43,12 +47,14 @@ public class OrderParamsFragment extends Fragment
         // Required empty public constructor
     }
 
-    public static OrderParamsFragment newInstance(boolean showMpesa, String param2)
+    public static OrderParamsFragment newInstance(boolean showMpesa, String dining_options, Double delivery_charge, Double sub_total)
     {
         OrderParamsFragment fragment = new OrderParamsFragment();
         Bundle args = new Bundle();
         args.putBoolean(ARG_SHOW_MPESA, showMpesa);
-        args.putString(ARG_DINING_OPTIONS, param2);
+        args.putString(ARG_DINING_OPTIONS, dining_options);
+        args.putDouble(ARG_DELIVERY_CHARGE, delivery_charge);
+        args.putDouble(ARG_SUB_TOTAL,sub_total);
         fragment.setArguments(args);
         return fragment;
     }
@@ -61,6 +67,8 @@ public class OrderParamsFragment extends Fragment
         {
             showMpesa = getArguments().getBoolean(ARG_SHOW_MPESA);
             mDiningOptions = getArguments().getString(ARG_DINING_OPTIONS);
+            mDeliveryCharge = getArguments().getDouble(ARG_DELIVERY_CHARGE);
+            mSubTotal = getArguments().getDouble(ARG_SUB_TOTAL);
         }
     }
 
@@ -84,8 +92,14 @@ public class OrderParamsFragment extends Fragment
         final CardView c_delivery_mobile = view.findViewById(R.id.cardview_delivery_mobile);
         final TextView t_m_pesa_mobile = view.findViewById(R.id.edit_payment_mobile);
         final TextView t_mobile_delivery = view.findViewById(R.id.edit_delivery_mobile);
+        TextView t_delivery_charges = view.findViewById(R.id.delivery_charge);
+        TextView t_sub_total = view.findViewById(R.id.sub_total);
+        TextView t_total = view.findViewById(R.id.total);
         Button b_order = view.findViewById(R.id.button_order);
 
+        t_delivery_charges.setText(String.valueOf(mDeliveryCharge.intValue()));
+        t_sub_total.setText(String.valueOf(mSubTotal.intValue()));
+        t_total.setText(String.valueOf(mDeliveryCharge.intValue()+mSubTotal));
         if(preferences.getMpesa_mobile()!=null)
             t_m_pesa_mobile.setText(preferences.getMpesa_mobile());
         if(preferences.getDelivery_mobile()!=null)

@@ -11,7 +11,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-
+        <activity android:name=".wallet.WalletActivity"></activity>
         <activity android:name=".explore.ExploreActivity" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.

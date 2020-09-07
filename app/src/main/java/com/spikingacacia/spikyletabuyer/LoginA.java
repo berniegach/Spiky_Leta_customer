@@ -24,8 +24,6 @@ import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.spikingacacia.spikyletabuyer.database.Messages;
-import com.spikingacacia.spikyletabuyer.database.Orders;
 import com.spikingacacia.spikyletabuyer.database.ServerAccount;
 import com.spikingacacia.spikyletabuyer.main.MainActivity;
 
@@ -37,7 +35,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 import static java.lang.Thread.sleep;
@@ -46,8 +43,8 @@ import static java.lang.Thread.sleep;
 public class LoginA extends AppCompatActivity implements View.OnClickListener
 {
     //REMEMBER TO CHANGE THIS WHEN CHANGING BETWEEN ONLINE AND LOCALHOST
-    //public static final String base_url="https://3.20.17.200/order/"; //online
-    public static final String base_url="http://10.0.2.2/leta_project/android/"; //localhost no connection for testing user accounts coz it doesnt require subscription checking
+    public static final String base_url="https://3.20.17.200/order/"; //online
+    //public static final String base_url="http://10.0.2.2/leta_project/android/"; //localhost no connection for testing user accounts coz it doesnt require subscription checking
     private String TAG="LoginA";
     //buyers
     private static ServerAccount serverAccount;
@@ -56,6 +53,11 @@ public class LoginA extends AppCompatActivity implements View.OnClickListener
     static public GoogleSignInAccount account;
     private ProgressBar progressBar;
     private View mainView;
+    public final static String SAVE_INSTANCE_SERVER_ACCOUNT = "save_server_account";
+    public interface MyListener
+    {
+        public void onLogin(boolean success, int success_value, ServerAccount account);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -218,6 +220,7 @@ public class LoginA extends AppCompatActivity implements View.OnClickListener
         private final String mEmail;
         private  JSONParser jsonParser;
         private int success=0;
+        private ServerAccount account;
 
         LoginTask(String email) {
             mEmail = email;
@@ -246,14 +249,18 @@ public class LoginA extends AppCompatActivity implements View.OnClickListener
                     JSONArray accountArray=jsonObject.getJSONArray("account");
                     JSONObject accountObject=accountArray.getJSONObject(0);
 
-                    serverAccount.setId(accountObject.getInt("id"));
-                    serverAccount.setEmail(accountObject.getString("email"));
-                    serverAccount.setPassword("");
-                    serverAccount.setUsername(accountObject.getString("username"));
-                    serverAccount.setLocation(accountObject.getString("location"));
-                    serverAccount.setImageType(accountObject.getString("image_type"));
-                    serverAccount.setDateadded(accountObject.getString("dateadded"));
-                    serverAccount.setDatechanged(accountObject.getString("datechanged"));
+                    int id = accountObject.getInt("id");
+                    String email = accountObject.getString("email");
+                    String password = "";
+                    String username = accountObject.getString("username");
+                    String location = accountObject.getString("location");
+                    String image_type = accountObject.getString("image_type");
+                    double wallet = accountObject.getDouble("wallet");
+                    String date_added = accountObject.getString("dateadded");
+                    String date_changed = accountObject.getString("datechanged");
+
+                    account = new ServerAccount(id,email,password, username, location, image_type, wallet, date_added, date_changed);
+
                     return true;
                 }
                 else
@@ -276,6 +283,7 @@ public class LoginA extends AppCompatActivity implements View.OnClickListener
 
             if (successful)
             {
+                serverAccount = account;
                 Intent intent=new Intent(LoginA.this, MainActivity.class);
                 //prevent this activity from flickering as we call the next one
                 intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);

@@ -68,7 +68,7 @@ public class RestaurantsFragment extends Fragment
         {
             Context context = view.getContext();
             RecyclerView recyclerView = (RecyclerView) view;
-            mColumnCount = getHorizontalItemCount();
+            mColumnCount = 1;//getHorizontalItemCount();
             if (mColumnCount <= 1)
             {
                 recyclerView.setLayoutManager(new LinearLayoutManager(context));
@@ -76,7 +76,7 @@ public class RestaurantsFragment extends Fragment
             {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.addItemDecoration(new SpacesItemDecoration(16));
+            recyclerView.addItemDecoration(new SpacesItemDecoration(20));
             recyclerView.setAdapter(new MyRestaurantsRecyclerViewAdapter(mListener,getContext()));
         }
         return view;

@@ -185,6 +185,7 @@ public class OneOrderFragment extends Fragment
             String size = orders.getSize();
             double price= orders.getPrice();
             String date_added= orders.getDateAdded();
+            String date_added_local= orders.getDateAddedLocal();
             String[] date=date_added.split(" ");
             if(!(date[0]+":"+order_number).contentEquals(mOrder))
                 continue;
@@ -215,7 +216,7 @@ public class OneOrderFragment extends Fragment
 
             count+=1;
             total_price+=price;
-            date_to_show=dateAdded;
+            date_to_show=date_added_local;
         }
         ((TextView)view.findViewById(R.id.total)).setText("Total "+String.valueOf(total_price));
         total = total_price.intValue();

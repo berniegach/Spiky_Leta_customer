@@ -63,7 +63,8 @@ public class ShopA extends AppCompatActivity
         implements
         menuFragment.OnListFragmentInteractionListener,
         CartFragment.OnListFragmentInteractionListener,
-        OrderParamsFragment.OnFragmentInteractionListener
+        OrderParamsFragment.OnFragmentInteractionListener,
+        ScanToOrderParamsFragment.OnFragmentInteractionListener
 {
     private static LinkedHashMap<Integer, DMenu> menuLinkedHashMap;
     private String TAG="ShopA";
@@ -89,6 +90,7 @@ public class ShopA extends AppCompatActivity
     private LinkedHashMap<String,Integer> cartLinkedHashMap;
     private LinkedHashMap<String,Integer> itemPriceSizeLinkedHashMap;
     private Double tempTotal =0.0;
+    private Double deliveryCharge = 0.0;
     private boolean hasPayment = false;
     private boolean preOrder = false;
     private String mPesaTillNumber;
@@ -182,10 +184,20 @@ public class ShopA extends AppCompatActivity
     {
         fab.hide();
         getSupportFragmentManager().popBackStack();
-        Fragment fragment= OrderParamsFragment.newInstance(hasPayment,diningOptions);
+        Fragment fragment= OrderParamsFragment.newInstance(hasPayment,diningOptions,deliveryCharge,tempTotal);
         FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.base,fragment,"order");
         transaction.addToBackStack("order");
+        transaction.commit();
+    }
+    void onOrderClickedScanToOder()
+    {
+        fab.hide();
+        getSupportFragmentManager().popBackStack();
+        Fragment fragment= ScanToOrderParamsFragment.newInstance(hasPayment,tableNumber, numberOfTables);
+        FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.base,fragment,"scan_to_order");
+        transaction.addToBackStack("scan_to_order");
         transaction.commit();
     }
 
@@ -268,8 +280,9 @@ public class ShopA extends AppCompatActivity
      * implementation of CartFragment.java
      * ************************************************************************************************************************************************************************************/
     @Override
-    public void onProceed()
+    public void onProceed(double new_total)
     {
+        tempTotal = new_total;
         //first check if the the location is within the restaurants range
         if(!preOrder && buyerDistance>sellerOrderRadius)
         {
@@ -283,7 +296,8 @@ public class ShopA extends AppCompatActivity
         }
         else
         {
-            new androidx.appcompat.app.AlertDialog.Builder(ShopA.this)
+            onOrderClickedScanToOder();
+            /*new androidx.appcompat.app.AlertDialog.Builder(ShopA.this)
                     .setTitle("How will you take your order?")
                     .setItems(new String[]{"Sit in", "Take away"}, new DialogInterface.OnClickListener()
                     {
@@ -322,7 +336,7 @@ public class ShopA extends AppCompatActivity
                             else
                                 new OrderTask(tableNumber,"null", which,"null","null","null").execute((Void)null);
                         }
-                    }).create().show();
+                    }).create().show();*/
         }
 
 
@@ -351,7 +365,6 @@ public class ShopA extends AppCompatActivity
             int count = set.getValue();
             total_count += count;
         }
-        Log.d(TAG,"CART COUNT "+total_count);
         return total_count;
     }
     private void getTotal()
@@ -390,15 +403,6 @@ public class ShopA extends AppCompatActivity
         MediaPlayer mp = MediaPlayer. create (getBaseContext(), alarmSound);
         mp.start();
 
-       /* NotificationCompat.Builder mBuilder =
-                new NotificationCompat.Builder(SMenuA.this, default_notification_channel_id )
-                        .setSmallIcon(R.mipmap.ic_launcher )
-                        .setContentTitle( "New Order" )
-                        .setContentText( "a new order has arrived" ) ;
-        NotificationManager mNotificationManager = (NotificationManager)
-                getSystemService(Context. NOTIFICATION_SERVICE );
-        mNotificationManager.notify(( int ) System. currentTimeMillis () ,
-                mBuilder.build());*/
     }
     private void vibrate_on_click()
     {
@@ -421,6 +425,20 @@ public class ShopA extends AppCompatActivity
     public void onPlacePreOrder(int which, String time, String mobile_mpesa, String mobile_delivery, String instructions)
     {
         new OrderTask(tableNumber,time, which, mobile_mpesa, mobile_delivery, instructions).execute((Void)null);
+    }
+    /*************************************************************************************************************************************************************************************
+     * implementation of ScanToOrderParamsFragment.java
+     * ************************************************************************************************************************************************************************************/
+    @Override
+    public void onScanToOrderDetachCalled()
+    {
+        fab.hide();
+    }
+
+    @Override
+    public void onScanToOrderPlaceOrder(int which, int table, String mobile_mpesa)
+    {
+        new OrderTask(table,"null", which,mobile_mpesa,"null","null").execute((Void)null);
     }
 
     private class OrderTask extends AsyncTask<Void, Void, Boolean>
@@ -457,7 +475,6 @@ public class ShopA extends AppCompatActivity
             super.onPreExecute();
             showProgress(true);
 
-            Log.d("ORDERING","starting....");
             for(int c=0; c<items.size(); c++)
             {
                 itemsIds+=String.valueOf(items.get(c));
@@ -483,6 +500,7 @@ public class ShopA extends AppCompatActivity
             info.add(new BasicNameValuePair("delivery_mobile", deliveryMobile));
             info.add(new BasicNameValuePair("delivery_instructions", deliveryInstructions));
             info.add(new BasicNameValuePair("delivery_location", MainActivity.myLocation));
+            info.add(new BasicNameValuePair("delivery_charge", String.valueOf(deliveryCharge.intValue())));
             // making HTTP request
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_place_order,"POST",info);
             Log.d("sItems",""+jsonObject.toString());
@@ -516,9 +534,9 @@ public class ShopA extends AppCompatActivity
                 if(hasPayment)
                 {
                     // the order is succesfully registered, so we carry out the payment
-                    if(!preOrder)
-                        showMobileNumberDialog(orderNumber, dateAdded);
-                    new LipaNaMpesaStkPush(orderNumber,dateAdded,mpesaMobile).execute((Void)null);
+                    //new LipaNaMpesaStkPush(orderNumber,dateAdded,mpesaMobile).execute((Void)null);
+                    String amount = String.valueOf(tempTotal.intValue());
+                    new MpesaStkPushTask(orderNumber, dateAdded, mpesaMobile, amount).execute((Void)null);
                 }
                 else
                 {
@@ -571,225 +589,23 @@ public class ShopA extends AppCompatActivity
 
         }
     }
-    private  void showMobileNumberDialog(final String orderNumber, final String dateAdded)
+    private class MpesaStkPushTask extends AsyncTask<Void, Void, Boolean>
     {
-        String title = "Pay with mpesa";
-        new MaterialAlertDialogBuilder(this)
-                .setTitle(title)
-                .setView(R.layout.item_dialog_mobile_number)
-                .setPositiveButton("Ok", new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which)
-                    {
-                        Dialog dialog1 = (Dialog) dialog;
-                        EditText editText = dialog1.findViewById(R.id.edittext);
-                        String msisdn = editText.getText().toString();
-                        if(TextUtils.isEmpty(msisdn))
-                        {
-                            editText.setError("Please enter a mobile number");
-                            return;
-                        }
-                        if(msisdn.contains("+254") || msisdn.startsWith("07") )
-                        {
-                            editText.setError("The number should begin with 254");
-                            return;
-                        }
-                        //make the payment
-                        new LipaNaMpesaStkPush(orderNumber,dateAdded,msisdn).execute((Void)null);
-                        dialog.dismiss();
-                    }
-                })
-                .setOnCancelListener(new DialogInterface.OnCancelListener()
-                {
-                    @Override
-                    public void onCancel(DialogInterface dialog)
-                    {
-                        showProgress(false);
-                    }
-                }).create().show();
-    }
-    private class LipaNaMpesaStkPush extends AsyncTask<Void, Void, Boolean>
-    {
-        private String orderNumber;
-        private String dateAdded;
-        private String spikingAcaciaShortcode = "7004537";// "7004537";//"5267197";//; // This is spking acacaia till number 5267197 HO number
-        private String msisdn; // MSISDN (phone number) sending the transaction, start with country code without the plus(+) sign.
-        private String passkey="bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"; // this passkey is generated by safaricom on the portal https://developer.safaricom.co.ke/test_credentials
-        private String passkeyProduction = "581d00f794be8b06879cacc830ae638861e266410c393dffdff3bcc34f107f11";// this passkey was given by safaricom for production purposes
-        private String password;
-        private String timeStamp;
-        private String confirmationUrl = base_url+"mpesa_confirmation.php";//"https://sandbox.safaricom.co.ke/mpesa/"
-        //result
-        String MerchantRequestID;
-        String CheckoutRequestID;
-        String ResponseCode;
-        String ResponseDescription;
-
-        public LipaNaMpesaStkPush(String orderNumber, String dateAdded, String msisdn)
-        {
-            this.orderNumber = orderNumber;
-            this.dateAdded = dateAdded;
-            //this.msisdn = "254708374149";
-            this.msisdn = msisdn;
-            timeStamp = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
-            //shortcode = "174379";// partyA = 601362 , partyB = 600000, lipa na mpesa = 174379
-        }
-        @Override
-        protected Boolean doInBackground(Void... voids)
-        {
-            //encode password
-            String pass_to_encode = spikingAcaciaShortcode+passkeyProduction+timeStamp;
-            byte[] bytes = new byte[0];
-            try
-            {
-                bytes = pass_to_encode.getBytes("ISO-8859-1");
-            }
-            catch (UnsupportedEncodingException e)
-            {
-                Log.e(TAG," "+e.getMessage());
-                e.printStackTrace();
-                return false;
-            }
-            password = Base64.encodeToString(bytes, Base64.NO_WRAP | Base64.URL_SAFE);
-            try
-            {
-                String amount = String.valueOf(tempTotal.intValue());
-                JSONObject jobject= Mpesa.STKPushSimulation("7004537",password,
-                        timeStamp,"CustomerBuyGoodsOnline",amount,msisdn,msisdn,"5267197",
-                        "http://3.20.17.200/order/m_listener.php","https://sandbox.safaricom.co.ke/mpesa/",
-                        "order","Testing stk push");
-                MerchantRequestID = jobject.getString("MerchantRequestID");
-                CheckoutRequestID = jobject.getString("CheckoutRequestID");
-                ResponseCode = jobject.getString("ResponseCode");
-                ResponseDescription = jobject.getString("ResponseDescription");
-                Log.d(TAG,"JSON+"+jobject.toString());
-                if(ResponseCode.contentEquals("0"))
-                    return true;
-            }
-            catch (IOException | JSONException e)
-            {
-                Log.e(TAG," "+e.getMessage());
-                e.printStackTrace();
-                return false;
-            }
-
-            return false;
-        }
-        @Override
-        protected void onPostExecute(final Boolean successful)
-        {
-
-            if (successful)
-            {
-                //check the status
-                //status -3 = paid request not sent -2 = payment request sent successfuly, -1 = payment received is 0= delete 1=accepted 2=done 3 = collected
-                new UpdateOrderTask(orderNumber, dateAdded,"-2","0").execute((Void)null);
-                //also add the mpesa request for tracking
-                new AddNewMpesaResponseTask(orderNumber,dateAdded,CheckoutRequestID,spikingAcaciaShortcode,password,timeStamp).execute((Void)null);
-            }
-            else
-            {
-                new UpdateOrderTask(orderNumber, dateAdded,"0","0").execute((Void)null);
-                Snackbar.make(fab,"Order was not successful.\nPlease try again.",Snackbar.LENGTH_LONG).show();
-            }
-        }
-    }
-    private class UpdateOrderTask extends AsyncTask<Void, Void, Boolean>
-    {
-        private String url_update=base_url+"update_seller_order.php";
+        private String url_update=base_url+"m_lnm.php";
         private String TAG_SUCCESS="success";
         private String TAG_MESSAGE="message";
         private JSONParser jsonParser;
         final private String orderNumber;
         private final String dateAdded;
-        private final String orderStatus;
-        private final String updateSellerTotal;
+        private final String amount;
+        private final String mobile;
 
-        public  UpdateOrderTask(String orderNumber, String dateAdded, String orderStatus,  String updateSellerTotal)
+        public MpesaStkPushTask(String orderNumber, String dateAdded,String mobile, String amount )
         {
             this.orderNumber = orderNumber;
             this.dateAdded = dateAdded;
-            this.orderStatus = orderStatus; // order status for unpaid order is -1, delete is 0 and for a succesful order is 1
-            this.updateSellerTotal = updateSellerTotal;
-            jsonParser = new JSONParser();
-        }
-        @Override
-        protected Boolean doInBackground(Void... params)
-        {
-            //getting columns list
-            List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
-            info.add(new BasicNameValuePair("seller_email",sellerEmail));
-            info.add(new BasicNameValuePair("buyer_email",LoginA.getServerAccount().getEmail()));
-            info.add(new BasicNameValuePair("waiter_email", "unavailable"));
-            info.add(new BasicNameValuePair("order_number",orderNumber));
-            info.add(new BasicNameValuePair("status",orderStatus));
-            info.add(new BasicNameValuePair("update_seller_total",updateSellerTotal));
-            info.add(new BasicNameValuePair("m_message",""));
-            info.add(new BasicNameValuePair("date_added",dateAdded));
-            // making HTTP request
-            JSONObject jsonObject= jsonParser.makeHttpRequest(url_update,"POST",info);
-            try
-            {
-                int success=jsonObject.getInt(TAG_SUCCESS);
-                if(success==1)
-                {
-                    return true;
-                }
-                else
-                {
-                    String message=jsonObject.getString(TAG_MESSAGE);
-                    Log.e(TAG_MESSAGE,""+message);
-                    return false;
-                }
-            }
-            catch (JSONException e)
-            {
-                Log.e("JSON",""+e.getMessage());
-                return false;
-            }
-        }
-        @Override
-        protected void onPostExecute(final Boolean successful)
-        {
-            taskCounter+=1;
-            showProgress(false);
-            if (successful && orderStatus.contentEquals("-2") && taskCounter==2)
-            {
-                Snackbar.make(fab,"Order Placed",Snackbar.LENGTH_LONG).show();
-                cartLinkedHashMap.clear();;
-                tempTotal = 0.0;
-                fab.setText(Integer.toString(getCartCount()));
-                fab.setVisibility(View.GONE);
-                onBackPressed();
-            }
-            else if(!successful)
-            {
-                Snackbar.make(fab,"Order was not successful.\nPlease try again.",Snackbar.LENGTH_LONG).show();
-            }
-        }
-    }
-    private class AddNewMpesaResponseTask extends AsyncTask<Void, Void, Boolean>
-    {
-        private String url_update=base_url+"add_mpesa_request.php";
-        private String TAG_SUCCESS="success";
-        private String TAG_MESSAGE="message";
-        private JSONParser jsonParser;
-        final private String orderNumber;
-        private final String dateAdded;
-        private final String CheckoutRequestID;
-        private final String businessShortcode;
-        private final String password;
-        private final String timestamp;
-
-        public AddNewMpesaResponseTask(String orderNumber, String dateAdded, String checkoutRequestID, String businessShortcode, String password, String timestamp)
-        {
-            this.orderNumber = orderNumber;
-            this.dateAdded = dateAdded;
-            CheckoutRequestID = checkoutRequestID;
-            this.businessShortcode = businessShortcode;
-            this.password = password;
-            this.timestamp = timestamp;
+            this.amount = amount;
+            this.mobile = mobile;
             jsonParser = new JSONParser();
         }
         @Override
@@ -801,10 +617,9 @@ public class ShopA extends AppCompatActivity
             info.add(new BasicNameValuePair("seller_email",sellerEmail));
             info.add(new BasicNameValuePair("order_number", orderNumber));
             info.add(new BasicNameValuePair("order_date_added",dateAdded));
-            info.add(new BasicNameValuePair("business_shortcode",businessShortcode));
-            info.add(new BasicNameValuePair("password",password));
-            info.add(new BasicNameValuePair("timestamp",timestamp));
-            info.add(new BasicNameValuePair("chequeout_request_id",CheckoutRequestID));
+            info.add(new BasicNameValuePair("amount",amount));
+            info.add(new BasicNameValuePair("mobile",mobile));
+
 
             // making HTTP request
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_update,"POST",info);
@@ -831,9 +646,8 @@ public class ShopA extends AppCompatActivity
         @Override
         protected void onPostExecute(final Boolean successful)
         {
-            taskCounter+=1;
             showProgress(false);
-            if (successful  && taskCounter==2)
+            if (successful)
             {
                 Snackbar.make(fab,"Order Placed",Snackbar.LENGTH_LONG).show();
                 cartLinkedHashMap.clear();;
@@ -842,7 +656,7 @@ public class ShopA extends AppCompatActivity
                 fab.setVisibility(View.GONE);
                 onBackPressed();
             }
-            else if(!successful)
+            else
             {
                 Snackbar.make(fab,"Order was not successful.\nPlease try again.",Snackbar.LENGTH_LONG).show();
             }

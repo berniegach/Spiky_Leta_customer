@@ -11,10 +11,11 @@ public class DMenu
     private String sizes;
     private String prices;
     private String imageType;
+    private boolean available;
     private String dateAdded;
     private String datechanged;
 
-    public DMenu(int id, int categoryId, int groupId, String linkedItems, String item, String description,  String sizes, String prices, String imageType, String dateAdded, String datechanged)
+    public DMenu(int id, int categoryId, int groupId, String linkedItems, String item, String description,  String sizes, String prices, String imageType, boolean available, String dateAdded, String datechanged)
     {
         this.id = id;
         this.categoryId = categoryId;
@@ -25,6 +26,7 @@ public class DMenu
         this.sizes = sizes;
         this.prices = prices;
         this.imageType = imageType;
+        this.available = available;
         this.dateAdded = dateAdded;
         this.datechanged = datechanged;
     }
@@ -115,6 +117,15 @@ public class DMenu
     public void setImageType(String imageType)
     {
         this.imageType = imageType;
+    }
+    public boolean isAvailable()
+    {
+        return available;
+    }
+
+    public void setAvailable(boolean available)
+    {
+        this.available = available;
     }
 
     public String getDateAdded()
