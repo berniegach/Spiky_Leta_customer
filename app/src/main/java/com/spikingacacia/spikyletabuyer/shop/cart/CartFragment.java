@@ -116,7 +116,7 @@ public class CartFragment extends Fragment
         EditText e_deduct = view.findViewById(R.id.deduct);
         String location = MainActivity.myLocation;
         String[] location_pieces = location.split(":");
-        if(location_pieces.length==3)
+        if(location_pieces.length==3 && (!location_pieces[2].contentEquals("null")))
             textViewTotal.setText(Utils.getCurrencyCode(location_pieces[2])+" "+ mTempTotal.intValue());
         else
             textViewTotal.setText( mTempTotal.intValue());

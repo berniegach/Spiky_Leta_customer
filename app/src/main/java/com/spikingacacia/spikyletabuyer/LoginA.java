@@ -220,7 +220,7 @@ public class LoginA extends AppCompatActivity implements View.OnClickListener
         private final String mEmail;
         private  JSONParser jsonParser;
         private int success=0;
-        private ServerAccount account;
+        private ServerAccount local_account;
 
         LoginTask(String email) {
             mEmail = email;
@@ -259,7 +259,7 @@ public class LoginA extends AppCompatActivity implements View.OnClickListener
                     String date_added = accountObject.getString("dateadded");
                     String date_changed = accountObject.getString("datechanged");
 
-                    account = new ServerAccount(id,email,password, username, location, image_type, wallet, date_added, date_changed);
+                    local_account = new ServerAccount(id,email,password, username, location, image_type, wallet, date_added, date_changed);
 
                     return true;
                 }
@@ -283,7 +283,7 @@ public class LoginA extends AppCompatActivity implements View.OnClickListener
 
             if (successful)
             {
-                serverAccount = account;
+                serverAccount = local_account;
                 Intent intent=new Intent(LoginA.this, MainActivity.class);
                 //prevent this activity from flickering as we call the next one
                 intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);

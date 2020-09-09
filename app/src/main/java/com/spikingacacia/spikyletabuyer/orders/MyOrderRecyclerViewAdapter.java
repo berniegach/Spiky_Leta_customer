@@ -5,8 +5,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.toolbox.ImageLoader;
@@ -16,6 +18,7 @@ import com.spikingacacia.spikyletabuyer.AppController;
 import com.spikingacacia.spikyletabuyer.LoginA;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.database.Orders;
+import com.spikingacacia.spikyletabuyer.database.TastyBoard;
 import com.spikingacacia.spikyletabuyer.main.orders_list.OrdersFragment.OnListFragmentInteractionListener;
 
 import org.ocpsoft.prettytime.PrettyTime;
@@ -26,9 +29,10 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public class MyOrderRecyclerViewAdapter extends RecyclerView.Adapter<MyOrderRecyclerViewAdapter.ViewHolder>
+public class MyOrderRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 {
-
+    private final int VIEW_TYPE_ITEM = 0;
+    private final int VIEW_TYPE_LOADING = 1;
     private List<Orders> mValues;
     private List<Orders> itemsCopy;
     private final OnListFragmentInteractionListener mListener;
@@ -43,56 +47,48 @@ public class MyOrderRecyclerViewAdapter extends RecyclerView.Adapter<MyOrderRecy
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType)
     {
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.fragment_orders, parent, false);
-        return new ViewHolder(view);
+        if (viewType == VIEW_TYPE_ITEM) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.fragment_orders, parent, false);
+            return new ViewHolder(view);
+        } else {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_loading, parent, false);
+            return new LoadingViewHolder(view);
+        }
+
+        /*View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.fragment_orders, parent, false);*/
+        //return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(final ViewHolder holder, int position)
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position)
     {
-        String image_url= LoginA.base_url+"src/sellers_pics/";
-        holder.mItem = mValues.get(position);
-        holder.mOrderView.setText("Order "+mValues.get(position).getOrderNumber());
-        int table_number = mValues.get(position).getTableNumber();
-        holder.mTableView.setText(table_number == -1 ? "Pre - Order" : "Table "+table_number);
-        holder.mUsernameView.setText(mValues.get(position).getSellerNames());
-        //format the date
-        SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:mm");
-        PrettyTime p = new PrettyTime();
-        try
+        if (holder instanceof ViewHolder)
         {
-            holder.mDateView.setText(p.format(format.parse(mValues.get(position).getDateAddedLocal())));
-        } catch (ParseException e)
-        {
-            e.printStackTrace();
+            populateItemRows((ViewHolder) holder, position);
         }
-        if(mValues.get(position).getOrderStatus()==5)
-            holder.mTimeImage.setVisibility(View.GONE);
-
-        holder.mView.setOnClickListener(new View.OnClickListener()
+        else if (holder instanceof LoadingViewHolder)
         {
-            @Override
-            public void onClick(View v)
-            {
-                if (null != mListener)
-                {
-                    // Notify the active callbacks interface (the activity, if the
-                    // fragment is attached to one) that an item has been selected.
-                    mListener.onOrderClicked(holder.mItem);
-                }
-            }
-        });
-        String url=image_url+String.valueOf(mValues.get(position).getSellerId())+'_'+String.valueOf(mValues.get(position).getSellerImageType());
-        Glide.with(context).load(url).into(holder.image);
+            showLoadingView((LoadingViewHolder) holder, position);
+        }
     }
 
     @Override
     public int getItemCount()
     {
-        return mValues.size();
+        return mValues == null ? 0 : mValues.size();
+    }
+    /**
+     * The following method decides the type of ViewHolder to display in the RecyclerView
+     *
+     * @param position
+     * @return
+     */
+    @Override
+    public int getItemViewType(int position) {
+        return mValues.get(position) == null ? VIEW_TYPE_LOADING : VIEW_TYPE_ITEM;
     }
     public void filter(String text)
     {
@@ -105,6 +101,21 @@ public class MyOrderRecyclerViewAdapter extends RecyclerView.Adapter<MyOrderRecy
             for(Orders orderItem:itemsCopy)
             {
                 if(orderItem.getSellerNames().toLowerCase().contains(text))
+                    mValues.add(orderItem);
+            }
+        }
+        notifyDataSetChanged();
+    }
+    public void filter(int status)
+    {
+        mValues.clear();
+        if(status==0)
+            mValues.addAll(itemsCopy);
+        else
+        {
+            for(Orders orderItem:itemsCopy)
+            {
+                if(orderItem.getOrderStatus()!=5)
                     mValues.add(orderItem);
             }
         }
@@ -140,11 +151,81 @@ public class MyOrderRecyclerViewAdapter extends RecyclerView.Adapter<MyOrderRecy
             return super.toString() + " '" + mUsernameView.getText() + "'";
         }
     }
+    public  class LoadingViewHolder extends RecyclerView.ViewHolder
+    {
+
+        ProgressBar progressBar;
+
+        public LoadingViewHolder(@NonNull View itemView)
+        {
+            super(itemView);
+            progressBar = itemView.findViewById(R.id.progressBar);
+        }
+
+    }
+
     public void listUpdated(List<Orders> newitems)
     {
         mValues.clear();
         mValues.addAll(newitems);
         itemsCopy.addAll(newitems);
         notifyDataSetChanged();
+    }
+    public void listAddProgressBar()
+    {
+        mValues.add(null);
+        notifyDataSetChanged();
+    }
+    public void listRemoveProgressBar()
+    {
+        mValues.remove(mValues.size()-1);
+        notifyDataSetChanged();
+    }
+    public void listAddItems(List<Orders> newitems)
+    {
+        mValues.addAll(newitems);
+        itemsCopy.addAll(newitems);
+        notifyDataSetChanged();
+    }
+    private void showLoadingView(LoadingViewHolder viewHolder, int position) {
+        //ProgressBar would be displayed
+
+    }
+    private void populateItemRows(final ViewHolder holder, int position)
+    {
+        String image_url= LoginA.base_url+"src/sellers_pics/";
+        holder.mItem = mValues.get(position);
+        holder.mOrderView.setText("Order "+mValues.get(position).getOrderNumber());
+        int table_number = mValues.get(position).getTableNumber();
+        holder.mTableView.setText(table_number == -1 ? "Pre - Order" : "Table "+table_number);
+        holder.mUsernameView.setText(mValues.get(position).getSellerNames());
+        //format the date
+        SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy HH:mm");
+        PrettyTime p = new PrettyTime();
+        try
+        {
+            holder.mDateView.setText(p.format(format.parse(mValues.get(position).getDateAddedLocal())));
+        } catch (ParseException e)
+        {
+            // e.printStackTrace();
+        }
+        if(mValues.get(position).getOrderStatus()==5)
+            holder.mTimeImage.setVisibility(View.GONE);
+
+        holder.mView.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                if (null != mListener)
+                {
+                    // Notify the active callbacks interface (the activity, if the
+                    // fragment is attached to one) that an item has been selected.
+                    mListener.onOrderClicked(holder.mItem);
+                }
+            }
+        });
+        String url=image_url+String.valueOf(mValues.get(position).getSellerId())+'_'+String.valueOf(mValues.get(position).getSellerImageType());
+        Glide.with(context).load(url).into(holder.image);
     }
 }

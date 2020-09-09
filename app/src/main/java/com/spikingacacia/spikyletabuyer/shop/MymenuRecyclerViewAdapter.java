@@ -78,7 +78,7 @@ public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecycl
         {
             String location = MainActivity.myLocation;
             String[] location_pieces = location.split(":");
-            if(location_pieces.length==3)
+            if(location_pieces.length==3 && (!location_pieces[2].contentEquals("null")))
                 sizePrice+=" "+sizes[c]+" @ "+ Utils.getCurrencyCode(location_pieces[2])+" "+prices[c];
             else
                 sizePrice+=" "+sizes[c]+" @ "+prices[c];

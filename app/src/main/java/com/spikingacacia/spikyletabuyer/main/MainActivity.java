@@ -175,14 +175,14 @@ public class MainActivity extends AppCompatActivity implements
     public void onRestoreInstanceState(Bundle savedInstanceState)
     {
         LoginA.setServerAccount((ServerAccount) savedInstanceState.getSerializable(LoginA.SAVE_INSTANCE_SERVER_ACCOUNT));
-        Log.d(TAG,"main_a has been recreated therefoew we restore server account");
+        //Log.d(TAG,"main_a has been recreated therefoew we restore server account");
     }
     // invoked when the activity may be temporarily destroyed, save the instance state here
     @Override
     public void onSaveInstanceState(Bundle outState)
     {
         outState.putSerializable(LoginA.SAVE_INSTANCE_SERVER_ACCOUNT,LoginA.getServerAccount());
-        Log.e(TAG,"main_a is been destroyed threfore we call onsaved instance");
+        //Log.d(TAG,"main_a is been destroyed threfore we call onsaved instance");
         // call superclass to save any view hierarchy
         super.onSaveInstanceState(outState);
     }

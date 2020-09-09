@@ -8,8 +8,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -21,6 +24,7 @@ import com.spikingacacia.spikyletabuyer.LoginA;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.database.Orders;
 import com.spikingacacia.spikyletabuyer.main.orders_list.OrdersFragment;
+import com.spikingacacia.spikyletabuyer.util.Utils;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -103,6 +107,36 @@ public class OneOrderFragment extends Fragment
         TextView t_order_type = view.findViewById(R.id.order_type);
         LinearLayout l_payment_failed = view.findViewById(R.id.l_payment_failed);
         Button b_delete = view.findViewById(R.id.b_delete);
+        ScrollView l_less = view.findViewById(R.id.layout_less);
+        LinearLayout l_more = view.findViewById(R.id.layout_more);
+        ImageButton b_expand_less = view.findViewById(R.id.expand_less);
+        ImageButton b_expand_more = view.findViewById(R.id.expand_more);
+        ImageView image_qr_code = view.findViewById(R.id.qr_code);
+        Utils.collapse(l_more);
+        b_expand_more.setVisibility(View.GONE);
+
+        b_expand_less.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                v.setVisibility(View.GONE);
+                b_expand_more.setVisibility(View.VISIBLE);
+                Utils.collapse(l_less);
+                Utils.expand(l_more);
+            }
+        });
+        b_expand_more.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                v.setVisibility(View.GONE);
+                b_expand_less.setVisibility(View.VISIBLE);
+                Utils.collapse(l_more);
+                Utils.expand(l_less);
+            }
+        });
         //set the buttons listeners
         Button b_pay=view.findViewById(R.id.pay);
         b_pay.setOnClickListener(new View.OnClickListener()
@@ -172,6 +206,8 @@ public class OneOrderFragment extends Fragment
         String waiter="";
         String collect_time="";
         int i_order_type=0;
+        String url_code_start_delivery ="";
+        String url_code_end_delivery = "";
         Iterator iterator= OrdersFragment.ordersLinkedHashMap.entrySet().iterator();
         while (iterator.hasNext())
         {
@@ -197,6 +233,11 @@ public class OneOrderFragment extends Fragment
             if(count==0)
             {
                 progressBar.setProgress(orderStatus);
+            }
+            if(mOrderStatus == 3 || mOrderStatus == 4)
+            {
+                url_code_start_delivery = orders.getUrlCodeStartDelivery();
+                url_code_end_delivery = orders.getUrlCodeEndDelivery();
             }
             sellerEmail = orders.getSellerEmail();
             orderNumber = orders.getOrderNumber();
@@ -232,6 +273,15 @@ public class OneOrderFragment extends Fragment
         t_waiter.setText(waiter);
         String[] order_types = new String[]{"In house", "Take away", "Delivery"};
         t_order_type.setText(order_types[i_order_type]);
+        if(mOrderStatus == 4)
+        {
+            if(url_code_end_delivery.length()>10)
+            {
+                image_qr_code.setVisibility(View.VISIBLE);
+                image_qr_code.setImageBitmap(Utils.generateQRCode(url_code_end_delivery));
+            }
+        }
+
         return view;
     }
     @Override
