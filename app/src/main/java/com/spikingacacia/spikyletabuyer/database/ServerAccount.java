@@ -13,10 +13,11 @@ public class ServerAccount implements Serializable
     private double wallet;
     private String dateadded;
     private String datechanged;
+    private String mFirebaseTokenId;
 
     public ServerAccount(){}
 
-    public ServerAccount(int id, String email, String password, String username, String location, String imageType, double wallet, String dateadded, String datechanged) {
+    public ServerAccount(int id, String email, String password, String username, String location, String imageType, double wallet, String dateadded, String datechanged, String firebaseTokenId) {
         this.id = id;
         this.email = email;
         this.password = password;
@@ -26,6 +27,7 @@ public class ServerAccount implements Serializable
         this.wallet = wallet;
         this.dateadded = dateadded;
         this.datechanged = datechanged;
+        this.mFirebaseTokenId = firebaseTokenId;
     }
 
     public int getId() {
@@ -103,6 +105,15 @@ public class ServerAccount implements Serializable
 
     public void setDatechanged(String datechanged) {
         this.datechanged = datechanged;
+    }
+    public String getmFirebaseTokenId()
+    {
+        return mFirebaseTokenId;
+    }
+
+    public void setmFirebaseTokenId(String mFirebaseTokenId)
+    {
+        this.mFirebaseTokenId = mFirebaseTokenId;
     }
 
 }

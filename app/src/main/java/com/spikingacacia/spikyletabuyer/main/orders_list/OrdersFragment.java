@@ -311,13 +311,20 @@ public class OrdersFragment extends Fragment
             }
             if (successful)
             {
+                List<Orders> unique_order= new ArrayList<>();
+                Iterator iterator = uniqueOrderLinkedHashMap.entrySet().iterator();
+                while (iterator.hasNext())
+                {
+                    LinkedHashMap.Entry<String, Orders> value = ( LinkedHashMap.Entry<String, Orders>) iterator.next();
+                    unique_order.add(value.getValue());
+                }
                 if(load_more)
                 {
-                    myOrderRecyclerViewAdapter.listAddItems(list);
+                    myOrderRecyclerViewAdapter.listAddItems(unique_order);
                 }
                 else
                 {
-                    myOrderRecyclerViewAdapter.listUpdated(list);
+                    myOrderRecyclerViewAdapter.listUpdated(unique_order);
                 }
 
 

@@ -24,8 +24,11 @@ import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 import com.spikingacacia.spikyletabuyer.database.ServerAccount;
 import com.spikingacacia.spikyletabuyer.main.MainActivity;
+import com.spikingacacia.spikyletabuyer.util.MyFirebaseMessagingService;
 
 
 import org.apache.http.NameValuePair;
@@ -111,8 +114,8 @@ public class LoginA extends AppCompatActivity implements View.OnClickListener
             //proceed to sign in
             if(account!=null)
             {
-                Intent intent = new Intent(this, OrdersService.class);
-                startService(intent);
+                //Intent intent = new Intent(this, OrdersService.class);
+                //startService(intent);
                 proceedToLogin();
             }
             else
@@ -256,10 +259,11 @@ public class LoginA extends AppCompatActivity implements View.OnClickListener
                     String location = accountObject.getString("location");
                     String image_type = accountObject.getString("image_type");
                     double wallet = accountObject.getDouble("wallet");
+                    String firebase_token_id = accountObject.getString("firebase_token_id");
                     String date_added = accountObject.getString("dateadded");
                     String date_changed = accountObject.getString("datechanged");
 
-                    local_account = new ServerAccount(id,email,password, username, location, image_type, wallet, date_added, date_changed);
+                    local_account = new ServerAccount(id,email,password, username, location, image_type, wallet, date_added, date_changed, firebase_token_id);
 
                     return true;
                 }

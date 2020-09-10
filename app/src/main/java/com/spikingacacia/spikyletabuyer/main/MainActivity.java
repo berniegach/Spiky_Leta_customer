@@ -48,6 +48,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 import com.spikingacacia.spikyletabuyer.JSONParser;
 import com.spikingacacia.spikyletabuyer.LoginA;
 import com.spikingacacia.spikyletabuyer.database.MpesaRequests;
@@ -67,6 +69,7 @@ import com.spikingacacia.spikyletabuyer.orders.OrdersActivity;
 import com.spikingacacia.spikyletabuyer.restaurants.SRRestaurantsA;
 import com.spikingacacia.spikyletabuyer.shop.ShopA;
 import com.spikingacacia.spikyletabuyer.util.Mpesa;
+import com.spikingacacia.spikyletabuyer.util.MyFirebaseMessagingService;
 import com.spikingacacia.spikyletabuyer.wallet.WalletActivity;
 
 import org.apache.http.NameValuePair;
@@ -165,6 +168,7 @@ public class MainActivity extends AppCompatActivity implements
         getCurrentLocation();
         restaurantsList =new LinkedList<>();
         mpesaRequestsList = new ArrayList<>();
+        checkFirebaseToken();
 
     }
     // This callback is called only when there is a saved instance that is previously saved by using
@@ -343,6 +347,24 @@ public class MainActivity extends AppCompatActivity implements
                 = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+    private void checkFirebaseToken()
+    {
+        FirebaseInstanceId.getInstance().getInstanceId()
+                .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                        if (!task.isSuccessful()) {
+                            Log.e(TAG, "getInstanceId failed", task.getException());
+                            return;
+                        }
+
+                        // Get new Instance ID token
+                        String token = task.getResult().getToken();
+                        if(!LoginA.getServerAccount().getmFirebaseTokenId().contentEquals(token))
+                            new MyFirebaseMessagingService.UpdateTokenTask(token).execute((Void)null);
+                    }
+                });
     }
     private void getCurrentLocation(final Barcode barcode)
     {
