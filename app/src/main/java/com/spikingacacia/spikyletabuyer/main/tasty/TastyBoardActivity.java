@@ -62,7 +62,7 @@ public class TastyBoardActivity extends AppCompatActivity implements
     private LinkedHashMap<String,Integer> itemPriceSizeLinkedHashMap = new LinkedHashMap<>();
     private Double total = 0.0;
     private Double deliveryCharge = 0.0;
-    private String diningOptions="1:1:1";
+    private String diningOptions="1:1:0";
     private String sellerEmail="";
     private int taskCounter = 0; //counter for updating order and adding a new mpesa response request in the database
     @Override

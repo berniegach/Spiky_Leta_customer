@@ -14,6 +14,7 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
@@ -49,6 +50,7 @@ public class OneOrderFragment extends Fragment
     private static final String ARG_FORMAT = "order_format";
     private static final String ARG_ORDER_STATUS = "order_status";
     private static final String ARG_PRE_ORDER = "pre_order";
+    private CheckPaymentTask checkPaymentTask;
     private String mOrder;
     private int mOrderFormat;
     private int mOrderStatus;
@@ -107,10 +109,11 @@ public class OneOrderFragment extends Fragment
         TextView t_order_type = view.findViewById(R.id.order_type);
         LinearLayout l_payment_failed = view.findViewById(R.id.l_payment_failed);
         Button b_delete = view.findViewById(R.id.b_delete);
+        Button b_check_payment = view.findViewById(R.id.check_payment);
         ScrollView l_less = view.findViewById(R.id.layout_less);
         LinearLayout l_more = view.findViewById(R.id.layout_more);
-        ImageButton b_expand_less = view.findViewById(R.id.expand_less);
-        ImageButton b_expand_more = view.findViewById(R.id.expand_more);
+        Button b_expand_less = view.findViewById(R.id.expand_less);
+        Button b_expand_more = view.findViewById(R.id.expand_more);
         ImageView image_qr_code = view.findViewById(R.id.qr_code);
         Utils.collapse(l_more);
         b_expand_more.setVisibility(View.GONE);
@@ -156,6 +159,22 @@ public class OneOrderFragment extends Fragment
                 new UpdateOrderTask(sellerEmail,String.valueOf(orderNumber),dateAdded,"0","0").execute((Void)null);
             }
         });
+        b_check_payment.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                if(checkPaymentTask == null  || checkPaymentTask.getStatus() != AsyncTask.Status.RUNNING)
+                {
+                    checkPaymentTask = new CheckPaymentTask(sellerEmail,String.valueOf(orderNumber),dateAdded);
+                    checkPaymentTask.execute((Void)null);
+                }
+                else
+                {
+                    Toast.makeText(getContext(),"Task already running",Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
        //the order status are
         // -3 for new order, -2 = unpaid, -1 = paid, 0 = deleted, 1 = pending, 2 = ..... until 5 = finished
         String[] status_strings_1 = new String[]{"pending","in progress","delivery","payment","finished"};
@@ -174,6 +193,7 @@ public class OneOrderFragment extends Fragment
         else if( mOrderStatus == -2)
         {
             //payment not gone through yet
+            b_check_payment.setVisibility(View.VISIBLE);
         }
         else if( mOrderStatus == -3)
         {
@@ -378,6 +398,83 @@ public class OneOrderFragment extends Fragment
             else
             {
                 Log.e(TAG,"update order failed");
+            }
+        }
+    }
+    private class CheckPaymentTask extends AsyncTask<Void, Void, Boolean>
+    {
+        private String url_update=base_url+"m_lnm_check.php";
+        private String TAG_SUCCESS="success";
+        private String TAG_MESSAGE="message";
+        private JSONParser jsonParser;
+        final private String orderNumber;
+        private final String dateAdded;
+        private final String sellerEmail;
+        private int success = 0;
+
+        @Override
+        protected void onPreExecute()
+        {
+            super.onPreExecute();
+            Toast.makeText(getContext(),"Please wait",Toast.LENGTH_LONG).show();
+        }
+
+        public  CheckPaymentTask(String sellerEmail, String orderNumber, String dateAdded)
+        {
+            this.sellerEmail = sellerEmail;
+            this.orderNumber = orderNumber;
+            this.dateAdded = dateAdded;
+            jsonParser = new JSONParser();
+        }
+        @Override
+        protected Boolean doInBackground(Void... params)
+        {
+            //getting columns list
+            List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
+            info.add(new BasicNameValuePair("user_email", LoginA.getServerAccount().getEmail()));
+            info.add(new BasicNameValuePair("seller_email", sellerEmail));
+            info.add(new BasicNameValuePair("order_number",orderNumber));
+            info.add(new BasicNameValuePair("order_date_added",dateAdded));
+
+            // making HTTP request
+            JSONObject jsonObject= jsonParser.makeHttpRequest(url_update,"POST",info);
+            //Log.d(TAG,""+jsonObject.toString());
+            try
+            {
+                success=jsonObject.getInt(TAG_SUCCESS);
+                if(success==1)
+                {
+                    return true;
+                }
+                else
+                {
+                    String message=jsonObject.getString(TAG_MESSAGE);
+                    Log.e(TAG_MESSAGE,""+message);
+                    return false;
+                }
+            }
+            catch (JSONException e)
+            {
+                Log.e("JSON",""+e.getMessage());
+                return false;
+            }
+        }
+        @Override
+        protected void onPostExecute(final Boolean successful)
+        {
+            if (successful )
+            {
+                Log.d(TAG,"payment check succesful");
+                //since there can be multiple asyntasks running at the same time m_index may generate IndexOutOfBoundsException
+                requireActivity().onBackPressed();
+            }
+            else
+            {
+                if(success == -8)
+                    Toast.makeText(getContext(),"Payment already applied",Toast.LENGTH_LONG).show();
+                else if(success == -9)
+                    Toast.makeText(getContext(),"Payment failed. Please pay",Toast.LENGTH_LONG).show();
+                Log.e(TAG,"payment check failed");
             }
         }
     }

@@ -155,7 +155,7 @@ public class CartFragment extends Fragment
                     int num = Integer.parseInt(s.toString());
                     //we can't allow the final total be less than 5
                     if(mTempTotal-num<5)
-                        e_deduct.setError("Too low");
+                        e_deduct.setError("Total amount cannot be less than 0");
                     else if(num>wallet)
                         e_deduct.setError("Too high");
                     else

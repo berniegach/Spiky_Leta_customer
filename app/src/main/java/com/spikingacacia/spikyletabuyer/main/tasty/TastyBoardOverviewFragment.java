@@ -115,8 +115,8 @@ public class TastyBoardOverviewFragment extends Fragment
         TabLayout tabLayout = view.findViewById(R.id.tab_layout);
         tabLayout.setupWithViewPager(viewPager);
 
-        ImageButton b_expand_less = view.findViewById(R.id.expand_less);
-        ImageButton b_expand_more = view.findViewById(R.id.expand_more);
+        Button b_expand_less = view.findViewById(R.id.expand_less);
+        Button b_expand_more = view.findViewById(R.id.expand_more);
         Utils.collapse(viewPager);
         b_expand_more.setVisibility(View.GONE);
 

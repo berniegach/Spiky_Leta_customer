@@ -101,30 +101,27 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-
-    <ImageButton
+    <Button
         android:id="@+id/expand_less"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:backgroundTint="@android:color/white"
-        android:elevation="6dp"
-        android:src="@drawable/ic_baseline_expand_less"
+        android:drawableLeft="@drawable/ic_baseline_expand_less_w"
+        android:text="More"
+        android:textAllCaps="false"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layout_less" />
-
-    <ImageButton
+        app:layout_constraintTop_toBottomOf="@+id/layout_less"/>
+    <Button
         android:id="@+id/expand_more"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:backgroundTint="@android:color/white"
-        android:elevation="6dp"
-        android:src="@drawable/ic_baseline_expand_more"
+        android:drawableLeft="@drawable/ic_baseline_expand_more_w"
+        android:text="Overview"
+        android:textAllCaps="false"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"/>
+
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/pager"

@@ -6,11 +6,13 @@ import android.os.Bundle;
 import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 
+import android.text.Layout;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -96,6 +98,7 @@ public class OrderParamsFragment extends Fragment
         TextView t_sub_total = view.findViewById(R.id.sub_total);
         TextView t_total = view.findViewById(R.id.total);
         Button b_order = view.findViewById(R.id.button_order);
+        LinearLayout l_delivery = view.findViewById(R.id.l_delivery);
 
         t_delivery_charges.setText(String.valueOf(mDeliveryCharge.intValue()));
         t_sub_total.setText(String.valueOf(mSubTotal.intValue()));
@@ -135,6 +138,7 @@ public class OrderParamsFragment extends Fragment
                     c_instructions.setVisibility(View.GONE);
                     c_deliver_to_my_location.setVisibility(View.GONE);
                     which = 0;
+                    l_delivery.setVisibility(View.GONE);
                 }
                 else if(checkedId == R.id.radio_take_away)
                 {
@@ -145,6 +149,7 @@ public class OrderParamsFragment extends Fragment
                     c_instructions.setVisibility(View.GONE);
                     c_deliver_to_my_location.setVisibility(View.GONE);
                     which = 1;
+                    l_delivery.setVisibility(View.GONE);
                 }
                 else if(checkedId == R.id.radio_delivery)
                 {
@@ -155,13 +160,14 @@ public class OrderParamsFragment extends Fragment
                     c_instructions.setVisibility(View.VISIBLE);
                     c_deliver_to_my_location.setVisibility(View.VISIBLE);
                     which = 2;
+                    l_delivery.setVisibility(View.VISIBLE);
                 }
             }
         });
         //check dining options
         String[] s_dining_options = mDiningOptions.split(":");
         if(s_dining_options.length==1 || s_dining_options.length==0)
-            s_dining_options = new String[]{"1","1","1"};
+            s_dining_options = new String[]{"1","1","0"};
         int[] dining_options = new int[]{Integer.parseInt(s_dining_options[0]), Integer.parseInt(s_dining_options[1]), Integer.parseInt(s_dining_options[2])};
         radio_sit_in.setEnabled(dining_options[0] == 1);
         radio_take_away.setEnabled(dining_options[1] == 1);

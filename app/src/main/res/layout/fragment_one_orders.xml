@@ -243,23 +243,22 @@
                     android:layout_gravity="center_horizontal"/>
             </LinearLayout>
         </ScrollView>
-        <ImageButton
+        <Button
             android:id="@+id/expand_less"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:elevation="6dp"
-            android:layout_gravity="center_horizontal"
-            android:src="@drawable/ic_baseline_expand_less"
-            android:backgroundTint="@android:color/white"/>
-        <ImageButton
+            android:drawableLeft="@drawable/ic_baseline_expand_less_w"
+            android:text="Orders"
+            android:textAllCaps="false"
+            android:layout_gravity="center_horizontal" />
+        <Button
             android:id="@+id/expand_more"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:elevation="6dp"
-            android:layout_gravity="center_horizontal"
-            android:src="@drawable/ic_baseline_expand_more"
-            android:backgroundTint="@android:color/white"/>
-
+            android:drawableLeft="@drawable/ic_baseline_expand_more_w"
+            android:text="Overview"
+            android:textAllCaps="false"
+            android:layout_gravity="center_horizontal" />
 
     <LinearLayout
         android:id="@+id/layout_more"
@@ -334,6 +333,15 @@
                 android:layout_marginTop="3dp"
                 android:gravity="center"
                 android:text="Pay" />
+            <Button
+                android:id="@+id/check_payment"
+                android:visibility="gone"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="3dp"
+                android:gravity="center"
+                android:text="Check Payment" />
         </LinearLayout>
 
     </LinearLayout>
