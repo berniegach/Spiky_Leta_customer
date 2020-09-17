@@ -33,10 +33,13 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.Volley;
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.spikingacacia.spikyletabuyer.JSONParser;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.database.Categories;
 import com.spikingacacia.spikyletabuyer.database.DMenu;
+import com.spikingacacia.spikyletabuyer.database.Groups;
 
 
 import org.apache.http.NameValuePair;
@@ -46,6 +49,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -58,7 +62,7 @@ import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
 /**
  * A fragment representing a list of Items.
  */
-public class menuFragment extends Fragment
+public class menuFragment extends Fragment implements MymenuRecyclerViewAdapter.OptionsListener
 {
 
     private static final String ARG_SELLER_EMAIL = "seller-email";
@@ -69,6 +73,9 @@ public class menuFragment extends Fragment
     private MymenuCategoryRecyclerViewAdapter mymenuCategoryRecyclerViewAdapter;
     private OnListFragmentInteractionListener mListener;
     private String TAG = "menuF";
+    private ChipGroup chipGroupCategeories;
+    private ChipGroup chipGroupGroups;
+    private int chipCategoryChecked;
 
     public menuFragment()
     {
@@ -99,9 +106,11 @@ public class menuFragment extends Fragment
                              Bundle savedInstanceState)
     {
         View view = inflater.inflate(R.layout.fragment_menu_list, container, false);
-        RecyclerView recyclerViewCategories = view.findViewById(R.id.list_categories);
+        chipGroupCategeories = view.findViewById(R.id.chip_group_category);
+        //RecyclerView recyclerViewGroups = view.findViewById(R.id.list_groups);
+        chipGroupGroups = view.findViewById(R.id.chip_group_group);
         mymenuCategoryRecyclerViewAdapter = new MymenuCategoryRecyclerViewAdapter(mListener, getContext());
-        recyclerViewCategories.setAdapter(mymenuCategoryRecyclerViewAdapter);
+        //recyclerViewCategories.setAdapter(mymenuCategoryRecyclerViewAdapter);
 
         recyclerViewMenu = view.findViewById(R.id.list);
         Context context = view.getContext();
@@ -112,9 +121,45 @@ public class menuFragment extends Fragment
         {
             recyclerViewMenu.setLayoutManager(new GridLayoutManager(context, getHorizontalItemCount()));
         }
-        mymenuRecyclerViewAdapter = new MymenuRecyclerViewAdapter(mListener, getContext(), getChildFragmentManager());
+        mymenuRecyclerViewAdapter = new MymenuRecyclerViewAdapter(mListener, getContext(), getChildFragmentManager(), this);
         recyclerViewMenu.setAdapter(mymenuRecyclerViewAdapter);
         recyclerViewMenu.addItemDecoration(new SpacesItemDecoration(20));
+        chipGroupCategeories.setOnCheckedChangeListener(new ChipGroup.OnCheckedChangeListener()
+        {
+            @Override
+            public void onCheckedChanged(ChipGroup group, int checkedId)
+            {
+                Chip chip = chipGroupCategeories.findViewById( chipGroupCategeories.getCheckedChipId() );
+                if(chip != null)
+                {
+                    int category_id = (int)chip.getTag();
+                    mymenuRecyclerViewAdapter.filterCategory(category_id);
+                    chipCategoryChecked = category_id;
+                }
+                else
+                    mymenuRecyclerViewAdapter.filterCategory(0);
+            }
+        });
+        chipGroupGroups.setOnCheckedChangeListener(new ChipGroup.OnCheckedChangeListener()
+        {
+            @Override
+            public void onCheckedChanged(ChipGroup group, int checkedId)
+            {
+                Chip chip = chipGroupGroups.findViewById( chipGroupGroups.getCheckedChipId() );
+                if(chip != null)
+                {
+                    String tag = (String) chip.getTag();
+                    int category_id = Integer.parseInt(tag.split(":")[0]);
+                    int group_id = Integer.parseInt(tag.split(":")[1]);
+                    mymenuRecyclerViewAdapter.filterCategory(category_id, group_id);
+                }
+                else
+                    mymenuRecyclerViewAdapter.filterCategory(chipCategoryChecked);
+            }
+        });
+        new CategoriesTask().execute((Void)null);
+        new GroupsTask().execute((Void)null);
+        new MenuTask().execute((Void)null);
         return view;
     }
     @Override
@@ -136,13 +181,6 @@ public class menuFragment extends Fragment
     {
         super.onDetach();
         mListener = null;
-    }
-    @Override
-    public void onResume()
-    {
-        super.onResume();
-        new CategoriesTask().execute((Void)null);
-        new MenuTask().execute((Void)null);
     }
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
@@ -175,12 +213,18 @@ public class menuFragment extends Fragment
 
     }
 
+    @Override
+    public void onOptionsMenuChooseAccompaniments(DMenu dMenu, List<DMenu> dMenuList)
+    {
+        LinkedItemListDialogFragment.newInstance(dMenu,dMenuList, mListener).show(getChildFragmentManager(), "dialog");
+    }
 
-    public interface OnListFragmentInteractionListener
+
+    public interface OnListFragmentInteractionListener extends Serializable
     {
         // TODO: Update argument type and name
         //void onEditMenu(int which, DMenu dMenu);
-        void onMenuItemInteraction(List<DMenu> item);
+        void onMenuItemInteraction(List<DMenu> item, List<Integer>items_new_sizes_prices_index);
         //void onCategoryItemInteraction(Categories item);
     }
     private int getHorizontalItemCount()
@@ -228,8 +272,180 @@ public class menuFragment extends Fragment
             }
         }
     }
-
+    private void addCategoryChipLayouts(List<Categories>list)
+    {
+        for(int c=0; c<list.size(); c++)
+        {
+            Categories categories =list.get(c);
+            Chip chip = new Chip(getContext());
+            chip.setText(categories.getTitle());
+            chip.setTag(categories.getId());
+            chip.setClickable(true);
+            chip.setCheckable(true);
+            chipGroupCategeories.addView(chip);
+        }
+    }
+    private void addGroupChipLayouts(List<Groups>list)
+    {
+        for(int c=0; c<list.size(); c++)
+        {
+            Groups groups =list.get(c);
+            Chip chip = new Chip(getContext());
+            chip.setText(groups.getTitle());
+            chip.setTag(groups.getCategoryId()+":"+groups.getId());
+            chip.setClickable(true);
+            chip.setCheckable(true);
+            chipGroupGroups.addView(chip);
+        }
+    }
     private class CategoriesTask extends AsyncTask<Void, Void, Boolean>
+    {
+        private String TAG_SUCCESS="success";
+        private String TAG_MESSAGE="message";
+        private  JSONParser jsonParser;
+        private List<Categories> list;
+        @Override
+        protected void onPreExecute()
+        {
+            jsonParser = new JSONParser();
+            list = new ArrayList<>();
+            super.onPreExecute();
+        }
+        @Override
+        protected Boolean doInBackground(Void... params)
+        {
+            //getting columns list
+            List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
+            info.add(new BasicNameValuePair("email",mSellerEmail));
+            // making HTTP request
+            String url_get_s_categories = base_url + "get_seller_categories.php";
+            JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_s_categories,"POST",info);
+            Log.d("sCategories",""+jsonObject.toString());
+            try
+            {
+                JSONArray categoriesArrayList=null;
+                int success=jsonObject.getInt(TAG_SUCCESS);
+                if(success==1)
+                {
+                    categoriesArrayList=jsonObject.getJSONArray("categories");
+                    for(int count=0; count<categoriesArrayList.length(); count+=1)
+                    {
+                        JSONObject jsonObjectNotis=categoriesArrayList.getJSONObject(count);
+                        int id=jsonObjectNotis.getInt("id");
+                        String title=jsonObjectNotis.getString("title");
+                        String description=jsonObjectNotis.getString("description");
+                        String image_type=jsonObjectNotis.getString("image_type");
+                        String date_added=jsonObjectNotis.getString("date_added");
+                        String date_changed=jsonObjectNotis.getString("date_changed");
+
+                        Categories categories =new Categories(id,title,description,image_type,date_added,date_changed);
+                        list.add(categories);
+                        ShopA.categoriesLinkedHashMap.put(id,categories);
+                    }
+                    return true;
+                }
+                else
+                {
+                    String message=jsonObject.getString(TAG_MESSAGE);
+                    Log.e(TAG_MESSAGE,""+message);
+                    return false;
+                }
+            }
+            catch (JSONException e)
+            {
+                Log.e("JSON",""+e.getMessage());
+                return false;
+            }
+        }
+        @Override
+        protected void onPostExecute(final Boolean successful) {
+
+            if (successful)
+            {
+                //mymenuCategoryRecyclerViewAdapter.listUpdated(list);
+                addCategoryChipLayouts(list);
+
+            }
+            else
+            {
+
+            }
+        }
+    }
+    private class GroupsTask extends AsyncTask<Void, Void, Boolean>
+    {
+        private String TAG_SUCCESS="success";
+        private String TAG_MESSAGE="message";
+        private  JSONParser jsonParser;
+        private List<Groups> list;
+        @Override
+        protected void onPreExecute()
+        {
+            jsonParser = new JSONParser();
+            list = new ArrayList<>();
+            super.onPreExecute();
+        }
+        @Override
+        protected Boolean doInBackground(Void... params)
+        {
+            //getting columns list
+            List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
+            info.add(new BasicNameValuePair("email",mSellerEmail));
+            // making HTTP request
+            String url_get_s_categories = base_url + "get_seller_groups.php";
+            JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_s_categories,"POST",info);
+            try
+            {
+                JSONArray categoriesArrayList=null;
+                int success=jsonObject.getInt(TAG_SUCCESS);
+                if(success==1)
+                {
+                    categoriesArrayList=jsonObject.getJSONArray("groups");
+                    for(int count=0; count<categoriesArrayList.length(); count+=1)
+                    {
+                        JSONObject jsonObjectNotis=categoriesArrayList.getJSONObject(count);
+                        int id=jsonObjectNotis.getInt("id");
+                        int category_id=jsonObjectNotis.getInt("category_id");
+                        String title=jsonObjectNotis.getString("title");
+                        String description=jsonObjectNotis.getString("description");
+                        String image_type=jsonObjectNotis.getString("image_type");
+                        String date_added=jsonObjectNotis.getString("date_added");
+                        String date_changed=jsonObjectNotis.getString("date_changed");
+
+                        Groups groups =new Groups(id,category_id,title,description,image_type,date_added,date_changed);
+                        list.add(groups);
+                        ShopA.groupsLinkedHashMap.put(id,groups);
+                    }
+                    return true;
+                }
+                else
+                {
+                    String message=jsonObject.getString(TAG_MESSAGE);
+                    Log.e(TAG_MESSAGE,""+message);
+                    return false;
+                }
+            }
+            catch (JSONException e)
+            {
+                Log.e("JSON",""+e.getMessage());
+                return false;
+            }
+        }
+        @Override
+        protected void onPostExecute(final Boolean successful) {
+
+            if (successful)
+            {
+                //mymenuGroupRecyclerViewAdapter.listUpdated(list);
+                addGroupChipLayouts(list);
+            }
+            else
+            {
+
+            }
+        }
+    }
+   /* private class CategoriesTask extends AsyncTask<Void, Void, Boolean>
     {
         private String TAG_SUCCESS="success";
         private String TAG_MESSAGE="message";
@@ -300,7 +516,7 @@ public class menuFragment extends Fragment
 
             }
         }
-    }
+    }*/
     private class MenuTask extends AsyncTask<Void, Void, Boolean>
     {
         private String url_get_s_items = base_url + "get_seller_items.php";

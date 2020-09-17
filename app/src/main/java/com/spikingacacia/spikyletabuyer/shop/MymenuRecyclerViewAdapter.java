@@ -7,8 +7,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.fragment.app.DialogFragment;
@@ -33,6 +35,7 @@ import java.util.List;
 import java.util.Locale;
 
 import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
+import static com.spikingacacia.spikyletabuyer.util.Utils.getCurrencyCode;
 
 
 public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecyclerViewAdapter.ViewHolder>
@@ -44,8 +47,15 @@ public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecycl
     private Context context;
     private FragmentManager fragmentManager;
     private static int lastImageFaded = -1;
+    OptionsListener optionsListener;
 
-    public MymenuRecyclerViewAdapter(OnListFragmentInteractionListener listener, Context context, FragmentManager fragmentManager)
+
+    public interface OptionsListener
+    {
+        void onOptionsMenuChooseAccompaniments(final DMenu dMenu, List<DMenu> dMenuList);
+    }
+
+    public MymenuRecyclerViewAdapter(OnListFragmentInteractionListener listener, Context context, FragmentManager fragmentManager, OptionsListener optionsListener)
     {
         mListener = listener;
         mValues = new LinkedList<>();
@@ -54,6 +64,7 @@ public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecycl
             imageLoader = AppController.getInstance().getImageLoader();
         this.context = context;
         this.fragmentManager = fragmentManager;
+        this.optionsListener = optionsListener;
     }
 
     @Override
@@ -71,30 +82,55 @@ public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecycl
         holder.mItem = mValues.get(position);
         holder.mItemView.setText(mValues.get(position).getItem());
         holder.mDescriptionView.setText(mValues.get(position).getDescription());
+        /////
         String[] sizes = mValues.get(position).getSizes().split(":");
         String[] prices = mValues.get(position).getPrices().split(":");
-        String sizePrice="";
-        for(int c=0; c<sizes.length; c++)
+        String[] sizePrice;
+        String location = MainActivity.myLocation;
+        String[] location_pieces = location.split(",");
+        if(sizes.length == 1)
         {
-            String location = MainActivity.myLocation;
-            String[] location_pieces = location.split(":");
-            if(location_pieces.length==3 && (!location_pieces[2].contentEquals("null")))
-                sizePrice+=" "+sizes[c]+" @ "+ Utils.getCurrencyCode(location_pieces[2])+" "+prices[c];
+            if(location_pieces.length==4)
+                sizePrice = new String[]{getCurrencyCode(location_pieces[3])+" "+prices[0]};
             else
-                sizePrice+=" "+sizes[c]+" @ "+prices[c];
+                sizePrice = new String[]{prices[0]};
         }
-        holder.mPriceView.setText(sizePrice);
-        if(holder.mItem.isAvailable())
-            holder.mAddButton.setVisibility(View.VISIBLE);
         else
+        {
+            sizePrice = new String[sizes.length];
+            for(int c=0; c<sizes.length; c++)
+            {
+
+                if(location_pieces.length==4)
+                    sizePrice[c] = sizes[c]+" @ "+getCurrencyCode(location_pieces[3])+" "+prices[c];
+                else
+                    sizePrice[c] = sizes[c]+" @ "+prices[c];
+            }
+        }
+
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(context, android.R.layout.simple_spinner_item, sizePrice);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        holder.mPriceView.setAdapter(adapter);
+        holder.mPriceView.setSelection(0);
+        /////
+        if(holder.mItem.isAvailable())
+        {
+            holder.mAddButton.setVisibility(View.VISIBLE);
+            holder.mUnvailableButton.setVisibility(View.GONE);
+        }
+        else
+        {
             holder.mAddButton.setVisibility(View.GONE);
+            holder.mUnvailableButton.setVisibility(View.VISIBLE);
+        }
         holder.mAddButton.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
                 //first choose accompaniment
-                chooseLinkedFood(holder.mItem);
+                chooseLinkedFood(holder.mItem, holder.mPriceView.getSelectedItemPosition());
                 //mListener.onMenuItemInteraction(holder.mItem);
             }
         });
@@ -102,25 +138,6 @@ public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecycl
         // image
         final String url=image_url+String.valueOf(mValues.get(position).getId())+'_'+String.valueOf(mValues.get(position).getImageType());
         Glide.with(context).load(url).into(holder.image);
-        holder.mView.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                if(holder.image.getImageAlpha()==20)
-                {
-                    holder.image.setImageAlpha(255);
-                   // holder.mItemView.setAlpha((float)0.4);
-                    holder.mDescriptionView.setAlpha((float)0.0);
-                }
-                else
-                {
-                    holder.image.setImageAlpha(20);
-                    //holder.mItemView.setAlpha((float)1.0);
-                    holder.mDescriptionView.setAlpha((float)1.0);
-                }
-            }
-        });
     }
     @Override
     public int getItemCount()
@@ -134,7 +151,8 @@ public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecycl
         public final ImageView image;
         public final TextView mItemView;
         public final TextView mDescriptionView;
-        public final TextView mPriceView;
+        public final Spinner mPriceView;
+        public final ImageButton mUnvailableButton;
         public final ImageButton mAddButton;
         public DMenu mItem;
 
@@ -145,7 +163,8 @@ public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecycl
             image = view.findViewById(R.id.image);
             mItemView = (TextView) view.findViewById(R.id.item);
             mDescriptionView = view.findViewById(R.id.description);
-            mPriceView = (TextView) view.findViewById(R.id.price);
+            mPriceView = view.findViewById(R.id.price);
+            mUnvailableButton = view.findViewById(R.id.unavailable);
             mAddButton = view.findViewById(R.id.add);
         }
 
@@ -186,6 +205,21 @@ public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecycl
         }
         notifyDataSetChanged();
     }
+    public void filterCategory(int category_id, int group_id)
+    {
+        mValues.clear();
+        if(category_id == 0)
+            mValues.addAll(itemsCopy);
+        else
+        {
+            for(DMenu item:itemsCopy)
+            {
+                if(item.getCategoryId() == category_id && item.getGroupId() == group_id)
+                    mValues.add(item);
+            }
+        }
+        notifyDataSetChanged();
+    }
     public void listUpdated(List<DMenu> newitems)
     {
         mValues.clear();
@@ -193,9 +227,10 @@ public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecycl
         itemsCopy.addAll(newitems);
         notifyDataSetChanged();
     }
-    private void chooseLinkedFood(final DMenu dMenu)
+    private void chooseLinkedFood(final DMenu dMenu, int main_item_size)
     {
         final List<DMenu> dMenuList = new ArrayList<>();
+        final List<Integer>items_new_sizes_prices_index = new ArrayList<>();
         String linked_foods = dMenu.getLinkedItems();
         String[] links = linked_foods.split(":");
         String[] items = new String[mValues.size()];
@@ -244,11 +279,14 @@ public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecycl
         if(items_new.length==0)
         {
             dMenuList.add(dMenu);
-            mListener.onMenuItemInteraction(dMenuList);
+            items_new_sizes_prices_index.add(main_item_size);
+            mListener.onMenuItemInteraction(dMenuList, items_new_sizes_prices_index );
         }
         else
         {
-            new AlertDialog.Builder(context)
+            if(optionsListener!=null)
+                optionsListener.onOptionsMenuChooseAccompaniments(dMenu,  mValues);
+            /*new AlertDialog.Builder(context)
                     .setTitle("Accompaniments")
                     .setMultiChoiceItems(items_new, items_checked_new, new DialogInterface.OnMultiChoiceClickListener()
                     {
@@ -273,7 +311,7 @@ public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecycl
                         }
                     })
                     .setCancelable(false)
-                    .create().show();
+                    .create().show();*/
         }
 
 

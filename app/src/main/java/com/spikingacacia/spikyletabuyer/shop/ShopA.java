@@ -37,6 +37,7 @@ import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.JSONParser;
 import com.spikingacacia.spikyletabuyer.database.Categories;
 import com.spikingacacia.spikyletabuyer.database.DMenu;
+import com.spikingacacia.spikyletabuyer.database.Groups;
 import com.spikingacacia.spikyletabuyer.main.MainActivity;
 import com.spikingacacia.spikyletabuyer.shop.cart.CartContent;
 import com.spikingacacia.spikyletabuyer.shop.cart.CartFragment;
@@ -67,6 +68,8 @@ public class ShopA extends AppCompatActivity
         ScanToOrderParamsFragment.OnFragmentInteractionListener
 {
     private static LinkedHashMap<Integer, DMenu> menuLinkedHashMap;
+    public static LinkedHashMap<Integer, Categories> categoriesLinkedHashMap;
+    public static LinkedHashMap<Integer, Groups> groupsLinkedHashMap;
     private String TAG="ShopA";
     private JSONParser jsonParser;
     private String sellerEmail;
@@ -140,6 +143,8 @@ public class ShopA extends AppCompatActivity
         });
         jsonParser=new JSONParser();
         menuLinkedHashMap = new LinkedHashMap<>();
+        categoriesLinkedHashMap = new LinkedHashMap<>();
+        groupsLinkedHashMap = new LinkedHashMap<>();
         items=new ArrayList<>();
         names=new ArrayList<>();
         price=new ArrayList<>();
@@ -203,7 +208,7 @@ public class ShopA extends AppCompatActivity
 
 
     @Override
-    public void onMenuItemInteraction(final List<DMenu> dMenuList)
+    public void onMenuItemInteraction(final List<DMenu> dMenuList, List<Integer>items_new_sizes_prices_index)
     {
         if(!fab.isShown())
         {
@@ -213,6 +218,12 @@ public class ShopA extends AppCompatActivity
         for( int index=0; index< dMenuList.size(); index++)
         {
             final DMenu item = dMenuList.get(index);
+            //items whose price spinner has not been selected may be null therefore set the price to first item
+            if(items_new_sizes_prices_index.get(index) == null)
+                items_new_sizes_prices_index.set(index, 0);
+            itemPriceSizeLinkedHashMap.put(item.getId()+":"+items_new_sizes_prices_index.get(index), items_new_sizes_prices_index.get(index));
+            cartLinkedHashMap.put(item.getId()+":"+items_new_sizes_prices_index.get(index),1);
+            updateFab();
             //cartLinkedHashMap.put(item.getId(),1);
             //display a list of different sizes and prices for the customer to choose
             String[] sizes = item.getSizes().split(":");
@@ -220,13 +231,13 @@ public class ShopA extends AppCompatActivity
             if(sizes.length == 1)
             {
                 //there is only one size
-                itemPriceSizeLinkedHashMap.put(item.getId()+":"+0, 0);
-                cartLinkedHashMap.put(item.getId()+":"+0,1);
-                updateFab();
+                /*itemPriceSizeLinkedHashMap.put(item.getId()+":"+main_item_size, main_item_size);
+                cartLinkedHashMap.put(item.getId()+":"+main_item_size,1);
+                updateFab();*/
             }
             else
             {
-                String[] sizesPrices = new String[sizes.length];
+                /*String[] sizesPrices = new String[sizes.length];
                 for( int c=0; c< sizesPrices.length; c++)
                     sizesPrices[c] = sizes[c]+" @ "+ prices[c];
                 new AlertDialog.Builder(ShopA.this)
@@ -239,12 +250,12 @@ public class ShopA extends AppCompatActivity
                                 itemPriceSizeLinkedHashMap.put(item.getId()+":"+which, which);
                                 cartLinkedHashMap.put(item.getId()+":"+which,1);
                                 updateFab();
-                                /*//animate the fab button
+                                //animate the fab button
                                 final Animation myAnim = AnimationUtils.loadAnimation(getBaseContext(), R.anim.bounce);
                                 // Use bounce interpolator with amplitude 0.2 and frequency 20
                                 MyBounceInterpolator interpolator = new MyBounceInterpolator(0.2, 20);
                                 myAnim.setInterpolator(interpolator);
-                                fab.startAnimation(myAnim);*/
+                                fab.startAnimation(myAnim);
                             }
                         })
                         .setNegativeButton("No Thanks!!!", new DialogInterface.OnClickListener()
@@ -256,7 +267,7 @@ public class ShopA extends AppCompatActivity
                             }
                         })
                         .setCancelable(false)
-                        .create().show();
+                        .create().show();*/
             }
 
             //play_notification();
@@ -297,46 +308,6 @@ public class ShopA extends AppCompatActivity
         else
         {
             onOrderClickedScanToOder();
-            /*new androidx.appcompat.app.AlertDialog.Builder(ShopA.this)
-                    .setTitle("How will you take your order?")
-                    .setItems(new String[]{"Sit in", "Take away"}, new DialogInterface.OnClickListener()
-                    {
-                        @Override
-                        public void onClick(DialogInterface dialog, final int which)
-                        {
-                            // if pre order get collect time
-
-                            if(tableNumber==-1 )
-                            {
-                                final NumberPicker numberPicker=new NumberPicker(getBaseContext());
-                                numberPicker.setMinValue(1);
-                                numberPicker.setMaxValue(numberOfTables);
-                                new androidx.appcompat.app.AlertDialog.Builder(ShopA.this)
-                                        .setTitle("Table Number?")
-                                        .setView(numberPicker)
-                                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener()
-                                        {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which)
-                                            {
-                                                dialog.dismiss();
-                                            }
-                                        })
-                                        .setPositiveButton("Proceed", new DialogInterface.OnClickListener()
-                                        {
-                                            @Override
-                                            public void onClick(DialogInterface dialog, int which)
-                                            {
-                                                int tableNumber=numberPicker.getValue();
-                                                new OrderTask(tableNumber,"null", which,"null","null","null").execute((Void)null);
-                                            }
-                                        })
-                                        .create().show();
-                            }
-                            else
-                                new OrderTask(tableNumber,"null", which,"null","null","null").execute((Void)null);
-                        }
-                    }).create().show();*/
         }
 
 
