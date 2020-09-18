@@ -149,6 +149,7 @@ public class ExploreActivity extends AppCompatActivity implements
             has_payment = true;
         Intent intent=new Intent(this, ShopA.class);
         intent.putExtra("which",2);
+        intent.putExtra("seller_names", item.getNames());
         intent.putExtra("seller_email",item.getEmail());
         intent.putExtra("order_radius",item.getRadius());
         intent.putExtra("buyer_distance",item.getDistance());

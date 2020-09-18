@@ -1,5 +1,6 @@
 package com.spikingacacia.spikyletabuyer.shop;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
@@ -9,6 +10,7 @@ import android.app.Dialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -18,6 +20,8 @@ import android.os.Vibrator;
 import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -27,6 +31,8 @@ import android.widget.ProgressBar;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
@@ -39,9 +45,11 @@ import com.spikingacacia.spikyletabuyer.database.Categories;
 import com.spikingacacia.spikyletabuyer.database.DMenu;
 import com.spikingacacia.spikyletabuyer.database.Groups;
 import com.spikingacacia.spikyletabuyer.main.MainActivity;
+import com.spikingacacia.spikyletabuyer.shop.cart.CartBottomSheet;
 import com.spikingacacia.spikyletabuyer.shop.cart.CartContent;
 import com.spikingacacia.spikyletabuyer.shop.cart.CartFragment;
 import com.spikingacacia.spikyletabuyer.util.Mpesa;
+import com.spikingacacia.spikyletabuyer.wallet.WalletActivity;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -59,13 +67,14 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
+import static com.spikingacacia.spikyletabuyer.LoginA.mGoogleSignInClient;
 
 public class ShopA extends AppCompatActivity
         implements
         menuFragment.OnListFragmentInteractionListener,
-        CartFragment.OnListFragmentInteractionListener,
-        OrderParamsFragment.OnFragmentInteractionListener,
-        ScanToOrderParamsFragment.OnFragmentInteractionListener
+        CartBottomSheet.OnListFragmentInteractionListener,
+        OrderParamsBottomSheet.OnFragmentInteractionListener,
+        ScanToOrderParamsBottomSheet.OnFragmentInteractionListener
 {
     private static LinkedHashMap<Integer, DMenu> menuLinkedHashMap;
     public static LinkedHashMap<Integer, Categories> categoriesLinkedHashMap;
@@ -85,7 +94,6 @@ public class ShopA extends AppCompatActivity
     String previousTitle[]=new String[2];
     private int cartCount=0;
     private  double totalPrice=0;
-    private  ExtendedFloatingActionButton fab;
     private  List<Integer>items;
     private  List<String>names;
     private  List<Double>price;
@@ -112,6 +120,7 @@ public class ShopA extends AppCompatActivity
         //preference
         preferences=new Preferences(getBaseContext());
         which = getIntent().getIntExtra("which",1);
+        String seller_names = getIntent().getStringExtra("seller_names");
         sellerEmail =getIntent().getStringExtra("seller_email");
         sellerOrderRadius=getIntent().getIntExtra("order_radius",2);
         buyerDistance=getIntent().getDoubleExtra("buyer_distance",0);
@@ -120,27 +129,27 @@ public class ShopA extends AppCompatActivity
         hasPayment =  getIntent().getBooleanExtra("has_payment",false);
         mPesaTillNumber = getIntent().getStringExtra("m_code");
         diningOptions = getIntent().getStringExtra("dining_options");
-        if(which == 1)
-            setTitle("Menu");
-        else if(which == 2)
+        if(!seller_names.contentEquals("null") && !seller_names.contentEquals("NULL") && !seller_names.contentEquals(""))
+            setTitle(seller_names);
+        else
         {
-            setTitle("Menu - Pre order");
-            preOrder = true;
+            if(which == 1)
+                setTitle("Menu");
+            else if(which == 2)
+            {
+                setTitle("Menu - Pre order");
+                preOrder = true;
+            }
         }
+        if(which == 2)
+            preOrder = true;
+
 
         Fragment fragment= menuFragment.newInstance(sellerEmail);
         FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.base,fragment,"menu");
         transaction.commit();
-        fab=findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                cartClicked();
-            }
-        });
+
         jsonParser=new JSONParser();
         menuLinkedHashMap = new LinkedHashMap<>();
         categoriesLinkedHashMap = new LinkedHashMap<>();
@@ -154,40 +163,40 @@ public class ShopA extends AppCompatActivity
         itemPriceSizeLinkedHashMap = new LinkedHashMap<>();
     }
     @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.shop_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        if( id == R.id.action_cart)
+        {
+            getTotal();
+            CartBottomSheet.newInstance(tempTotal, cartLinkedHashMap, itemPriceSizeLinkedHashMap, menuLinkedHashMap, this).show(getSupportFragmentManager(), "dialog");
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+    @Override
     public void onBackPressed()
     {
         super.onBackPressed();
-        if (cartLinkedHashMap.size()>0)
-        {
-            if(!fab.isShown())
-            {
-                fab.show();
-                fab.setText(String.valueOf(getCartCount()));
-            }
-        }
     }
     static void putIntoMenu(int id, DMenu dMenu)
     {
         menuLinkedHashMap.put(id,dMenu);
     }
-    void cartClicked()
-    {
-        if(cartLinkedHashMap.size()<=0)
-        {
-            Toast.makeText(getBaseContext(),"Cart empty",Toast.LENGTH_SHORT).show();
-            return;
-        }
-        fab.hide();
-        getTotal();
-        Fragment fragment= CartFragment.newInstance(tempTotal, cartLinkedHashMap, itemPriceSizeLinkedHashMap, menuLinkedHashMap);
-        FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.base,fragment,"cart");
-        transaction.addToBackStack("cart");
-        transaction.commit();
-    }
+
     void onOrderClickedPreOder()
     {
-        fab.hide();
         getSupportFragmentManager().popBackStack();
         Fragment fragment= OrderParamsFragment.newInstance(hasPayment,diningOptions,deliveryCharge,tempTotal);
         FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
@@ -197,7 +206,6 @@ public class ShopA extends AppCompatActivity
     }
     void onOrderClickedScanToOder()
     {
-        fab.hide();
         getSupportFragmentManager().popBackStack();
         Fragment fragment= ScanToOrderParamsFragment.newInstance(hasPayment,tableNumber, numberOfTables);
         FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
@@ -210,11 +218,7 @@ public class ShopA extends AppCompatActivity
     @Override
     public void onMenuItemInteraction(final List<DMenu> dMenuList, List<Integer>items_new_sizes_prices_index)
     {
-        if(!fab.isShown())
-        {
-            fab.show();
-            fab.setText(String.valueOf(getCartCount()));
-        }
+
         for( int index=0; index< dMenuList.size(); index++)
         {
             final DMenu item = dMenuList.get(index);
@@ -223,7 +227,7 @@ public class ShopA extends AppCompatActivity
                 items_new_sizes_prices_index.set(index, 0);
             itemPriceSizeLinkedHashMap.put(item.getId()+":"+items_new_sizes_prices_index.get(index), items_new_sizes_prices_index.get(index));
             cartLinkedHashMap.put(item.getId()+":"+items_new_sizes_prices_index.get(index),1);
-            updateFab();
+            //updateFab();
             //cartLinkedHashMap.put(item.getId(),1);
             //display a list of different sizes and prices for the customer to choose
             String[] sizes = item.getSizes().split(":");
@@ -272,23 +276,22 @@ public class ShopA extends AppCompatActivity
 
             //play_notification();
         }
-
+        Snackbar.make(mainFragment,dMenuList.get(dMenuList.size()-1).getItem()+" added",Snackbar.LENGTH_SHORT).show();
+        showCartAddition();
     }
-    private void updateFab()
+
+    private void showCartAddition()
     {
-        if(getCartCount()>0)
-            fab.setVisibility(View.VISIBLE);
-        fab.setText(Integer.toString(getCartCount()));
         //animate the fab button
         final Animation myAnim = AnimationUtils.loadAnimation(this, R.anim.bounce);
         // Use bounce interpolator with amplitude 0.2 and frequency 20
         MyBounceInterpolator interpolator = new MyBounceInterpolator(0.2, 20);
         myAnim.setInterpolator(interpolator);
-        fab.startAnimation(myAnim);
+        //fab.startAnimation(myAnim);
         vibrate_on_click();
     }
     /*************************************************************************************************************************************************************************************
-     * implementation of CartFragment.java
+     * implementation of CartBottomSheet.java
      * ************************************************************************************************************************************************************************************/
     @Override
     public void onProceed(double new_total)
@@ -297,17 +300,19 @@ public class ShopA extends AppCompatActivity
         //first check if the the location is within the restaurants range
         if(!preOrder && buyerDistance>sellerOrderRadius)
         {
-            Snackbar.make(fab,"You are not within the restaurant's order radius",Snackbar.LENGTH_LONG).show();
+            Snackbar.make(mainFragment,"You are not within the restaurant's order radius",Snackbar.LENGTH_LONG).show();
             return;
         }
         //set the type of order
         if(preOrder)
         {
-            onOrderClickedPreOder();
+            //onOrderClickedPreOder();
+            OrderParamsBottomSheet.newInstance(hasPayment,diningOptions,deliveryCharge,tempTotal, this).show(getSupportFragmentManager(), "dialog");
         }
         else
         {
-            onOrderClickedScanToOder();
+            //onOrderClickedScanToOder();
+            ScanToOrderParamsBottomSheet.newInstance(hasPayment,tableNumber, numberOfTables, tempTotal, (ScanToOrderParamsBottomSheet.OnFragmentInteractionListener) this).show(getSupportFragmentManager(), "dialog");
         }
 
 
@@ -318,11 +323,6 @@ public class ShopA extends AppCompatActivity
     public void totalItemsChanged( LinkedHashMap<String,Integer> cartLinkedHashMap)
     {
         this.cartLinkedHashMap = cartLinkedHashMap;
-        fab.setText(Integer.toString(getCartCount()));
-        if(getCartCount()>0)
-            fab.setVisibility(View.VISIBLE);
-        else
-            fab.setVisibility(View.GONE);
     }
 
 
@@ -365,7 +365,6 @@ public class ShopA extends AppCompatActivity
     {
         progressBar.setVisibility(show? View.VISIBLE : View.GONE);
         mainFragment.setVisibility( show? View.INVISIBLE :View.VISIBLE);
-        fab.setVisibility( show? View.INVISIBLE :View.VISIBLE);
     }
     private void play_notification()
     {
@@ -383,28 +382,23 @@ public class ShopA extends AppCompatActivity
         else
             vibrator.vibrate(100);
     }
+
+
     /*************************************************************************************************************************************************************************************
-     * implementation of OrderParamsFragment.java
+     * implementation of OrderParamsBottomSheet.java
      * ************************************************************************************************************************************************************************************/
-    @Override
-    public void onDetachCalled()
-    {
-        fab.hide();
-    }
+
 
     @Override
     public void onPlacePreOrder(int which, String time, String mobile_mpesa, String mobile_delivery, String instructions)
     {
         new OrderTask(tableNumber,time, which, mobile_mpesa, mobile_delivery, instructions).execute((Void)null);
     }
+
     /*************************************************************************************************************************************************************************************
-     * implementation of ScanToOrderParamsFragment.java
+     * implementation of ScanToOrderParamsBottomSheet.java
      * ************************************************************************************************************************************************************************************/
-    @Override
-    public void onScanToOrderDetachCalled()
-    {
-        fab.hide();
-    }
+
 
     @Override
     public void onScanToOrderPlaceOrder(int which, int table, String mobile_mpesa)
@@ -512,18 +506,16 @@ public class ShopA extends AppCompatActivity
                 else
                 {
                     showProgress(false);
-                    Snackbar.make(fab,"Order Placed",Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(mainFragment,"Order Placed",Snackbar.LENGTH_LONG).show();
                     cartLinkedHashMap.clear();
                     tempTotal = 0.0;
-                    fab.setText(Integer.toString(getCartCount()));
-                    fab.setVisibility(View.GONE);
-                    onBackPressed();
+                    //onBackPressed();
                     play_notification();
                 }
             }
             else
             {
-                Snackbar.make(fab,"Order was not successful.\nPlease try again.",Snackbar.LENGTH_LONG).show();
+                Snackbar.make(mainFragment,"Order was not successful.\nPlease try again.",Snackbar.LENGTH_LONG).show();
             }
         }
         void  formData()
@@ -620,16 +612,14 @@ public class ShopA extends AppCompatActivity
             showProgress(false);
             if (successful)
             {
-                Snackbar.make(fab,"Order Placed",Snackbar.LENGTH_LONG).show();
+                Snackbar.make(mainFragment,"Order Placed",Snackbar.LENGTH_LONG).show();
                 cartLinkedHashMap.clear();;
                 tempTotal = 0.0;
-                fab.setText(Integer.toString(getCartCount()));
-                fab.setVisibility(View.GONE);
-                onBackPressed();
+                //onBackPressed();
             }
             else
             {
-                Snackbar.make(fab,"Order was not successful.\nPlease try again.",Snackbar.LENGTH_LONG).show();
+                Snackbar.make(mainFragment,"Order was not successful.\nPlease try again.",Snackbar.LENGTH_LONG).show();
             }
         }
     }

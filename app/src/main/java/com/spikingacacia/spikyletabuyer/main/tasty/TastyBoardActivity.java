@@ -25,9 +25,9 @@ import com.spikingacacia.spikyletabuyer.database.Restaurants;
 import com.spikingacacia.spikyletabuyer.database.TastyBoard;
 import com.spikingacacia.spikyletabuyer.main.MainActivity;
 import com.spikingacacia.spikyletabuyer.restaurants.SRRestaurantsA;
-import com.spikingacacia.spikyletabuyer.shop.OrderParamsFragment;
+import com.spikingacacia.spikyletabuyer.shop.OrderParamsBottomSheet;
 import com.spikingacacia.spikyletabuyer.shop.ShopA;
-import com.spikingacacia.spikyletabuyer.shop.cart.CartFragment;
+import com.spikingacacia.spikyletabuyer.shop.cart.CartBottomSheet;
 import com.spikingacacia.spikyletabuyer.util.Mpesa;
 
 import org.apache.http.NameValuePair;
@@ -49,8 +49,8 @@ import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
 
 public class TastyBoardActivity extends AppCompatActivity implements
         TastyBoardOverviewFragment.OnListFragmentInteractionListener,
-        CartFragment.OnListFragmentInteractionListener,
-        OrderParamsFragment.OnFragmentInteractionListener
+        CartBottomSheet.OnListFragmentInteractionListener,
+        OrderParamsBottomSheet.OnFragmentInteractionListener
 {
     private TastyBoard tastyBoard;
     private boolean hasPayment;
@@ -111,11 +111,7 @@ public class TastyBoardActivity extends AppCompatActivity implements
         menuLinkedHashMap.put(tastyBoard.getLinkedItemId(),dMenu);
         //add the cart
 
-        Fragment fragment= CartFragment.newInstance(total, cartLinkedHashMap, itemPriceSizeLinkedHashMap, menuLinkedHashMap);
-        FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.base,fragment,"cart");
-        transaction.addToBackStack("cart");
-        transaction.commit();
+        CartBottomSheet.newInstance(total, cartLinkedHashMap, itemPriceSizeLinkedHashMap, menuLinkedHashMap, this).show(getSupportFragmentManager(), "dialog");
     }
 
     @Override
@@ -160,6 +156,7 @@ public class TastyBoardActivity extends AppCompatActivity implements
             has_payment = true;
         Intent intent=new Intent(this, ShopA.class);
         intent.putExtra("which",2);
+        intent.putExtra("seller_names", item.getNames());
         intent.putExtra("seller_email",item.getEmail());
         intent.putExtra("order_radius",item.getRadius());
         intent.putExtra("buyer_distance",item.getDistance());
@@ -179,11 +176,7 @@ public class TastyBoardActivity extends AppCompatActivity implements
     public void onProceed(double new_total)
     {
         total = new_total;
-        Fragment fragment= OrderParamsFragment.newInstance(hasPayment,diningOptions, deliveryCharge, total);
-        FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.base,fragment,"order");
-        transaction.addToBackStack("order");
-        transaction.commit();
+        OrderParamsBottomSheet.newInstance(hasPayment,diningOptions,deliveryCharge,total, this).show(getSupportFragmentManager(), "dialog");
     }
 
     @Override
@@ -192,11 +185,6 @@ public class TastyBoardActivity extends AppCompatActivity implements
         this.cartLinkedHashMap = cartLinkedHashMap;
     }
 
-    @Override
-    public void onDetachCalled()
-    {
-
-    }
 
     @Override
     public void onPlacePreOrder(int which, String time, String mobile_mpesa, String mobile_delivery, String instructions)

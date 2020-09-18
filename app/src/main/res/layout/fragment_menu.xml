@@ -49,7 +49,7 @@
             android:layout_height="wrap_content"
             android:textAppearance="?attr/textAppearanceBody2"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/add"
             app:layout_constraintStart_toEndOf="@+id/image" />
         <ImageButton
             android:visibility="gone"

@@ -38,6 +38,7 @@ public class SRRestaurantsA extends AppCompatActivity
         if(item.getCountryCode().contentEquals("KE"))
             has_payment = true;
         Intent intent=new Intent(this, ShopA.class);
+        intent.putExtra("seller_names", item.getNames());
          intent.putExtra("seller_email",item.getEmail());
          intent.putExtra("order_radius",item.getRadius());
          intent.putExtra("buyer_distance",item.getDistance());

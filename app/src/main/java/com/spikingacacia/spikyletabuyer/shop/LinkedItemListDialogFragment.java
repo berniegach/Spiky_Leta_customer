@@ -130,7 +130,7 @@ public class LinkedItemListDialogFragment extends BottomSheetDialogFragment
         String[] location_pieces = location.split(",");
         if(sizes.length == 1)
         {
-            if(location_pieces.length==4)
+            if(location_pieces.length==3)
                 sizePrice = new String[]{getCurrencyCode(location_pieces[3])+" "+prices[0]};
             else
                 sizePrice = new String[]{prices[0]};
