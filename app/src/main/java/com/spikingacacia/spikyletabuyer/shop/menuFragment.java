@@ -67,10 +67,8 @@ public class menuFragment extends Fragment implements MymenuRecyclerViewAdapter.
 
     private static final String ARG_SELLER_EMAIL = "seller-email";
     private String mSellerEmail;
-    private RecyclerView recyclerViewCategories;
     private  RecyclerView recyclerViewMenu;
     public static MymenuRecyclerViewAdapter mymenuRecyclerViewAdapter;
-    private MymenuCategoryRecyclerViewAdapter mymenuCategoryRecyclerViewAdapter;
     private OnListFragmentInteractionListener mListener;
     private String TAG = "menuF";
     private ChipGroup chipGroupCategeories;
@@ -107,10 +105,7 @@ public class menuFragment extends Fragment implements MymenuRecyclerViewAdapter.
     {
         View view = inflater.inflate(R.layout.fragment_menu_list, container, false);
         chipGroupCategeories = view.findViewById(R.id.chip_group_category);
-        //RecyclerView recyclerViewGroups = view.findViewById(R.id.list_groups);
         chipGroupGroups = view.findViewById(R.id.chip_group_group);
-        mymenuCategoryRecyclerViewAdapter = new MymenuCategoryRecyclerViewAdapter(mListener, getContext());
-        //recyclerViewCategories.setAdapter(mymenuCategoryRecyclerViewAdapter);
 
         recyclerViewMenu = view.findViewById(R.id.list);
         Context context = view.getContext();
@@ -135,9 +130,14 @@ public class menuFragment extends Fragment implements MymenuRecyclerViewAdapter.
                     int category_id = (int)chip.getTag();
                     mymenuRecyclerViewAdapter.filterCategory(category_id);
                     chipCategoryChecked = category_id;
+                    hideAllChipsInGroup();
+                   showGroupChipsInCategory(category_id);
                 }
                 else
+                {
                     mymenuRecyclerViewAdapter.filterCategory(0);
+                    hideAllChipsInGroup();
+                }
             }
         });
         chipGroupGroups.setOnCheckedChangeListener(new ChipGroup.OnCheckedChangeListener()
@@ -295,7 +295,28 @@ public class menuFragment extends Fragment implements MymenuRecyclerViewAdapter.
             chip.setTag(groups.getCategoryId()+":"+groups.getId());
             chip.setClickable(true);
             chip.setCheckable(true);
+            chip.setVisibility(View.GONE);
             chipGroupGroups.addView(chip);
+        }
+    }
+    private void hideAllChipsInGroup()
+    {
+        for(int c=0; c<chipGroupGroups.getChildCount(); c++)
+        {
+            Chip chip_group = (Chip) chipGroupGroups.getChildAt(c);
+            chip_group.setVisibility(View.GONE);
+
+        }
+    }
+    private void showGroupChipsInCategory(int category_id)
+    {
+        for(int c=0; c<chipGroupGroups.getChildCount(); c++)
+        {
+            Chip chip_group = (Chip) chipGroupGroups.getChildAt(c);
+            String tag = (String) chip_group.getTag();
+            int categoryid = Integer.parseInt(tag.split(":")[0]);
+            if(category_id == categoryid)
+                chip_group.setVisibility(View.VISIBLE);
         }
     }
     private class CategoriesTask extends AsyncTask<Void, Void, Boolean>
@@ -445,78 +466,6 @@ public class menuFragment extends Fragment implements MymenuRecyclerViewAdapter.
             }
         }
     }
-   /* private class CategoriesTask extends AsyncTask<Void, Void, Boolean>
-    {
-        private String TAG_SUCCESS="success";
-        private String TAG_MESSAGE="message";
-        private JSONParser jsonParser;
-        private List<Categories> list;
-        @Override
-        protected void onPreExecute()
-        {
-            Log.d("SCATEGORIES: ","starting....");
-            jsonParser = new JSONParser();
-            list = new ArrayList<>();
-            super.onPreExecute();
-        }
-        @Override
-        protected Boolean doInBackground(Void... params)
-        {
-            //getting columns list
-            List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
-            info.add(new BasicNameValuePair("email",mSellerEmail));
-            // making HTTP request
-            String url_get_s_categories = base_url + "get_categories.php";
-            JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_s_categories,"POST",info);
-            Log.d("sCategories",""+jsonObject.toString());
-            try
-            {
-                JSONArray categoriesArrayList=null;
-                int success=jsonObject.getInt(TAG_SUCCESS);
-                if(success==1)
-                {
-                    categoriesArrayList=jsonObject.getJSONArray("categories");
-                    for(int count=0; count<categoriesArrayList.length(); count+=1)
-                    {
-                        JSONObject jsonObjectNotis=categoriesArrayList.getJSONObject(count);
-                        int id=jsonObjectNotis.getInt("id");
-                        String title=jsonObjectNotis.getString("title");
-                        String description=jsonObjectNotis.getString("description");
-                        String image_type=jsonObjectNotis.getString("image_type");
-                        String date_added=jsonObjectNotis.getString("date_added");
-                        String date_changed=jsonObjectNotis.getString("date_changed");
-
-                        Categories categories =new Categories(id,title,description,image_type,date_added,date_changed);
-                        list.add(categories);
-                    }
-                    return true;
-                }
-                else
-                {
-                    String message=jsonObject.getString(TAG_MESSAGE);
-                    Log.e(TAG_MESSAGE,""+message);
-                    return false;
-                }
-            }
-            catch (JSONException e)
-            {
-                Log.e("JSON",""+e.getMessage());
-                return false;
-            }
-        }
-        @Override
-        protected void onPostExecute(final Boolean successful) {
-
-            if (successful)
-            {
-                mymenuCategoryRecyclerViewAdapter.listUpdated(list);
-            }
-            else
-            {
-
-            }
-        }
-    }*/
     private class MenuTask extends AsyncTask<Void, Void, Boolean>
     {
         private String url_get_s_items = base_url + "get_seller_items.php";

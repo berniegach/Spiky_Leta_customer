@@ -18,6 +18,8 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.spikingacacia.spikyletabuyer.JSONParser;
 import com.spikingacacia.spikyletabuyer.LoginA;
 import com.spikingacacia.spikyletabuyer.R;
@@ -97,6 +99,7 @@ public class OrdersFragment extends Fragment
                              Bundle savedInstanceState)
     {
         View view = inflater.inflate(R.layout.fragment_orders_list, container, false);
+        ChipGroup chipGroup = view.findViewById(R.id.chip_group);
         ordersLinkedHashMap = new LinkedHashMap<>();
         Context context = view.getContext();
 
@@ -107,46 +110,20 @@ public class OrdersFragment extends Fragment
         myOrderRecyclerViewAdapter = new MyOrderRecyclerViewAdapter(mListener, getContext());
         recyclerView.setAdapter(myOrderRecyclerViewAdapter);
         initScrollListener();
-        Button b_unfinished = view.findViewById(R.id.unfinished);
-        Button b_all = view.findViewById(R.id.all);
-        b_unfinished.setOnClickListener(new View.OnClickListener()
+        chipGroup.setOnCheckedChangeListener(new ChipGroup.OnCheckedChangeListener()
         {
             @Override
-            public void onClick(View v)
+            public void onCheckedChanged(ChipGroup group, int checkedId)
             {
+                if(checkedId == R.id.check_unfinished)
+                    myOrderRecyclerViewAdapter.filter(1);
+                else if(checkedId == R.id.check_finished)
+                    myOrderRecyclerViewAdapter.filter(2);
+                else
+                    myOrderRecyclerViewAdapter.filter(0);
 
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-                {
-                    v.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(android.R.color.black)));
-                }
-                ((Button)v).setTextColor(getResources().getColor(android.R.color.white));
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-                {
-                    b_all.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(android.R.color.white)));
-                }
-                b_all.setTextColor(getResources().getColor(android.R.color.black));
-                myOrderRecyclerViewAdapter.filter(1);
             }
         });
-        b_all.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-                {
-                    v.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(android.R.color.black)));
-                }
-                ((Button)v).setTextColor(getResources().getColor(android.R.color.white));
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP)
-                {
-                    b_unfinished.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(android.R.color.white)));
-                }
-                b_unfinished.setTextColor(getResources().getColor(android.R.color.black));
-                myOrderRecyclerViewAdapter.filter(0);
-            }
-        });
-        //getOrders();
         new OrdersTask(-1, false).execute((Void)null);
         return view;
     }
@@ -274,11 +251,13 @@ public class OrdersFragment extends Fragment
                         int table_number=jsonObjectNotis.getInt("table_number");
                         int pre_order = jsonObjectNotis.getInt("pre_order");
                         String collect_time = jsonObjectNotis.getString("collect_time");
+                        int payment_type = jsonObjectNotis.getInt("payment_type");
                         int order_type = jsonObjectNotis.getInt("order_type");
                         String mpesa_message = jsonObjectNotis.getString("m_message");
 
-                        Orders orders =new Orders(id,waiter_email,item_id,order_number,order_status,url_code_start_delivery, url_code_end_delivery,date_added,date_changed,date_added_local,item,size,selling_price,seller_id, seller_email,seller_image_type,
-                                username,waiter_names,order_format,table_number, pre_order, collect_time, order_type, mpesa_message);
+                        Orders orders =new Orders(id,waiter_email,item_id,order_number,order_status,url_code_start_delivery, url_code_end_delivery,date_added,date_changed,date_added_local,
+                                item,size,selling_price,seller_id, seller_email,seller_image_type,
+                                username,waiter_names,order_format,table_number, pre_order, collect_time, payment_type, order_type, mpesa_message);
                         list.add( orders);
                         ordersLinkedHashMap.put(id,orders);
                         String[] date_pieces=date_added.split(" ");

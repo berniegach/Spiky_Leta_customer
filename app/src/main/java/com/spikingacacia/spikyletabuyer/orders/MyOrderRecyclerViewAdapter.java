@@ -111,11 +111,19 @@ public class MyOrderRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVie
         mValues.clear();
         if(status==0)
             mValues.addAll(itemsCopy);
-        else
+        else if(status == 1)//show the unfinished
         {
             for(Orders orderItem:itemsCopy)
             {
                 if(orderItem.getOrderStatus()!=5)
+                    mValues.add(orderItem);
+            }
+        }
+        else if( status == 2)//show finished
+        {
+            for(Orders orderItem:itemsCopy)
+            {
+                if(orderItem.getOrderStatus()==5)
                     mValues.add(orderItem);
             }
         }
@@ -130,7 +138,7 @@ public class MyOrderRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVie
         public final TextView mTableView;
         public final TextView mUsernameView;
         public final TextView mDateView;
-        public final ImageView mTimeImage;
+        public final TextView mOrderStatus;
         public Orders mItem;
 
         public ViewHolder(View view)
@@ -142,7 +150,7 @@ public class MyOrderRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVie
             mTableView = (TextView) view.findViewById(R.id.table_number);
             mUsernameView = (TextView) view.findViewById(R.id.username);
             mDateView = (TextView) view.findViewById(R.id.date);
-            mTimeImage = view.findViewById(R.id.time);
+            mOrderStatus = view.findViewById(R.id.status);
         }
 
         @Override
@@ -209,8 +217,37 @@ public class MyOrderRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVie
         {
             // e.printStackTrace();
         }
-        if(mValues.get(position).getOrderStatus()==5)
-            holder.mTimeImage.setVisibility(View.GONE);
+        String status;
+        switch(mValues.get(position).getOrderStatus())
+        {
+            case -3:
+                status = "Unpaid";
+                break;
+            case -2:
+                status = "Processing payment";
+                break;
+            case -1:
+                status = "Paid & Pending";
+                break;
+            case 1:
+                status = "UnPaid & Pending";
+                break;
+            case 2:
+                status = "Pending payment";
+                break;
+            case 3:
+                status = "In progress";
+                break;
+            case 4:
+                status = "Delivery";
+                break;
+            case 5:
+                status = "Finished";
+                break;
+            default:
+                status = "";
+        }
+        holder.mOrderStatus.setText(status);
 
         holder.mView.setOnClickListener(new View.OnClickListener()
         {

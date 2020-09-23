@@ -6,7 +6,6 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
@@ -24,11 +23,9 @@ import com.spikingacacia.spikyletabuyer.database.DMenu;
 import com.spikingacacia.spikyletabuyer.database.Restaurants;
 import com.spikingacacia.spikyletabuyer.database.TastyBoard;
 import com.spikingacacia.spikyletabuyer.main.MainActivity;
-import com.spikingacacia.spikyletabuyer.restaurants.SRRestaurantsA;
 import com.spikingacacia.spikyletabuyer.shop.OrderParamsBottomSheet;
 import com.spikingacacia.spikyletabuyer.shop.ShopA;
-import com.spikingacacia.spikyletabuyer.shop.cart.CartBottomSheet;
-import com.spikingacacia.spikyletabuyer.util.Mpesa;
+import com.spikingacacia.spikyletabuyer.shop.CartBottomSheet;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
@@ -36,11 +33,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -48,6 +41,7 @@ import java.util.List;
 import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
 
 public class TastyBoardActivity extends AppCompatActivity implements
+         TastyBoardFragment.OnListFragmentInteractionListener,
         TastyBoardOverviewFragment.OnListFragmentInteractionListener,
         CartBottomSheet.OnListFragmentInteractionListener,
         OrderParamsBottomSheet.OnFragmentInteractionListener
@@ -72,16 +66,30 @@ public class TastyBoardActivity extends AppCompatActivity implements
         setContentView(R.layout.activity_tasty_board);
 
         setTitle("Tasty Board");
-        //get the tasty board
-        tastyBoard = (TastyBoard) getIntent().getSerializableExtra("tasty_board");
-        hasPayment =  getIntent().getBooleanExtra("has_payment",false);
-
         progressBar = findViewById(R.id.progress);
         mainFragment = findViewById(R.id.base);
 
+        Fragment fragment= TastyBoardFragment.newInstance(1);
+        FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
+        transaction.add(R.id.base,fragment,"tasty");
+        transaction.commit();
+    }
+    /*
+     * implementation of TastyBoardFragment.java
+     */
+    @Override
+    public void onTastyBoardItemClicked(TastyBoard tastyBoard)
+    {
+        //if the location of the hotel is kenya then we ask for mpesa payment
+        hasPayment = false;
+            /*if( item.getmCode().contentEquals("") ||  item.getmCode().contentEquals("null") || item.getmCode().contentEquals("NULL"))
+                has_payment = false;*/
+        if(tastyBoard.getCountry().contentEquals("KE"))
+            hasPayment = true;
         Fragment fragment= TastyBoardOverviewFragment.newInstance(tastyBoard);
         FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
-        transaction.add(R.id.base,fragment,"overview");
+        transaction.replace(R.id.base,fragment,"overview");
+        transaction.addToBackStack(null);
         transaction.commit();
     }
     /*
@@ -111,7 +119,7 @@ public class TastyBoardActivity extends AppCompatActivity implements
         menuLinkedHashMap.put(tastyBoard.getLinkedItemId(),dMenu);
         //add the cart
 
-        CartBottomSheet.newInstance(total, cartLinkedHashMap, itemPriceSizeLinkedHashMap, menuLinkedHashMap, this).show(getSupportFragmentManager(), "dialog");
+        CartBottomSheet.newInstance(total, cartLinkedHashMap, itemPriceSizeLinkedHashMap, menuLinkedHashMap, hasPayment, true, this).show(getSupportFragmentManager(), "dialog");
     }
 
     @Override
@@ -170,13 +178,13 @@ public class TastyBoardActivity extends AppCompatActivity implements
 
     }
 /*
-* implementation of CartFragment.java
+* implementation of CartBottomSheet.java
  */
     @Override
-    public void onProceed(double new_total)
+    public void onProceed(double new_total, int payment_type)
     {
         total = new_total;
-        OrderParamsBottomSheet.newInstance(hasPayment,diningOptions,deliveryCharge,total, this).show(getSupportFragmentManager(), "dialog");
+        OrderParamsBottomSheet.newInstance(hasPayment,diningOptions,deliveryCharge,total, payment_type,this).show(getSupportFragmentManager(), "dialog");
     }
 
     @Override
@@ -187,9 +195,9 @@ public class TastyBoardActivity extends AppCompatActivity implements
 
 
     @Override
-    public void onPlacePreOrder(int which, String time, String mobile_mpesa, String mobile_delivery, String instructions)
+    public void onPlacePreOrder(int which, String time, String mobile_mpesa, String mobile_delivery, String instructions,  int payment_type)
     {
-        new OrderTask(-1,time, which, mobile_mpesa, mobile_delivery, instructions).execute((Void)null);
+        new OrderTask(-1,time, which, mobile_mpesa, mobile_delivery, instructions, payment_type).execute((Void)null);
     }
 
     private class RestaurantTask extends AsyncTask<Void, Void, Boolean>
@@ -281,7 +289,7 @@ public class TastyBoardActivity extends AppCompatActivity implements
     }
     private class OrderTask extends AsyncTask<Void, Void, Boolean>
     {
-        private String url_place_order = base_url + "place_order.php";
+        private String url_place_order = base_url + "place_order_1.php";
         private String TAG_MESSAGE = "message";
         private String TAG_SUCCESS = "success";
         private JSONParser jsonParser;
@@ -294,11 +302,12 @@ public class TastyBoardActivity extends AppCompatActivity implements
         private String deliveryMobile;
         private String mpesaMobile;
         private String deliveryInstructions;
+        private int paymentType;
         private String orderNumber;
         private String dateAdded;
 
 
-        public OrderTask(int tableNumber, String collectTime, int orderType, String mpesaMobile, String deliveryMobile, String deliveryInstructions)
+        public OrderTask(int tableNumber, String collectTime, int orderType, String mpesaMobile, String deliveryMobile, String deliveryInstructions, int paymentType)
         {
             jsonParser = new JSONParser();
             this.tableNumber=tableNumber;
@@ -307,6 +316,7 @@ public class TastyBoardActivity extends AppCompatActivity implements
             this.mpesaMobile = mpesaMobile;
             this.deliveryMobile = deliveryMobile;
             this.deliveryInstructions = deliveryInstructions;
+            this.paymentType = paymentType;
             formData();
         }
         @Override
@@ -331,6 +341,7 @@ public class TastyBoardActivity extends AppCompatActivity implements
             info.add(new BasicNameValuePair("has_payment", hasPayment? "1" : "0"));
             info.add(new BasicNameValuePair("pre_order",  "1" )); // 1 means pre order 0 means not
             info.add(new BasicNameValuePair("collect_time", collectTime ));
+            info.add(new BasicNameValuePair("payment_type", String.valueOf(paymentType))); // 0 means mpesa , 1 is for cash payment
             info.add(new BasicNameValuePair("order_type", orderType)); // 0 means eat while eat , 1 is for take away and 2 is for delivery
             info.add(new BasicNameValuePair("delivery_mobile", deliveryMobile));
             info.add(new BasicNameValuePair("delivery_instructions", deliveryInstructions));
@@ -366,7 +377,7 @@ public class TastyBoardActivity extends AppCompatActivity implements
             if (successful)
             {
                 //check if we can be able to do payments
-                if(hasPayment)
+                if(hasPayment && paymentType == 0)
                 {
                     // the order is succesfully registered, so we carry out the payment
                     String amount = String.valueOf(total.intValue());

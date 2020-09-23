@@ -94,52 +94,20 @@ public class OneOrderFragment extends Fragment
             Bundle savedInstanceState)
     {
         View view = inflater.inflate(R.layout.fragment_one_orders, container, false);
-        ProgressBar progressBar=view.findViewById(R.id.progress);
         LinearLayout l_base=view.findViewById(R.id.orders_base);
         TextView t_date=view.findViewById(R.id.date);
         TextView t_username=view.findViewById(R.id.username);
+        TextView t_order_number = view.findViewById(R.id.order_number);
         TextView t_table=view.findViewById(R.id.table);
         TextView t_waiter=view.findViewById(R.id.waiter);
         TextView t_status = view.findViewById(R.id.status);
-        CardView c_table = view.findViewById(R.id.c_table);
-        CardView c_pre_order = view.findViewById(R.id.pre_order);
-        CardView c_collect_time = view.findViewById(R.id.c_collect_time);
         TextView t_collect_time = view.findViewById(R.id.collect_time);
-        CardView c_paid = view.findViewById(R.id.paid);
         TextView t_order_type = view.findViewById(R.id.order_type);
-        LinearLayout l_payment_failed = view.findViewById(R.id.l_payment_failed);
         Button b_delete = view.findViewById(R.id.b_delete);
         Button b_check_payment = view.findViewById(R.id.check_payment);
-        ScrollView l_less = view.findViewById(R.id.layout_less);
-        LinearLayout l_more = view.findViewById(R.id.layout_more);
-        Button b_expand_less = view.findViewById(R.id.expand_less);
-        Button b_expand_more = view.findViewById(R.id.expand_more);
         ImageView image_qr_code = view.findViewById(R.id.qr_code);
-        Utils.collapse(l_more);
-        b_expand_more.setVisibility(View.GONE);
+        TextView t_payment_type = view.findViewById(R.id.payment_type);
 
-        b_expand_less.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                v.setVisibility(View.GONE);
-                b_expand_more.setVisibility(View.VISIBLE);
-                Utils.collapse(l_less);
-                Utils.expand(l_more);
-            }
-        });
-        b_expand_more.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                v.setVisibility(View.GONE);
-                b_expand_less.setVisibility(View.VISIBLE);
-                Utils.collapse(l_more);
-                Utils.expand(l_less);
-            }
-        });
         //set the buttons listeners
         Button b_pay=view.findViewById(R.id.pay);
         b_pay.setOnClickListener(new View.OnClickListener()
@@ -180,29 +148,20 @@ public class OneOrderFragment extends Fragment
         String[] status_strings_1 = new String[]{"pending","in progress","delivery","payment","finished"};
         String[] status_strings_2 = new String[]{"pending","payment","in progress","delivery","finished"};
 
-        if(mPreOrder == 1)
-        {
-            c_pre_order.setVisibility(View.VISIBLE);
-            c_collect_time.setVisibility(View.VISIBLE);
-        }
-        if(mOrderStatus == -1)
-        {
-            t_status.setText(status_strings_1[0]);
-            c_paid.setVisibility(View.VISIBLE);
-        }
-        else if( mOrderStatus == -2)
+        if( mOrderStatus == -2)
         {
             //payment not gone through yet
-            b_check_payment.setVisibility(View.VISIBLE);
+            b_check_payment.setEnabled(true);
         }
         else if( mOrderStatus == -3)
         {
             //payment refused
-            l_payment_failed.setVisibility(View.VISIBLE);
-            b_pay.setVisibility(View.VISIBLE);
+            ;//l_payment_failed.setVisibility(View.VISIBLE);
+            b_pay.setEnabled(true);
+            b_delete.setEnabled(true);
         }
         else
-            t_status.setText(mOrderFormat==1?status_strings_1[mOrderStatus-1]:status_strings_2[mOrderStatus-1]);
+            ;//t_status.setText(mOrderFormat==1?status_strings_1[mOrderStatus-1]:status_strings_2[mOrderStatus-1]);
         //show the respective buttons and change their labels accordingly
         //for pending the buttons remain as they are
         if(mOrderFormat==1)
@@ -225,36 +184,34 @@ public class OneOrderFragment extends Fragment
         String date_to_show="";
         String waiter="";
         String collect_time="";
+        int payment_type = -1;
         int i_order_type=0;
         String url_code_start_delivery ="";
         String url_code_end_delivery = "";
-        Iterator iterator= OrdersFragment.ordersLinkedHashMap.entrySet().iterator();
-        while (iterator.hasNext())
+        int order_number = 0;
+        for (LinkedHashMap.Entry<Integer, Orders> set : OrdersFragment.ordersLinkedHashMap.entrySet())
         {
-            LinkedHashMap.Entry<Integer, Orders>set=(LinkedHashMap.Entry<Integer, Orders>) iterator.next();
-            Orders orders =set.getValue();
-            int itemId= orders.getItemId();
-            int order_number= orders.getOrderNumber();
-            int orderStatus= orders.getOrderStatus();
-            String orderName= orders.getItem();
-            orderName=orderName.replace("_"," ");
+            Orders orders = set.getValue();
+            int itemId = orders.getItemId();
+            order_number = orders.getOrderNumber();
+            int orderStatus = orders.getOrderStatus();
+            String orderName = orders.getItem();
+            orderName = orderName.replace("_", " ");
             String size = orders.getSize();
-            double price= orders.getPrice();
-            String date_added= orders.getDateAdded();
-            String date_added_local= orders.getDateAddedLocal();
-            String[] date=date_added.split(" ");
-            if(!(date[0]+":"+order_number).contentEquals(mOrder))
+            double price = orders.getPrice();
+            String date_added = orders.getDateAdded();
+            String date_added_local = orders.getDateAddedLocal();
+            String[] date = date_added.split(" ");
+            if (!(date[0] + ":" + order_number).contentEquals(mOrder))
                 continue;
-            username= orders.getSellerNames();
-            waiter= orders.getWaiterNames();
-            table= orders.getTableNumber();
+            username = orders.getSellerNames();
+            waiter = orders.getWaiterNames();
+            table = orders.getTableNumber();
             collect_time = orders.getCollectTime();
+            payment_type = orders.getPaymentType();
             i_order_type = orders.getOrderType();
-            if(count==0)
-            {
-                progressBar.setProgress(orderStatus);
-            }
-            if(mOrderStatus == 3 || mOrderStatus == 4)
+
+            if (mOrderStatus == 3 || mOrderStatus == 4)
             {
                 url_code_start_delivery = orders.getUrlCodeStartDelivery();
                 url_code_end_delivery = orders.getUrlCodeEndDelivery();
@@ -264,20 +221,20 @@ public class OneOrderFragment extends Fragment
             dateAdded = orders.getDateAdded();
             //add the layouts
             //cardview
-            View layout = inflater.inflate(R.layout.order_cardview_layout,null);
+            View layout = inflater.inflate(R.layout.order_cardview_layout, null);
             TextView t_count = layout.findViewById(R.id.count);
             TextView t_item = layout.findViewById(R.id.item);
             TextView t_price = layout.findViewById(R.id.price);
 
-            t_count.setText(String.valueOf(count+1));
+            t_count.setText(String.valueOf(count + 1));
             t_item.setText(orderName);
-            t_price.setText(size+" @ "+String.valueOf(price));
+            t_price.setText(size + " @ " + String.valueOf(price));
             l_base.addView(layout);
 
 
-            count+=1;
-            total_price+=price;
-            date_to_show=date_added_local;
+            count += 1;
+            total_price += price;
+            date_to_show = date_added_local;
         }
         ((TextView)view.findViewById(R.id.total)).setText("Total "+String.valueOf(total_price));
         total = total_price.intValue();
@@ -286,13 +243,44 @@ public class OneOrderFragment extends Fragment
         t_date.setText(date_to_show);
         t_username.setText(username);
         t_collect_time.setText(collect_time);
+        t_order_number.setText("Order "+String.valueOf(order_number));
         if(table!=-1)
             t_table.setText("Table "+table);
-        else
-            c_table.setVisibility(View.GONE);
-        t_waiter.setText(waiter);
+        t_waiter.setText(" served by "+waiter);
         String[] order_types = new String[]{"In house", "Take away", "Delivery"};
         t_order_type.setText(order_types[i_order_type]);
+        //set order status
+        String status;
+        switch(mOrderStatus)
+        {
+            case -3:
+                status = "Unpaid";
+                break;
+            case -2:
+                status = "Processing payment";
+                break;
+            case -1:
+                status = "Paid & Pending";
+                break;
+            case 1:
+                status = "UnPaid & Pending";
+                break;
+            case 2:
+                status = "Pending payment";
+                break;
+            case 3:
+                status = "In progress";
+                break;
+            case 4:
+                status = "Delivery";
+                break;
+            case 5:
+                status = "Finished";
+                break;
+            default:
+                status = "";
+        }
+        t_status.setText(status);
         if(mOrderStatus == 4)
         {
             if(url_code_end_delivery.length()>10)
@@ -300,6 +288,17 @@ public class OneOrderFragment extends Fragment
                 image_qr_code.setVisibility(View.VISIBLE);
                 image_qr_code.setImageBitmap(Utils.generateQRCode(url_code_end_delivery));
             }
+        }
+        //payment type
+        String[] payments = new String[]{"M-Pesa","Cash"};
+        if(payment_type == 0)
+            t_payment_type.setText("Paid by "+payments[0]);
+        else if(payment_type == 1)
+        {
+            if(mOrderStatus!=5)
+                t_payment_type.setText("TO BE PAID BY CASH");
+            else
+                t_payment_type.setText("Paid by "+payments[1]);
         }
 
         return view;

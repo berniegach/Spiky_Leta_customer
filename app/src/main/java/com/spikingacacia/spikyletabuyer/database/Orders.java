@@ -24,11 +24,12 @@ public class Orders
     public int tableNumber;
     private int preOrder;
     private String collectTime;
+    private int paymentType;
     private int orderType;
     private String mpesaMessage;
 
     public Orders(int id, String waiterEmail, int itemId, int orderNumber, int orderStatus, String urlCodeStartDelivery, String urlCodeEndDelivery, String dateAdded, String dateChanged, String dateAddedLocal, String item, String size, double price, int sellerId, String sellerEmail, String sellerImageType,
-                  String sellerNames, String waiterNames, int orderFormat, int tableNumber, int preOrder, String collectTime, int order_type, String mpesaMessage)
+                  String sellerNames, String waiterNames, int orderFormat, int tableNumber, int preOrder, String collectTime, int paymentType, int order_type, String mpesaMessage)
     {
         this.id = id;
         this.waiterEmail = waiterEmail;
@@ -52,6 +53,7 @@ public class Orders
         this.tableNumber = tableNumber;
         this.preOrder = preOrder;
         this.collectTime = collectTime;
+        this.paymentType = paymentType;
         this.orderType = order_type;
         this.mpesaMessage = mpesaMessage;
     }
@@ -270,6 +272,15 @@ public class Orders
     public void setCollectTime(String collectTime)
     {
         this.collectTime = collectTime;
+    }
+    public int getPaymentType()
+    {
+        return paymentType;
+    }
+
+    public void setPaymentType(int paymentType)
+    {
+        this.paymentType = paymentType;
     }
     public int getOrderType()
     {

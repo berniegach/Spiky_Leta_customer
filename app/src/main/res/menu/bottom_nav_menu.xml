@@ -5,10 +5,10 @@
         android:id="@+id/navigation_order"
         android:icon="@drawable/ic_restaurant"
         android:title="Menu"/>
-    <item
+    <!--<item
         android:id="@+id/navigation_tasty_board"
         android:icon="@drawable/ic_article"
-        android:title="Tasty Board"/>
+        android:title="Tasty Board"/>-->
     <item
         android:visible="false"
         android:id="@+id/navigation_explore"
@@ -19,10 +19,10 @@
         android:icon="@drawable/ic_baseline_list"
         android:title="orders" />
 
-    <item
+    <!--<item
         android:id="@+id/navigation_messages"
         android:icon="@drawable/ic_messages"
-        android:title="Messages" />
+        android:title="Messages" />-->
 
 
 

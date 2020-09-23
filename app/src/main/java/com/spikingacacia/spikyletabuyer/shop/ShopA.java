@@ -1,40 +1,24 @@
 package com.spikingacacia.spikyletabuyer.shop;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.TimePickerDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.media.MediaPlayer;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Vibrator;
-import android.text.TextUtils;
-import android.util.Base64;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.EditText;
-import android.widget.NumberPicker;
 import android.widget.ProgressBar;
-import android.widget.TimePicker;
-import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.spikingacacia.spikyletabuyer.LoginA;
 import com.spikingacacia.spikyletabuyer.MyBounceInterpolator;
@@ -45,29 +29,18 @@ import com.spikingacacia.spikyletabuyer.database.Categories;
 import com.spikingacacia.spikyletabuyer.database.DMenu;
 import com.spikingacacia.spikyletabuyer.database.Groups;
 import com.spikingacacia.spikyletabuyer.main.MainActivity;
-import com.spikingacacia.spikyletabuyer.shop.cart.CartBottomSheet;
-import com.spikingacacia.spikyletabuyer.shop.cart.CartContent;
-import com.spikingacacia.spikyletabuyer.shop.cart.CartFragment;
-import com.spikingacacia.spikyletabuyer.util.Mpesa;
-import com.spikingacacia.spikyletabuyer.wallet.WalletActivity;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 
 import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
-import static com.spikingacacia.spikyletabuyer.LoginA.mGoogleSignInClient;
 
 public class ShopA extends AppCompatActivity
         implements
@@ -180,7 +153,7 @@ public class ShopA extends AppCompatActivity
         if( id == R.id.action_cart)
         {
             getTotal();
-            CartBottomSheet.newInstance(tempTotal, cartLinkedHashMap, itemPriceSizeLinkedHashMap, menuLinkedHashMap, this).show(getSupportFragmentManager(), "dialog");
+            CartBottomSheet.newInstance(tempTotal, cartLinkedHashMap, itemPriceSizeLinkedHashMap, menuLinkedHashMap,hasPayment, preOrder, this).show(getSupportFragmentManager(), "dialog");
         }
 
         return super.onOptionsItemSelected(item);
@@ -193,25 +166,6 @@ public class ShopA extends AppCompatActivity
     static void putIntoMenu(int id, DMenu dMenu)
     {
         menuLinkedHashMap.put(id,dMenu);
-    }
-
-    void onOrderClickedPreOder()
-    {
-        getSupportFragmentManager().popBackStack();
-        Fragment fragment= OrderParamsFragment.newInstance(hasPayment,diningOptions,deliveryCharge,tempTotal);
-        FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.base,fragment,"order");
-        transaction.addToBackStack("order");
-        transaction.commit();
-    }
-    void onOrderClickedScanToOder()
-    {
-        getSupportFragmentManager().popBackStack();
-        Fragment fragment= ScanToOrderParamsFragment.newInstance(hasPayment,tableNumber, numberOfTables);
-        FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.base,fragment,"scan_to_order");
-        transaction.addToBackStack("scan_to_order");
-        transaction.commit();
     }
 
 
@@ -294,7 +248,7 @@ public class ShopA extends AppCompatActivity
      * implementation of CartBottomSheet.java
      * ************************************************************************************************************************************************************************************/
     @Override
-    public void onProceed(double new_total)
+    public void onProceed(double new_total, int payment_type)
     {
         tempTotal = new_total;
         //first check if the the location is within the restaurants range
@@ -307,12 +261,12 @@ public class ShopA extends AppCompatActivity
         if(preOrder)
         {
             //onOrderClickedPreOder();
-            OrderParamsBottomSheet.newInstance(hasPayment,diningOptions,deliveryCharge,tempTotal, this).show(getSupportFragmentManager(), "dialog");
+            OrderParamsBottomSheet.newInstance(hasPayment,diningOptions,deliveryCharge,tempTotal, payment_type,this).show(getSupportFragmentManager(), "dialog");
         }
         else
         {
             //onOrderClickedScanToOder();
-            ScanToOrderParamsBottomSheet.newInstance(hasPayment,tableNumber, numberOfTables, tempTotal, (ScanToOrderParamsBottomSheet.OnFragmentInteractionListener) this).show(getSupportFragmentManager(), "dialog");
+            ScanToOrderParamsBottomSheet.newInstance(hasPayment,tableNumber, numberOfTables, tempTotal, payment_type, this).show(getSupportFragmentManager(), "dialog");
         }
 
 
@@ -390,9 +344,9 @@ public class ShopA extends AppCompatActivity
 
 
     @Override
-    public void onPlacePreOrder(int which, String time, String mobile_mpesa, String mobile_delivery, String instructions)
+    public void onPlacePreOrder(int which, String time, String mobile_mpesa, String mobile_delivery, String instructions, int payment_type)
     {
-        new OrderTask(tableNumber,time, which, mobile_mpesa, mobile_delivery, instructions).execute((Void)null);
+        new OrderTask(tableNumber,time, which, mobile_mpesa, mobile_delivery, instructions, payment_type).execute((Void)null);
     }
 
     /*************************************************************************************************************************************************************************************
@@ -401,14 +355,14 @@ public class ShopA extends AppCompatActivity
 
 
     @Override
-    public void onScanToOrderPlaceOrder(int which, int table, String mobile_mpesa)
+    public void onScanToOrderPlaceOrder(int which, int table, String mobile_mpesa, int payment_type)
     {
-        new OrderTask(table,"null", which,mobile_mpesa,"null","null").execute((Void)null);
+        new OrderTask(table,"null", which,mobile_mpesa,"null","null", payment_type).execute((Void)null);
     }
 
     private class OrderTask extends AsyncTask<Void, Void, Boolean>
     {
-        private String url_place_order = base_url + "place_order.php";
+        private String url_place_order = base_url + "place_order_1.php";
         private String TAG_MESSAGE = "message";
         private String TAG_SUCCESS = "success";
         private String itemsIds="";
@@ -420,11 +374,12 @@ public class ShopA extends AppCompatActivity
         private String deliveryMobile;
         private String mpesaMobile;
         private String deliveryInstructions;
+        private int paymentType;
         private String orderNumber;
         private String dateAdded;
 
 
-        public OrderTask(int tableNumber, String collectTime, int orderType, String mpesaMobile, String deliveryMobile, String deliveryInstructions)
+        public OrderTask(int tableNumber, String collectTime, int orderType, String mpesaMobile, String deliveryMobile, String deliveryInstructions, int paymentType)
         {
             this.tableNumber=tableNumber;
             this.collectTime = collectTime;
@@ -432,6 +387,7 @@ public class ShopA extends AppCompatActivity
             this.mpesaMobile = mpesaMobile;
             this.deliveryMobile = deliveryMobile;
             this.deliveryInstructions = deliveryInstructions;
+            this.paymentType = paymentType;
             formData();
         }
         @Override
@@ -461,6 +417,7 @@ public class ShopA extends AppCompatActivity
             info.add(new BasicNameValuePair("has_payment", hasPayment? "1" : "0"));
             info.add(new BasicNameValuePair("pre_order", preOrder? "1" : "0")); // 1 means pre order 0 means not
             info.add(new BasicNameValuePair("collect_time", preOrder? collectTime : "null"));
+            info.add(new BasicNameValuePair("payment_type", String.valueOf(paymentType))); // 0 means mpesa , 1 is for cash payment
             info.add(new BasicNameValuePair("order_type", orderType)); // 0 means eat while eat , 1 is for take away and 2 is for delivery
             info.add(new BasicNameValuePair("delivery_mobile", deliveryMobile));
             info.add(new BasicNameValuePair("delivery_instructions", deliveryInstructions));
@@ -496,7 +453,7 @@ public class ShopA extends AppCompatActivity
             if (successful)
             {
                 //check if we can be able to do payments
-                if(hasPayment)
+                if(hasPayment && paymentType == 0)
                 {
                     // the order is succesfully registered, so we carry out the payment
                     //new LipaNaMpesaStkPush(orderNumber,dateAdded,mpesaMobile).execute((Void)null);

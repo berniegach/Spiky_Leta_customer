@@ -18,6 +18,29 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="0 items"/>
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chip_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:singleSelection="true"
+        android:layout_gravity="center_horizontal">
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_mpesa"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="M-Pesa"
+            android:clickable="true"
+            android:checkable="true"
+            android:focusable="true" />
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_cash"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Cash"
+            android:clickable="true"
+            android:checkable="true"
+            android:focusable="true" />
+    </com.google.android.material.chip.ChipGroup>
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list"
         android:layout_width="match_parent"
@@ -26,7 +49,7 @@
         android:layout_weight="1"
         android:paddingTop="@dimen/list_item_spacing_half"
         android:paddingBottom="@dimen/list_item_spacing_half"
-        tools:context=".shop.cart.CartBottomSheet"
+        tools:context=".shop.CartBottomSheet"
         tools:listitem="@layout/cart_bottom_sheet__item" />
     <LinearLayout
         android:layout_width="match_parent"

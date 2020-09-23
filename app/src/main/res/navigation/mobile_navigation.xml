@@ -10,11 +10,11 @@
         android:name="com.spikingacacia.spikyletabuyer.main.order.OrderSearchFragment"
         android:label="Menu"
         tools:layout="@layout/fragment_order_search" />
-    <fragment
+   <!-- <fragment
         android:id="@+id/navigation_tasty_board"
         android:name="com.spikingacacia.spikyletabuyer.main.tasty.TastyBoardFragment"
         android:label="Menu"
-        tools:layout="@layout/fragment_tasty_board_list" />
+        tools:layout="@layout/fragment_tasty_board_list" />-->
     <fragment
         android:id="@+id/navigation_explore"
         android:name="com.spikingacacia.spikyletabuyer.main.map.MapsFragment"
@@ -25,10 +25,10 @@
         android:name="com.spikingacacia.spikyletabuyer.main.orders_list.OrdersFragment"
         android:label="Order"
         tools:layout="@layout/fragment_orders_list" />
-    <fragment
+    <!--<fragment
         android:id="@+id/navigation_messages"
         android:name="com.spikingacacia.spikyletabuyer.main.messages.MessagesFragment"
         android:label="Order"
-        tools:layout="@layout/fragment_messages_list" />
+        tools:layout="@layout/fragment_messages_list" />-->
 
 </navigation>

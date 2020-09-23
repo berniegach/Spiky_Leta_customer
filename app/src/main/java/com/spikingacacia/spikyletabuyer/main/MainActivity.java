@@ -52,6 +52,7 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.spikingacacia.spikyletabuyer.JSONParser;
 import com.spikingacacia.spikyletabuyer.LoginA;
+import com.spikingacacia.spikyletabuyer.database.Messages;
 import com.spikingacacia.spikyletabuyer.database.MpesaRequests;
 import com.spikingacacia.spikyletabuyer.database.ServerAccount;
 import com.spikingacacia.spikyletabuyer.database.TastyBoard;
@@ -61,6 +62,7 @@ import com.spikingacacia.spikyletabuyer.SettingsActivity;
 import com.spikingacacia.spikyletabuyer.barcode.BarcodeCaptureActivity;
 import com.spikingacacia.spikyletabuyer.database.Restaurants;
 import com.spikingacacia.spikyletabuyer.database.Orders;
+import com.spikingacacia.spikyletabuyer.main.messages.MessagesActivity;
 import com.spikingacacia.spikyletabuyer.main.order.OrderSearchFragment;
 import com.spikingacacia.spikyletabuyer.main.orders_list.OrdersFragment;
 import com.spikingacacia.spikyletabuyer.main.tasty.TastyBoardActivity;
@@ -97,7 +99,7 @@ import static com.spikingacacia.spikyletabuyer.LoginA.mGoogleSignInClient;
 
 public class MainActivity extends AppCompatActivity implements
         OrderSearchFragment.OnFragmentInteractionListener,
-         OrdersFragment.OnListFragmentInteractionListener, TastyBoardFragment.OnListFragmentInteractionListener
+         OrdersFragment.OnListFragmentInteractionListener
 {
     /** Change this to {@code false} when you want to use the downloadable Emoji font. */
     private static final boolean USE_BUNDLED_EMOJI = true;
@@ -145,7 +147,7 @@ public class MainActivity extends AppCompatActivity implements
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         appBarConfiguration = new AppBarConfiguration.Builder(
-                 R.id.navigation_order,  R.id.navigation_tasty_board, R.id.navigation_orders, R.id.navigation_messages)
+                 R.id.navigation_order,  R.id.navigation_orders)
                 .build();
         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
@@ -206,7 +208,21 @@ public class MainActivity extends AppCompatActivity implements
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if( id == R.id.action_wallet)
+        if( id == R.id.action_tasty_board)
+        {
+            Intent intent=new Intent(MainActivity.this, TastyBoardActivity.class);
+            //prevent this activity from flickering as we call the next one
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            startActivity(intent);
+        }
+        else if( id == R.id.action_messages)
+        {
+            Intent intent=new Intent(MainActivity.this, MessagesActivity.class);
+            //prevent this activity from flickering as we call the next one
+            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+            startActivity(intent);
+        }
+        else if( id == R.id.action_wallet)
         {
             Intent intent=new Intent(MainActivity.this, WalletActivity.class);
             //prevent this activity from flickering as we call the next one
@@ -214,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements
             startActivity(intent);
         }
 
-        if (id == R.id.action_settings)
+        else if (id == R.id.action_settings)
         {
             proceedToSettings();
             return true;
@@ -623,25 +639,7 @@ implementation of OrdersFragment.java
         startActivity(intent);
     }
 
-    /*
-     * implementation of TastyBoardFragment.java
-     */
-    @Override
-    public void onTastyBoardItemClicked(TastyBoard tastyBoard)
-    {
-        //if the location of the hotel is kenya then we ask for mpesa payment
-        boolean has_payment = false;
-            /*if( item.getmCode().contentEquals("") ||  item.getmCode().contentEquals("null") || item.getmCode().contentEquals("NULL"))
-                has_payment = false;*/
-        if(tastyBoard.getCountry().contentEquals("KE"))
-            has_payment = true;
-        Intent intent=new Intent(MainActivity.this, TastyBoardActivity.class);
-        //prevent this activity from flickering as we call the next one
-        intent.putExtra("tasty_board",tastyBoard);
-        intent.putExtra("has_payment", has_payment);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-        startActivity(intent);
-    }
+
     private void initEmojiCompat() {
         final EmojiCompat.Config config;
         if (USE_BUNDLED_EMOJI) {

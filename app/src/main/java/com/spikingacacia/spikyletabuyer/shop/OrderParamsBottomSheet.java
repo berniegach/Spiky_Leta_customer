@@ -7,27 +7,19 @@ import androidx.annotation.NonNull;
 
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
-import androidx.cardview.widget.CardView;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.RadioButton;
-import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.TimePicker;
-import android.widget.Toast;
 
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
 import com.spikingacacia.spikyletabuyer.Preferences;
 import com.spikingacacia.spikyletabuyer.R;
-import com.spikingacacia.spikyletabuyer.shop.cart.CartBottomSheet;
 
 import java.io.Serializable;
 
@@ -45,11 +37,13 @@ public class OrderParamsBottomSheet extends BottomSheetDialogFragment
     private static final String ARG_DINING_OPTIONS = "param2";
     private static final String ARG_DELIVERY_CHARGE = "param3";
     private static final String ARG_SUB_TOTAL = "param4";
+    private static final String ARG_PAYMENT_TYPE = "param5";
     private static final String ARG_LISTENER = "arg5";
     private boolean showMpesa;
     private String mDiningOptions;
     private Double mDeliveryCharge;
     private Double mSubTotal;
+    private int paymentType;
     private OnFragmentInteractionListener mListener;
     private int which = 2;
     private String time = null;
@@ -60,10 +54,10 @@ public class OrderParamsBottomSheet extends BottomSheetDialogFragment
     // TODO: make sure time is set since its null in the begining
     public interface OnFragmentInteractionListener extends Serializable
     {
-        void onPlacePreOrder(int which, String time, String mobile_mpesa, String mobile_delivery, String instructions);
+        void onPlacePreOrder(int which, String time, String mobile_mpesa, String mobile_delivery, String instructions, int payment_type);
     }
 
-    public static OrderParamsBottomSheet newInstance(boolean showMpesa, String dining_options, Double delivery_charge, Double sub_total,OnFragmentInteractionListener listener)
+    public static OrderParamsBottomSheet newInstance(boolean showMpesa, String dining_options, Double delivery_charge, Double sub_total, int paymentType, OnFragmentInteractionListener listener)
     {
         final OrderParamsBottomSheet fragment = new OrderParamsBottomSheet();
         final Bundle args = new Bundle();
@@ -71,6 +65,7 @@ public class OrderParamsBottomSheet extends BottomSheetDialogFragment
         args.putString(ARG_DINING_OPTIONS, dining_options);
         args.putDouble(ARG_DELIVERY_CHARGE, delivery_charge);
         args.putDouble(ARG_SUB_TOTAL,sub_total);
+        args.putInt(ARG_PAYMENT_TYPE, paymentType);
         args.putSerializable(ARG_LISTENER, listener);
         fragment.setArguments(args);
         return fragment;
@@ -93,6 +88,7 @@ public class OrderParamsBottomSheet extends BottomSheetDialogFragment
             mDiningOptions = getArguments().getString(ARG_DINING_OPTIONS);
             mDeliveryCharge = getArguments().getDouble(ARG_DELIVERY_CHARGE);
             mSubTotal = getArguments().getDouble(ARG_SUB_TOTAL);
+            paymentType = getArguments().getInt(ARG_PAYMENT_TYPE);
             mListener = (OnFragmentInteractionListener) getArguments().getSerializable(ARG_LISTENER);
         }
         preferences = new Preferences(getContext());
@@ -124,7 +120,7 @@ public class OrderParamsBottomSheet extends BottomSheetDialogFragment
         if(preferences.getOrder_instructions()!=null)
             t_order_delivery_info.setText(preferences.getOrder_instructions());
 
-        if(!showMpesa)
+        if(!showMpesa  || paymentType!=0)
             l_mpesa.setVisibility(View.GONE);
         timePicker.setOnTimeChangedListener(new TimePicker.OnTimeChangedListener()
         {
@@ -272,7 +268,7 @@ public class OrderParamsBottomSheet extends BottomSheetDialogFragment
                         preferences.setDelivery_mobile(mobile_delivery);
                     if(!instructions.contentEquals(""))
                         preferences.setOrder_instructions(instructions);
-                    mListener.onPlacePreOrder(which,time,mobile_mpesa,mobile_delivery,instructions);
+                    mListener.onPlacePreOrder(which,time,mobile_mpesa,mobile_delivery,instructions, paymentType);
                     dismiss();
                 }
 

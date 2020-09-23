@@ -1,62 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:name="com.spikingacacia.leta.ui.buyer.orders.BOOrderF"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:orientation="vertical">
     <ProgressBar
         android:id="@+id/progress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
+        android:layout_gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/chip_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        app:singleSelection="true"
+        app:singleLine="true">
+        <com.google.android.material.chip.Chip
+            android:id="@+id/check_unfinished"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Unfinished"
+            android:fontFamily="@font/roboto_condensed_regular"
+            android:checkable="true"
+            android:clickable="true"/>
+        <com.google.android.material.chip.Chip
+            android:id="@+id/check_finished"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Finished"
+            android:fontFamily="@font/roboto_condensed_regular"
+            android:checkable="true"
+            android:clickable="true"/>
+
+    </com.google.android.material.chip.ChipGroup>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_weight="1"
         app:layoutManager="LinearLayoutManager"
         app:layout_constraintBottom_toTopOf="@+id/linearLayout"
         app:layout_constraintTop_toTopOf="parent"
         tools:context="com.spikingacacia.spikyletabuyer.main.orders_list.OrdersFragment"
         tools:listitem="@layout/fragment_orders" />
 
-    <LinearLayout
-        android:id="@+id/linearLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent">
-
-        <Button
-            android:id="@+id/unfinished"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Unfinished"
-            android:backgroundTint="@android:color/white"
-            android:textColor="@android:color/black"
-            android:textAllCaps="false"
-            android:layout_marginStart="20dp"
-            android:layout_marginEnd="20dp"/>
-        <Button
-            android:id="@+id/all"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginEnd="20dp"
-            android:text="All"
-            android:textAllCaps="false"/>
-
-
-
-
-    </LinearLayout>
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>

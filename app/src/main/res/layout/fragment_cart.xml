@@ -42,14 +42,15 @@
             app:layout_constraintStart_toEndOf="@id/image"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toTopOf="parent"/>
+
         <TextView
             android:id="@+id/size"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
             android:text="Size"
             app:layout_constraintStart_toEndOf="@id/image"
-            app:layout_constraintTop_toBottomOf="@id/item"
-            android:layout_marginTop="10dp"/>
+            app:layout_constraintTop_toBottomOf="@id/item" />
         <ImageButton
             android:id="@+id/plus"
             android:layout_width="50dp"

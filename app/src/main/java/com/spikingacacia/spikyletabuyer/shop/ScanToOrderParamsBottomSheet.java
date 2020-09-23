@@ -10,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -36,21 +37,22 @@ public class ScanToOrderParamsBottomSheet extends BottomSheetDialogFragment
     private static final String ARG_TABLE_NUMBER = "param2";
     private static final String ARG_TABLES_COUNT = "param3";
     private static final String ARG_SUB_TOTAL = "param4";
-    private static final String ARG_LISTENER = "arg5";
+    private static final String ARG_PAYMENT_TYPE = "param5";
+    private static final String ARG_LISTENER = "param6";
     private boolean showMpesa;
     private int mTableNumber;
     private int mNumberOfTables;
     private Double mTotal;
+    private int paymentType;
     private OnFragmentInteractionListener mListener;
-    private int which = 2;
     private String mobile_mpesa = "";
     private Preferences preferences;
     public interface OnFragmentInteractionListener extends Serializable
     {
-        void onScanToOrderPlaceOrder(int which, int table, String mobile_mpesa);
+        void onScanToOrderPlaceOrder(int which, int table, String mobile_mpesa, int payment_type);
     }
 
-    public static ScanToOrderParamsBottomSheet newInstance(boolean showMpesa, int tableNumber, int number_of_tables, Double total, OnFragmentInteractionListener listener)
+    public static ScanToOrderParamsBottomSheet newInstance(boolean showMpesa, int tableNumber, int number_of_tables, Double total, int paymentType,OnFragmentInteractionListener listener)
     {
         final ScanToOrderParamsBottomSheet fragment = new ScanToOrderParamsBottomSheet();
         final Bundle args = new Bundle();
@@ -58,6 +60,7 @@ public class ScanToOrderParamsBottomSheet extends BottomSheetDialogFragment
         args.putInt(ARG_TABLE_NUMBER, tableNumber);
         args.putInt(ARG_TABLES_COUNT,number_of_tables);
         args.putDouble(ARG_SUB_TOTAL,total);
+        args.putInt(ARG_PAYMENT_TYPE, paymentType);
         args.putSerializable(ARG_LISTENER, listener);
         fragment.setArguments(args);
         return fragment;
@@ -80,6 +83,7 @@ public class ScanToOrderParamsBottomSheet extends BottomSheetDialogFragment
             mTableNumber = getArguments().getInt(ARG_TABLE_NUMBER);
             mNumberOfTables = getArguments().getInt(ARG_TABLES_COUNT);
             mTotal = getArguments().getDouble(ARG_SUB_TOTAL);
+            paymentType = getArguments().getInt(ARG_PAYMENT_TYPE);
             mListener = (OnFragmentInteractionListener) getArguments().getSerializable(ARG_LISTENER);
         }
         preferences = new Preferences(getContext());
@@ -99,7 +103,7 @@ public class ScanToOrderParamsBottomSheet extends BottomSheetDialogFragment
         if(preferences.getMpesa_mobile()!=null)
             t_m_pesa_mobile.setText(preferences.getMpesa_mobile());
 
-        if(!showMpesa)
+        if(!showMpesa || paymentType!=0)
             l_mpesa.setVisibility(View.GONE);
         if(mTableNumber!=-1)
         {
@@ -110,52 +114,47 @@ public class ScanToOrderParamsBottomSheet extends BottomSheetDialogFragment
         t_sub_total.setText(String.valueOf(mTotal.intValue()));
         t_total.setText(String.valueOf(mTotal));
 
-        chipGroup.setOnCheckedChangeListener(new ChipGroup.OnCheckedChangeListener()
-        {
-            @Override
-            public void onCheckedChanged(ChipGroup group, int checkedId)
-            {
-                if(checkedId == R.id.chip_sit_in)
-                {
-                    which = 0;
-                }
-                else if(checkedId == R.id.chip_take_away)
-                {
-                    which = 1;
-                }
-
-            }
-        });
-
 
         b_order.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
+                int which = 0;
+                int chip_id = chipGroup.getCheckedChipId();
+                if(chip_id == R.id.chip_sit_in)
+                    which = 0;
+                else if(chip_id == R.id.chip_take_away)
+                    which = 1;
+                else
+                {
+                    Toast.makeText(getContext(),"Please choose order type",Toast.LENGTH_SHORT).show();
+                    return;
+                }
                 //tablenumber
                 int table = numberPicker.getValue();
                 //sit in and pick up
                 String msisdn = t_m_pesa_mobile.getText().toString();
-                if(showMpesa)
+                if(showMpesa && paymentType == 0)
                 {
                     if(TextUtils.isEmpty(msisdn))
                     {
                         t_m_pesa_mobile.setError("Please enter a mobile number");
                         return;
                     }
+                    if(msisdn.contains("+254") || msisdn.startsWith("07") )
+                    {
+                        t_m_pesa_mobile.setError("The number should begin with 254");
+                        return;
+                    }
                 }
-                if(msisdn.contains("+254") || msisdn.startsWith("07") )
-                {
-                    t_m_pesa_mobile.setError("The number should begin with 254");
-                    return;
-                }
+
                 mobile_mpesa = msisdn;
                 if(mListener!=null)
                 {
                     if(!mobile_mpesa.contentEquals(""))
                         preferences.setMpesa_mobile(mobile_mpesa);
-                    mListener.onScanToOrderPlaceOrder(which,table,mobile_mpesa);
+                    mListener.onScanToOrderPlaceOrder(which,table,mobile_mpesa, paymentType);
                     dismiss();
                 }
 
