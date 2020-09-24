@@ -61,11 +61,8 @@ public class LinkedItemListDialogFragment extends BottomSheetDialogFragment
     private boolean[] items_checked_new;
     private String[] items_new;
     private DMenu[] dmenu_new;
-    private Integer[] items_new_sizes_prices_index;
-    public interface UpdateListener extends Serializable
-    {
-        void onLinkedItemUpdateDone(int menu_id, String linked_items);
-    }
+    private Integer[] items_new_sizes_prices_index; // this are the indexes in the price size string in DMenu
+    private boolean[] items_new_free;
     private  OnListFragmentInteractionListener mListener;
     public static LinkedItemListDialogFragment newInstance(DMenu dMenu,  List<DMenu> dMenuList, OnListFragmentInteractionListener listener)
     {
@@ -95,7 +92,7 @@ public class LinkedItemListDialogFragment extends BottomSheetDialogFragment
         mListener = (OnListFragmentInteractionListener) getArguments().getSerializable(ARG_LISTENER);
         recyclerView = view.findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        recyclerView.setAdapter(new LinkedItemAdapter(getArguments().getInt(ARG_MENU_INDEX)));
+        recyclerView.setAdapter(new LinkedItemAdapter());
         TextView t_title = view.findViewById(R.id.title);
         t_title.setText(dMenu.getItem());
         Spinner spinner = view.findViewById(R.id.spinner);
@@ -107,17 +104,20 @@ public class LinkedItemListDialogFragment extends BottomSheetDialogFragment
             {
                 List<DMenu> checked = new ArrayList<>();
                 List<Integer> checkedPrices = new ArrayList<>();
+                List<Boolean> areItemsFree = new ArrayList<>();
                 for(int c=0; c<items_checked_new.length; c++)
                 {
                     if(items_checked_new[c])
                     {
                         checked.add(dmenu_new[c]);
                         checkedPrices.add(items_new_sizes_prices_index[c]);
+                        areItemsFree.add(items_new_free[c]);
                     }
                 }
                 checked.add(dMenu);
                 checkedPrices.add(spinner.getSelectedItemPosition());
-                mListener.onMenuItemInteraction(checked, checkedPrices);
+                areItemsFree.add(false);
+                mListener.onMenuItemInteraction(checked, checkedPrices, areItemsFree);
                 dismiss();
             }
         });
@@ -173,24 +173,28 @@ public class LinkedItemListDialogFragment extends BottomSheetDialogFragment
     private class LinkedItemAdapter extends RecyclerView.Adapter<ViewHolder>
     {
 
-        private final int mItemCount;
 
-        LinkedItemAdapter(int itemCount)
+        LinkedItemAdapter()
         {
-            mItemCount = itemCount;
-
-            //final List<DMenu> dMenuList = new ArrayList<>();
             String linked_foods = dMenu.getLinkedItems();
+            String linked_foods_price = dMenu.getLinkedItemsPrice();
             String[] links = linked_foods.split(":");
+            String[] links_price = linked_foods_price.split(":");
             String[] items = new String[dMenuList.size()];
             String[] ids = new String[dMenuList.size()];
             boolean[] items_checked = new boolean[dMenuList.size()];
-
+            boolean[] items_free = new boolean[dMenuList.size()];
 
             if(links.length==1 && links[0].contentEquals("null"))
                 links[0]="-1";
             else if(links.length==1 && links[0].contentEquals(""))
                 links[0]="-1";
+            if(links.length != links_price.length)
+            {
+                links_price = new String[links.length];
+                for(int c=0; c<links.length; c++)
+                    links_price[c] = "0";
+            }
             int itemsCount = 0;
             for(int c = 0; c< items.length; c++)
             {
@@ -205,6 +209,7 @@ public class LinkedItemListDialogFragment extends BottomSheetDialogFragment
                         if( id==dMenuList.get(c).getId())
                         {
                             items_checked[c]=true;
+                            items_free[c] = links_price[d].contentEquals("1");
                             itemsCount+=1;
                             break;
                         }
@@ -216,6 +221,7 @@ public class LinkedItemListDialogFragment extends BottomSheetDialogFragment
             dmenu_new = new DMenu[itemsCount];
             items_checked_new = new boolean[itemsCount];
             items_new_sizes_prices_index = new Integer[itemsCount];
+            items_new_free = new boolean[itemsCount];
             int index = 0;
             for(int c = 0; c< items_checked.length; c++)
             {
@@ -223,6 +229,7 @@ public class LinkedItemListDialogFragment extends BottomSheetDialogFragment
                 {
                     items_new[index]= dMenuList.get(c).getItem();
                     dmenu_new[index] = dMenuList.get(c);
+                    items_new_free[index] = items_free[c];
                     index+=1;
 
                 }
@@ -258,21 +265,31 @@ public class LinkedItemListDialogFragment extends BottomSheetDialogFragment
             String[] location_pieces = location.split(",");
             if(sizes.length == 1)
             {
-                if(location_pieces.length==4)
-                    sizePrice = new String[]{getCurrencyCode(location_pieces[3])+" "+prices[0]};
+                if(items_new_free[position])
+                    sizePrice = new String[]{"Free"};
                 else
-                    sizePrice = new String[]{prices[0]};
+                {
+                    if(location_pieces.length==4)
+                        sizePrice = new String[]{getCurrencyCode(location_pieces[3])+" "+prices[0]};
+                    else
+                        sizePrice = new String[]{prices[0]};
+                }
+
             }
             else
             {
                 sizePrice = new String[sizes.length];
                 for(int c=0; c<sizes.length; c++)
                 {
-
-                    if(location_pieces.length==4)
-                        sizePrice[c] = sizes[c]+" @ "+getCurrencyCode(location_pieces[3])+" "+prices[c];
+                    if(items_new_free[position])
+                        sizePrice[c] = sizes[c]+" Free ";
                     else
-                        sizePrice[c] = sizes[c]+" @ "+prices[c];
+                    {
+                        if(location_pieces.length==4)
+                            sizePrice[c] = sizes[c]+" @ "+getCurrencyCode(location_pieces[3])+" "+prices[c];
+                        else
+                            sizePrice[c] = sizes[c]+" @ "+prices[c];
+                    }
                 }
             }
             ArrayAdapter<String> adapter = new ArrayAdapter<String>(getContext(), android.R.layout.simple_spinner_item, sizePrice);

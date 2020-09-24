@@ -224,7 +224,7 @@ public class menuFragment extends Fragment implements MymenuRecyclerViewAdapter.
     {
         // TODO: Update argument type and name
         //void onEditMenu(int which, DMenu dMenu);
-        void onMenuItemInteraction(List<DMenu> item, List<Integer>items_new_sizes_prices_index);
+        void onMenuItemInteraction(List<DMenu> item, List<Integer>items_new_sizes_prices_index, List<Boolean> areItemsFree);
         //void onCategoryItemInteraction(Categories item);
     }
     private int getHorizontalItemCount()
@@ -512,6 +512,7 @@ public class menuFragment extends Fragment implements MymenuRecyclerViewAdapter.
                             group_id = -1;
                         }
                         String linked_items = jsonObjectNotis.getString("linked_items");
+                        String linked_items_price = jsonObjectNotis.getString("linked_items_price");
                         String item=jsonObjectNotis.getString("item");
                         String description=jsonObjectNotis.getString("description");
                         String sizes = jsonObjectNotis.getString("sizes");
@@ -521,7 +522,7 @@ public class menuFragment extends Fragment implements MymenuRecyclerViewAdapter.
                         String date_added=jsonObjectNotis.getString("date_added");
                         String date_changed=jsonObjectNotis.getString("date_changed");
 
-                        DMenu dMenu =new DMenu(id,category_id,group_id,linked_items,item,description,sizes, prices,image_type,available,date_added,date_changed);
+                        DMenu dMenu =new DMenu(id,category_id,group_id,linked_items, linked_items_price,item,description,sizes, prices,image_type,available,date_added,date_changed);
                         list.add(dMenu);
                         ShopA.putIntoMenu(id,dMenu);
                     }

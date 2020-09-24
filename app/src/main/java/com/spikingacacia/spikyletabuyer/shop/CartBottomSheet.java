@@ -274,7 +274,11 @@ public class CartBottomSheet extends BottomSheetDialogFragment
                 String priceString = inv.getPrices();
                 final String[] prices = priceString.split(":");
                 String[] sizes = inv.getSizes().split(":");
-                Double price = Double.parseDouble(prices[pos].contentEquals("null") ? "0" : prices[pos]);
+                Double price = 0.0;
+                if(pos>=0)
+                    price = Double.parseDouble(prices[pos].contentEquals("null") ? "0" : prices[pos]);
+                if(pos <0)
+                    pos = pos+100;
                 String size = sizes[pos];
                 String description = inv.getDescription();
 

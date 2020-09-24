@@ -264,7 +264,7 @@ public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecycl
         //form now a new list but with only linked items
         String[] items_new = new String[itemsCount];
         final DMenu[] dmenu_new = new DMenu[itemsCount];
-        final boolean[] items_checked_new = new boolean[itemsCount];
+        final boolean[] items_new_free = new boolean[itemsCount];
         int index = 0;
         for(int c=0; c<items_checked.length; c++)
         {
@@ -280,38 +280,14 @@ public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecycl
         {
             dMenuList.add(dMenu);
             items_new_sizes_prices_index.add(main_item_size);
-            mListener.onMenuItemInteraction(dMenuList, items_new_sizes_prices_index );
+            List<Boolean> areItemsFree = new ArrayList<>();
+            areItemsFree.add(false);
+            mListener.onMenuItemInteraction(dMenuList, items_new_sizes_prices_index , areItemsFree);
         }
         else
         {
             if(optionsListener!=null)
                 optionsListener.onOptionsMenuChooseAccompaniments(dMenu,  mValues);
-            /*new AlertDialog.Builder(context)
-                    .setTitle("Accompaniments")
-                    .setMultiChoiceItems(items_new, items_checked_new, new DialogInterface.OnMultiChoiceClickListener()
-                    {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which, boolean isChecked)
-                        {
-                            items_checked_new[which] = isChecked;
-                        }
-                    })
-                    .setPositiveButton("Proceed", new DialogInterface.OnClickListener()
-                    {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which)
-                        {
-                            for(int c=0; c<items_checked_new.length; c++)
-                            {
-                                if(items_checked_new[c])
-                                    dMenuList.add(dmenu_new[c]);
-                            }
-                            dMenuList.add(dMenu);
-                            mListener.onMenuItemInteraction(dMenuList);
-                        }
-                    })
-                    .setCancelable(false)
-                    .create().show();*/
         }
 
 

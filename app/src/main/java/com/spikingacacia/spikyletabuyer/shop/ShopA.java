@@ -69,7 +69,7 @@ public class ShopA extends AppCompatActivity
     private  double totalPrice=0;
     private  List<Integer>items;
     private  List<String>names;
-    private  List<Double>price;
+    private  List<Double>prices;
     private Preferences preferences;
     private LinkedHashMap<String,Integer> cartLinkedHashMap;
     private LinkedHashMap<String,Integer> itemPriceSizeLinkedHashMap;
@@ -129,7 +129,7 @@ public class ShopA extends AppCompatActivity
         groupsLinkedHashMap = new LinkedHashMap<>();
         items=new ArrayList<>();
         names=new ArrayList<>();
-        price=new ArrayList<>();
+        prices=new ArrayList<>();
         cartCount=0;
         totalPrice=0;
         cartLinkedHashMap = new LinkedHashMap<>();
@@ -170,65 +170,20 @@ public class ShopA extends AppCompatActivity
 
 
     @Override
-    public void onMenuItemInteraction(final List<DMenu> dMenuList, List<Integer>items_new_sizes_prices_index)
+    public void onMenuItemInteraction(final List<DMenu> dMenuList, List<Integer>items_new_sizes_prices_index, List<Boolean> areItemsFree)
     {
-
         for( int index=0; index< dMenuList.size(); index++)
         {
             final DMenu item = dMenuList.get(index);
             //items whose price spinner has not been selected may be null therefore set the price to first item
             if(items_new_sizes_prices_index.get(index) == null)
                 items_new_sizes_prices_index.set(index, 0);
-            itemPriceSizeLinkedHashMap.put(item.getId()+":"+items_new_sizes_prices_index.get(index), items_new_sizes_prices_index.get(index));
+            //since there are those items which are accompaniments and thier prices are set to free...
+            //we add an array position of -100-index ...
+            //eg if index == 2 array position is -100-2== -102
+            //when we want to get the size we just use -102+100 == 2
+            itemPriceSizeLinkedHashMap.put(item.getId()+":"+items_new_sizes_prices_index.get(index), areItemsFree.get(index) ? -100-items_new_sizes_prices_index.get(index) : items_new_sizes_prices_index.get(index));
             cartLinkedHashMap.put(item.getId()+":"+items_new_sizes_prices_index.get(index),1);
-            //updateFab();
-            //cartLinkedHashMap.put(item.getId(),1);
-            //display a list of different sizes and prices for the customer to choose
-            String[] sizes = item.getSizes().split(":");
-            String[] prices = item.getPrices().split(":");
-            if(sizes.length == 1)
-            {
-                //there is only one size
-                /*itemPriceSizeLinkedHashMap.put(item.getId()+":"+main_item_size, main_item_size);
-                cartLinkedHashMap.put(item.getId()+":"+main_item_size,1);
-                updateFab();*/
-            }
-            else
-            {
-                /*String[] sizesPrices = new String[sizes.length];
-                for( int c=0; c< sizesPrices.length; c++)
-                    sizesPrices[c] = sizes[c]+" @ "+ prices[c];
-                new AlertDialog.Builder(ShopA.this)
-                        .setTitle("Size for "+item.getItem())
-                        .setItems(sizesPrices, new DialogInterface.OnClickListener()
-                        {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which)
-                            {
-                                itemPriceSizeLinkedHashMap.put(item.getId()+":"+which, which);
-                                cartLinkedHashMap.put(item.getId()+":"+which,1);
-                                updateFab();
-                                //animate the fab button
-                                final Animation myAnim = AnimationUtils.loadAnimation(getBaseContext(), R.anim.bounce);
-                                // Use bounce interpolator with amplitude 0.2 and frequency 20
-                                MyBounceInterpolator interpolator = new MyBounceInterpolator(0.2, 20);
-                                myAnim.setInterpolator(interpolator);
-                                fab.startAnimation(myAnim);
-                            }
-                        })
-                        .setNegativeButton("No Thanks!!!", new DialogInterface.OnClickListener()
-                        {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which)
-                            {
-                                dialog.dismiss();
-                            }
-                        })
-                        .setCancelable(false)
-                        .create().show();*/
-            }
-
-            //play_notification();
         }
         Snackbar.make(mainFragment,dMenuList.get(dMenuList.size()-1).getItem()+" added",Snackbar.LENGTH_SHORT).show();
         showCartAddition();
@@ -295,7 +250,7 @@ public class ShopA extends AppCompatActivity
     private void getTotal()
     {
         Iterator iterator= cartLinkedHashMap.entrySet().iterator();
-        Double total=0.0;
+        double total=0.0;
         while(iterator.hasNext())
         {
             LinkedHashMap.Entry<String, Integer>set = (LinkedHashMap.Entry<String, Integer>) iterator.next();
@@ -305,10 +260,16 @@ public class ShopA extends AppCompatActivity
             int count=set.getValue();
             DMenu inv = menuLinkedHashMap.get(id);
 
+            double price = 0.0;
             int pos = itemPriceSizeLinkedHashMap.get(id_size);
-            String priceString = inv.getPrices();
-           final String[] prices = priceString.split(":");
-            Double price = Double.parseDouble( prices[pos].contentEquals("null")?"0":prices[pos]);
+            if(pos >=0 )
+            {
+                String priceString = inv.getPrices();
+                final String[] prices = priceString.split(":");
+                price = Double.parseDouble( prices[pos].contentEquals("null")?"0":prices[pos]);
+            }
+
+
 
             total += count*price;
 
@@ -491,8 +452,13 @@ public class ShopA extends AppCompatActivity
                 String priceString = inv.getPrices();
                 final String[] prices = priceString.split(":");
                 String[] sizes = inv.getSizes().split(":");
-                String  price =  prices[pos].contentEquals("null")?"0":prices[pos];
+                String price = "0";
+                if(pos >=0 )
+                    price =  prices[pos].contentEquals("null")?"0":prices[pos];
+                if(pos <0)
+                    pos = pos+100;
                 String size = sizes[pos];
+
                 for(int c=0; c<quantity; c++)
                 {
                     if (!itemsIds.contentEquals(""))

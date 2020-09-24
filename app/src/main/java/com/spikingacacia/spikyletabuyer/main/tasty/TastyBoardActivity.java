@@ -114,7 +114,7 @@ public class TastyBoardActivity extends AppCompatActivity implements
             cartLinkedHashMap.put(tastyBoard.getLinkedItemId()+":"+c,1);
             total += Double.parseDouble(discount_prices[c]);
         }
-        DMenu dMenu = new DMenu(tastyBoard.getLinkedItemId(),-1,-1,"null",tastyBoard.getItemNames(),"",sizes,tastyBoard.getDiscountPrice(),
+        DMenu dMenu = new DMenu(tastyBoard.getLinkedItemId(),-1,-1,"null","null",tastyBoard.getItemNames(),"",sizes,tastyBoard.getDiscountPrice(),
                 ".jpg",true,"","");
         menuLinkedHashMap.put(tastyBoard.getLinkedItemId(),dMenu);
         //add the cart
