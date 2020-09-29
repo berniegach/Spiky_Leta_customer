@@ -178,6 +178,7 @@ public class LinkedItemListDialogFragment extends BottomSheetDialogFragment
         {
             String linked_foods = dMenu.getLinkedItems();
             String linked_foods_price = dMenu.getLinkedItemsPrice();
+
             String[] links = linked_foods.split(":");
             String[] links_price = linked_foods_price.split(":");
             String[] items = new String[dMenuList.size()];

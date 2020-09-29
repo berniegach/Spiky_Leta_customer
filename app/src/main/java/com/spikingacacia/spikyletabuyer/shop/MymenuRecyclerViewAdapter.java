@@ -287,7 +287,7 @@ public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecycl
         else
         {
             if(optionsListener!=null)
-                optionsListener.onOptionsMenuChooseAccompaniments(dMenu,  mValues);
+                optionsListener.onOptionsMenuChooseAccompaniments(dMenu,  itemsCopy);
         }
 
 
