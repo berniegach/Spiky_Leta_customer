@@ -1,10 +1,12 @@
 package com.spikingacacia.spikyletabuyer.util;
 
+import android.app.Activity;
 import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.LinearLayout;
 
 import java.util.Currency;
@@ -100,5 +102,6 @@ public class Utils
             return null;
         }
     }
+
 
 }

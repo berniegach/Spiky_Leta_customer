@@ -86,11 +86,12 @@ public class TastyBoardActivity extends AppCompatActivity implements
                 has_payment = false;*/
         if(tastyBoard.getCountry().contentEquals("KE"))
             hasPayment = true;
-        Fragment fragment= TastyBoardOverviewFragment.newInstance(tastyBoard);
+        TastyBoardOverviewBottomSheet.newInstance(tastyBoard).show(getSupportFragmentManager(), "dialog");
+        /*Fragment fragment= TastyBoardOverviewFragment.newInstance(tastyBoard);
         FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.base,fragment,"overview");
         transaction.addToBackStack(null);
-        transaction.commit();
+        transaction.commit();*/
     }
     /*
      * implementation of TastyBoardOverviewFragment.java

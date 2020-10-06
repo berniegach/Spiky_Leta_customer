@@ -11,7 +11,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".main.messages.MessagesActivity"></activity>
+        <activity android:name=".main.messages.MessagesActivity"/>
         <activity android:name=".wallet.WalletActivity" />
         <activity android:name=".explore.ExploreActivity" />
         <!--

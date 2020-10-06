@@ -137,7 +137,7 @@ public class CartBottomSheet extends BottomSheetDialogFragment
             textViewTotal.setText("Total "+currency+" "+ mTotal.intValue());
         }
         else
-            textViewTotal.setText( mTotal.intValue());
+            textViewTotal.setText( String.valueOf(mTotal.intValue()));
         final RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(new CartAdapter());

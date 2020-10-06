@@ -19,6 +19,9 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ProgressBar;
 
+import com.google.android.material.badge.BadgeDrawable;
+import com.google.android.material.badge.BadgeUtils;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.spikingacacia.spikyletabuyer.LoginA;
 import com.spikingacacia.spikyletabuyer.MyBounceInterpolator;
@@ -81,6 +84,7 @@ public class ShopA extends AppCompatActivity
     private int taskCounter = 0; //counter for updating order and adding a new mpesa response request in the database
     private ProgressBar progressBar;
     private View mainFragment;
+    private FloatingActionButton floatingActionButton;
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -89,6 +93,7 @@ public class ShopA extends AppCompatActivity
 
         progressBar = findViewById(R.id.progress);
         mainFragment = findViewById(R.id.base);
+        floatingActionButton = findViewById(R.id.fab);
 
         //preference
         preferences=new Preferences(getBaseContext());
@@ -122,6 +127,15 @@ public class ShopA extends AppCompatActivity
         FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
         transaction.replace(R.id.base,fragment,"menu");
         transaction.commit();
+        floatingActionButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                getTotal();
+                CartBottomSheet.newInstance(tempTotal, cartLinkedHashMap, itemPriceSizeLinkedHashMap, menuLinkedHashMap,hasPayment, preOrder, ShopA.this).show(getSupportFragmentManager(), "dialog");
+            }
+        });
 
         jsonParser=new JSONParser();
         menuLinkedHashMap = new LinkedHashMap<>();
@@ -196,7 +210,7 @@ public class ShopA extends AppCompatActivity
         // Use bounce interpolator with amplitude 0.2 and frequency 20
         MyBounceInterpolator interpolator = new MyBounceInterpolator(0.2, 20);
         myAnim.setInterpolator(interpolator);
-        //fab.startAnimation(myAnim);
+        floatingActionButton.startAnimation(myAnim);
         vibrate_on_click();
     }
     /*************************************************************************************************************************************************************************************
@@ -307,6 +321,7 @@ public class ShopA extends AppCompatActivity
     @Override
     public void onPlacePreOrder(int which, String time, String mobile_mpesa, String mobile_delivery, String instructions, int payment_type)
     {
+        floatingActionButton.setVisibility(View.GONE);
         new OrderTask(tableNumber,time, which, mobile_mpesa, mobile_delivery, instructions, payment_type).execute((Void)null);
     }
 
@@ -424,6 +439,7 @@ public class ShopA extends AppCompatActivity
                 else
                 {
                     showProgress(false);
+                    floatingActionButton.setVisibility(View.VISIBLE);
                     Snackbar.make(mainFragment,"Order Placed",Snackbar.LENGTH_LONG).show();
                     cartLinkedHashMap.clear();
                     tempTotal = 0.0;
@@ -434,6 +450,7 @@ public class ShopA extends AppCompatActivity
             else
             {
                 Snackbar.make(mainFragment,"Order was not successful.\nPlease try again.",Snackbar.LENGTH_LONG).show();
+                floatingActionButton.setVisibility(View.VISIBLE);
             }
         }
         void  formData()
@@ -533,6 +550,7 @@ public class ShopA extends AppCompatActivity
         protected void onPostExecute(final Boolean successful)
         {
             showProgress(false);
+            floatingActionButton.setVisibility(View.VISIBLE);
             if (successful)
             {
                 Snackbar.make(mainFragment,"Order Placed",Snackbar.LENGTH_LONG).show();
