@@ -3,6 +3,7 @@ package com.spikingacacia.spikyletabuyer.database;
 public class Categories
 {
     private int id;
+    private int idIndex;
     private String title;
     private String description;
     private String imageType;
@@ -10,9 +11,10 @@ public class Categories
     private String dateChanged;
 
 
-    public Categories(int id, String title, String description, String imageType, String dateAdded, String dateChanged)
+    public Categories(int id, int idIndex, String title, String description, String imageType, String dateAdded, String dateChanged)
     {
         this.id = id;
+        this.idIndex = idIndex;
         this.title = title;
         this.description = description;
         this.imageType = imageType;
@@ -28,6 +30,15 @@ public class Categories
     public void setId(int id)
     {
         this.id = id;
+    }
+    public int getIdIndex()
+    {
+        return idIndex;
+    }
+
+    public void setIdIndex(int idIndex)
+    {
+        this.idIndex = idIndex;
     }
 
     public String getTitle()

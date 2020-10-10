@@ -353,13 +353,14 @@ public class menuFragment extends Fragment implements MymenuRecyclerViewAdapter.
                     {
                         JSONObject jsonObjectNotis=categoriesArrayList.getJSONObject(count);
                         int id=jsonObjectNotis.getInt("id");
+                        int id_index=jsonObjectNotis.getInt("id_index");
                         String title=jsonObjectNotis.getString("title");
                         String description=jsonObjectNotis.getString("description");
                         String image_type=jsonObjectNotis.getString("image_type");
                         String date_added=jsonObjectNotis.getString("date_added");
                         String date_changed=jsonObjectNotis.getString("date_changed");
 
-                        Categories categories =new Categories(id,title,description,image_type,date_added,date_changed);
+                        Categories categories =new Categories(id, id_index, title,description,image_type,date_added,date_changed);
                         list.add(categories);
                         ShopA.categoriesLinkedHashMap.put(id,categories);
                     }
