@@ -1,3 +1,9 @@
+/*
+ * Created by Benard Gachanja on 10/13/20 5:26 PM
+ * Copyright (c) 2020 . Spiking Acacia. All rights reserved.
+ * Last modified 10/11/20 1:32 AM
+ */
+
 apply plugin: 'com.android.application'
 
 android {
@@ -7,8 +13,8 @@ android {
         applicationId "com.spikingacacia.spikyletabuyer"
         minSdkVersion 19
         targetSdkVersion 29
-        versionCode 53
-        versionName "1.5.2"
+        versionCode 54
+        versionName "1.5.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
     }

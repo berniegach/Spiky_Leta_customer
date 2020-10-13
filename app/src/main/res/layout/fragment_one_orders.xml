@@ -1,4 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Created by Benard Gachanja on 10/13/20 5:26 PM
+  ~ Copyright (c) 2020 . Spiking Acacia. All rights reserved.
+  ~ Last modified 9/23/20 3:23 PM
+  -->
+
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -151,6 +157,19 @@
                 android:textAllCaps="false"
                 android:fontFamily="@font/roboto_condensed_regular"/>
         </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center">
+                <Button
+                    android:enabled="false"
+                    android:id="@+id/am_here"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Am Here"
+                    android:textAllCaps="false"/>
+            </LinearLayout>
         <ImageView
             android:visibility="gone"
             android:id="@+id/qr_code"

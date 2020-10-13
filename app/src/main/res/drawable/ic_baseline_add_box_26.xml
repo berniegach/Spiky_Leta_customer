@@ -1,3 +1,9 @@
+<!--
+  ~ Created by Benard Gachanja on 10/13/20 5:26 PM
+  ~ Copyright (c) 2020 . Spiking Acacia. All rights reserved.
+  ~ Last modified 9/17/20 3:06 PM
+  -->
+
 <vector android:height="26dp" android:tint="#666666"
     android:viewportHeight="24" android:viewportWidth="24"
     android:width="26dp" xmlns:android="http://schemas.android.com/apk/res/android">

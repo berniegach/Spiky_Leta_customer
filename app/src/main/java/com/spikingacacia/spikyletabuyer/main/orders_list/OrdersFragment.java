@@ -1,3 +1,9 @@
+/*
+ * Created by Benard Gachanja on 10/13/20 5:26 PM
+ * Copyright (c) 2020 . Spiking Acacia. All rights reserved.
+ * Last modified 9/23/20 3:12 PM
+ */
+
 package com.spikingacacia.spikyletabuyer.main.orders_list;
 
 import android.content.Context;
@@ -10,13 +16,16 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.Button;
+import android.widget.ProgressBar;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.google.android.material.chip.Chip;
 import com.google.android.material.chip.ChipGroup;
@@ -61,6 +70,8 @@ public class OrdersFragment extends Fragment
     private String TAG = "orders_f";
     boolean isLoading = false;
     private int lastOrderId = 0;
+    private boolean refreshList = false;
+    private SwipeRefreshLayout swipeRefreshLayout;
 
     /**
      * Mandatory empty constructor for the fragment manager to instantiate the
@@ -100,6 +111,7 @@ public class OrdersFragment extends Fragment
     {
         View view = inflater.inflate(R.layout.fragment_orders_list, container, false);
         ChipGroup chipGroup = view.findViewById(R.id.chip_group);
+        swipeRefreshLayout = view.findViewById(R.id.swipe_container);
         ordersLinkedHashMap = new LinkedHashMap<>();
         Context context = view.getContext();
 
@@ -124,6 +136,14 @@ public class OrdersFragment extends Fragment
 
             }
         });
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener()
+        {
+            @Override
+            public void onRefresh()
+            {
+                refreshList();
+            }
+        });
         new OrdersTask(-1, false).execute((Void)null);
         return view;
     }
@@ -141,6 +161,12 @@ public class OrdersFragment extends Fragment
             throw new RuntimeException(context.toString()
                     + " must implement OnListFragmentInteractionListener");
         }
+    }
+
+    @Override
+    public void onResume()
+    {
+        super.onResume();
     }
 
     @Override
@@ -184,6 +210,11 @@ public class OrdersFragment extends Fragment
         new OrdersTask(lastOrderId, true).execute((Void)null);
 
     }
+    private void refreshList()
+    {
+        refreshList = true;
+        new OrdersTask(-1, false).execute((Void)null);
+    }
     private class OrdersTask extends AsyncTask<Void, Void, Boolean>
     {
         private String url_get_b_orders = base_url + "get_buyer_orders_1.php";
@@ -198,7 +229,6 @@ public class OrdersFragment extends Fragment
         protected void onPreExecute()
         {
             jsonParser = new JSONParser();
-            Log.d("BORDERS: ","starting....");
             list = new LinkedList<>();
             uniqueOrderLinkedHashMap = new LinkedHashMap<>();
             //ordersLinkedHashMap.clear();
@@ -304,35 +334,18 @@ public class OrdersFragment extends Fragment
                 else
                 {
                     myOrderRecyclerViewAdapter.listUpdated(unique_order);
+                    if (refreshList)
+                    {
+                        refreshList = false;
+                        swipeRefreshLayout.setRefreshing(false);
+                    }
                 }
 
 
             }
 
-            /*if (successful)
-            {
-                List<Orders> unique_order= new ArrayList<>();
-                Iterator iterator = uniqueOrderLinkedHashMap.entrySet().iterator();
-                while (iterator.hasNext())
-                {
-                    LinkedHashMap.Entry<String, Orders> value = ( LinkedHashMap.Entry<String, Orders>) iterator.next();
-                    unique_order.add(value.getValue());
-                }
-                checkIfOrderChanged(unique_order);
-
-            }*/
 
         }
-    }
-    private void checkIfOrderChanged(List<Orders> unique_order)
-    {
-        //check size
-        if(myOrderRecyclerViewAdapter.getItemCount()!=unique_order.size())
-        {
-            myOrderRecyclerViewAdapter.listUpdated(unique_order);
-            recyclerView.scrollToPosition(myOrderRecyclerViewAdapter.getItemCount()-1);
-        }
-
     }
 
 }

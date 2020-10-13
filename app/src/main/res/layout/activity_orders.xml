@@ -1,8 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Created by Benard Gachanja on 10/13/20 5:26 PM
+  ~ Copyright (c) 2020 . Spiking Acacia. All rights reserved.
+  ~ Last modified 6/26/20 6:12 PM
+  -->
+
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/base"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <ProgressBar
+        android:id="@+id/progress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"/>
+    <LinearLayout
+        android:id="@+id/base"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"/>
 
 
 </FrameLayout>

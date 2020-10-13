@@ -1,3 +1,9 @@
+/*
+ * Created by Benard Gachanja on 10/13/20 5:26 PM
+ * Copyright (c) 2020 . Spiking Acacia. All rights reserved.
+ * Last modified 6/28/20 2:07 PM
+ */
+
 package com.spikingacacia.spikyletabuyer.restaurants;
 
 import android.content.Context;

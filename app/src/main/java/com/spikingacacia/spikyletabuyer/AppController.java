@@ -1,4 +1,10 @@
 /*
+ * Created by Benard Gachanja on 03/06/20 3:09 PM
+ * Copyright (c) 2020 . Spiking Acacia. All rights reserved.
+ * Last modified 6/8/20 1:17 PM
+ */
+
+/*
 This class is a singleton class which initializes core objects of volley library
  */
 package com.spikingacacia.spikyletabuyer;

@@ -1,3 +1,9 @@
+/*
+ * Created by Benard Gachanja on 10/13/20 5:26 PM
+ * Copyright (c) 2020 . Spiking Acacia. All rights reserved.
+ * Last modified 9/22/20 3:27 PM
+ */
+
 package com.spikingacacia.spikyletabuyer.orders;
 
 import android.content.Context;
@@ -57,9 +63,6 @@ public class MyOrderRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVie
             return new LoadingViewHolder(view);
         }
 
-        /*View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.fragment_orders, parent, false);*/
-        //return new ViewHolder(view);
     }
 
     @Override

@@ -1,3 +1,9 @@
+<!--
+  ~ Created by Benard Gachanja on 10/13/20 5:26 PM
+  ~ Copyright (c) 2020 . Spiking Acacia. All rights reserved.
+  ~ Last modified 7/21/20 7:25 PM
+  -->
+
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <com.spikingacacia.spikyletabuyer.TermsAndConditions/>
 </PreferenceScreen>

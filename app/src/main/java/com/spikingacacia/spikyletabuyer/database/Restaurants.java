@@ -1,3 +1,9 @@
+/*
+ * Created by Benard Gachanja on 09/10/19 4:20 PM
+ * Copyright (c) 2020 . Spiking Acacia. All rights reserved.
+ * Last modified 8/14/20 4:41 PM
+ */
+
 package com.spikingacacia.spikyletabuyer.database;
 
 public class Restaurants

@@ -1,3 +1,9 @@
+/*
+ * Created by Benard Gachanja on 11/07/20 10:13 AM
+ * Copyright (c) 2020 . Spiking Acacia. All rights reserved.
+ * Last modified 7/11/20 11:24 AM
+ */
+
 package com.spikingacacia.spikyletabuyer.database;
 
 public class MpesaRequests

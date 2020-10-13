@@ -1,3 +1,9 @@
+<!--
+  ~ Created by Benard Gachanja on 10/13/20 5:26 PM
+  ~ Copyright (c) 2020 . Spiking Acacia. All rights reserved.
+  ~ Last modified 9/14/20 5:20 PM
+  -->
+
 <vector android:height="24dp" android:viewportHeight="512"
     android:viewportWidth="512" android:width="24dp" xmlns:android="http://schemas.android.com/apk/res/android">
     <path android:fillColor="#FF000000" android:pathData="m488.5,61h-465c-12.958,0 -23.5,10.542 -23.5,23.5v276.143c0,4.143 3.358,7.5 7.5,7.5s7.5,-3.357 7.5,-7.5v-276.143c0,-4.687 3.813,-8.5 8.5,-8.5h465c4.687,0 8.5,3.813 8.5,8.5v59.571c0,4.143 3.358,7.5 7.5,7.5s7.5,-3.357 7.5,-7.5v-59.571c0,-12.958 -10.542,-23.5 -23.5,-23.5z"/>

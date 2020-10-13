@@ -1,3 +1,9 @@
+/*
+ * Created by Benard Gachanja on 10/13/20 5:26 PM
+ * Copyright (c) 2020 . Spiking Acacia. All rights reserved.
+ * Last modified 8/19/20 12:57 PM
+ */
+
 package com.spikingacacia.spikyletabuyer.explore;
 
 import androidx.recyclerview.widget.RecyclerView;

@@ -1,3 +1,9 @@
+/*
+ * Created by Benard Gachanja on 10/13/20 5:26 PM
+ * Copyright (c) 2020 . Spiking Acacia. All rights reserved.
+ * Last modified 9/23/20 3:23 PM
+ */
+
 package com.spikingacacia.spikyletabuyer.orders;
 
 import android.content.Context;
@@ -105,6 +111,7 @@ public class OneOrderFragment extends Fragment
         TextView t_order_type = view.findViewById(R.id.order_type);
         Button b_delete = view.findViewById(R.id.b_delete);
         Button b_check_payment = view.findViewById(R.id.check_payment);
+        Button b_am_here = view.findViewById(R.id.am_here);
         ImageView image_qr_code = view.findViewById(R.id.qr_code);
         TextView t_payment_type = view.findViewById(R.id.payment_type);
 
@@ -141,6 +148,15 @@ public class OneOrderFragment extends Fragment
                 {
                     Toast.makeText(getContext(),"Task already running",Toast.LENGTH_SHORT).show();
                 }
+            }
+        });
+        b_am_here.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                if(mListener!=null)
+                    mListener.onAmHereClicked(String.valueOf(orderNumber),dateAdded, sellerEmail);
             }
         });
        //the order status are
@@ -249,6 +265,8 @@ public class OneOrderFragment extends Fragment
         t_waiter.setText(" served by "+waiter);
         String[] order_types = new String[]{"In house", "Take away", "Delivery"};
         t_order_type.setText(order_types[i_order_type]);
+        if(table == -1 && mPreOrder == 1 && mOrderStatus>2)
+            b_am_here.setEnabled(true);
         //set order status
         String status;
         switch(mOrderStatus)
@@ -326,6 +344,7 @@ public class OneOrderFragment extends Fragment
     public interface OnFragmentInteractionListener
     {
         void onPay(final String orderNumber, final String dateAdded, int total, String sellerEmail);
+        void onAmHereClicked(final String orderNumber, final String dateAdded, String sellerEmail);
     }
     private class UpdateOrderTask extends AsyncTask<Void, Void, Boolean>
     {

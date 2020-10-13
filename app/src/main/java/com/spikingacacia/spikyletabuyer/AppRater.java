@@ -1,3 +1,9 @@
+/*
+ * Created by Benard Gachanja on 28/10/19 2:14 PM
+ * Copyright (c) 2020 . Spiking Acacia. All rights reserved.
+ * Last modified 6/8/20 1:03 PM
+ */
+
 package com.spikingacacia.spikyletabuyer;
 
 import android.app.Dialog;

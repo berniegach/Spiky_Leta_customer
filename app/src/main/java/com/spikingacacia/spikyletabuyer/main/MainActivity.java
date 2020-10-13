@@ -1,9 +1,16 @@
+/*
+ * Created by Benard Gachanja on 10/13/20 5:26 PM
+ * Copyright (c) 2020 . Spiking Acacia. All rights reserved.
+ * Last modified 10/11/20 7:45 PM
+ */
+
 package com.spikingacacia.spikyletabuyer.main;
 
 import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Geocoder;
@@ -14,6 +21,7 @@ import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
@@ -39,8 +47,15 @@ import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 
+import com.google.android.gms.common.api.ResolvableApiException;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.LocationSettingsResponse;
+import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -99,24 +114,28 @@ import static com.spikingacacia.spikyletabuyer.LoginA.mGoogleSignInClient;
 
 public class MainActivity extends AppCompatActivity implements
         OrderSearchFragment.OnFragmentInteractionListener,
-         OrdersFragment.OnListFragmentInteractionListener
+        OrdersFragment.OnListFragmentInteractionListener
 {
     /** Change this to {@code false} when you want to use the downloadable Emoji font. */
     private static final boolean USE_BUNDLED_EMOJI = true;
-    private static final int PERMISSION_REQUEST_INTERNET=2;
+    private static final int PERMISSION_REQUEST_INTERNET = 2;
+    private int REQUEST_CHECK_SETTINGS = 3;
     private FusedLocationProviderClient fusedLocationProviderClient;
+    private LocationCallback locationCallback;
     private NavController navController;
     private AppBarConfiguration appBarConfiguration;
     private ProgressBar progressBar;
     private View mainFragment;
-    private String TAG="MainA";
-    public static  List<Restaurants> restaurantsList;
+    private String TAG = "MainA";
+    public static List<Restaurants> restaurantsList;
     private static boolean useQrCode = false;
+    private boolean amHere = false;
     private List<MpesaRequests> mpesaRequestsList;
     private boolean mpesaOrderUpdateInprogress;
     //private Thread thread;
     ActivityResultLauncher<Intent> mGetBarcode = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
-            new ActivityResultCallback<ActivityResult>() {
+            new ActivityResultCallback<ActivityResult>()
+            {
                 @Override
                 public void onActivityResult(ActivityResult result)
                 {
@@ -125,10 +144,9 @@ public class MainActivity extends AppCompatActivity implements
                     {
                         Barcode barcode = intent.getParcelableExtra(BarcodeCaptureActivity.BarcodeObject);
                         barcodeReceived(barcode);
-                    }
-                    catch (NullPointerException excpetion)
+                    } catch (NullPointerException excpetion)
                     {
-                        Log.e(TAG,"no barcode");
+                        Log.e(TAG, "no barcode");
                         // TODO: remove this its only for testing
                         //onCorrectScan();
                     }
@@ -136,6 +154,7 @@ public class MainActivity extends AppCompatActivity implements
                 }
             });
     public static String myLocation = "";
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -147,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
         appBarConfiguration = new AppBarConfiguration.Builder(
-                 R.id.navigation_order,  R.id.navigation_orders)
+                R.id.navigation_order, R.id.navigation_orders)
                 .build();
         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
@@ -164,15 +183,47 @@ public class MainActivity extends AppCompatActivity implements
         progressBar = findViewById(R.id.progress);
         mainFragment = findViewById(R.id.nav_host_fragment);
 
-        fusedLocationProviderClient= LocationServices.getFusedLocationProviderClient(this);
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         start_background_tasks();
-        checkIfLocationEnabled();
-        getCurrentLocation();
-        restaurantsList =new LinkedList<>();
+        //checkIfLocationEnabled();
+        //getCurrentLocation();
+        restaurantsList = new LinkedList<>();
         mpesaRequestsList = new ArrayList<>();
         checkFirebaseToken();
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null) {
+                    return;
+                }
+                for (Location location : locationResult.getLocations()) {
+                    saveCurrentLocation(location);
+                }
+            }
+        };
 
     }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+        if (checkIfLocationEnabled())
+        {
+            createLocationRequest();
+        }
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
+        stopLocationUpdates();
+    }
+
+    private void stopLocationUpdates() {
+        fusedLocationProviderClient.removeLocationUpdates(locationCallback);
+    }
+
+
     // This callback is called only when there is a saved instance that is previously saved by using
 // onSaveInstanceState(). We restore some state in onCreate(), while we can optionally restore
 // other state here, possibly usable after onStart() has completed.
@@ -183,11 +234,12 @@ public class MainActivity extends AppCompatActivity implements
         LoginA.setServerAccount((ServerAccount) savedInstanceState.getSerializable(LoginA.SAVE_INSTANCE_SERVER_ACCOUNT));
         //Log.d(TAG,"main_a has been recreated therefoew we restore server account");
     }
+
     // invoked when the activity may be temporarily destroyed, save the instance state here
     @Override
     public void onSaveInstanceState(Bundle outState)
     {
-        outState.putSerializable(LoginA.SAVE_INSTANCE_SERVER_ACCOUNT,LoginA.getServerAccount());
+        outState.putSerializable(LoginA.SAVE_INSTANCE_SERVER_ACCOUNT, LoginA.getServerAccount());
         //Log.d(TAG,"main_a is been destroyed threfore we call onsaved instance");
         // call superclass to save any view hierarchy
         super.onSaveInstanceState(outState);
@@ -208,41 +260,36 @@ public class MainActivity extends AppCompatActivity implements
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if( id == R.id.action_tasty_board)
+        if (id == R.id.action_tasty_board)
         {
-            Intent intent=new Intent(MainActivity.this, TastyBoardActivity.class);
+            Intent intent = new Intent(MainActivity.this, TastyBoardActivity.class);
             //prevent this activity from flickering as we call the next one
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
             startActivity(intent);
-        }
-        else if( id == R.id.action_messages)
+        } else if (id == R.id.action_messages)
         {
-            Intent intent=new Intent(MainActivity.this, MessagesActivity.class);
+            Intent intent = new Intent(MainActivity.this, MessagesActivity.class);
             //prevent this activity from flickering as we call the next one
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
             startActivity(intent);
-        }
-        else if( id == R.id.action_wallet)
+        } else if (id == R.id.action_wallet)
         {
-            Intent intent=new Intent(MainActivity.this, WalletActivity.class);
+            Intent intent = new Intent(MainActivity.this, WalletActivity.class);
             //prevent this activity from flickering as we call the next one
             intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
             startActivity(intent);
-        }
-
-        else if (id == R.id.action_settings)
+        } else if (id == R.id.action_settings)
         {
             proceedToSettings();
             return true;
-        }
-        else if( id == R.id.action_sign_out)
+        } else if (id == R.id.action_sign_out)
         {
             mGoogleSignInClient.signOut().addOnCompleteListener(MainActivity.this, new OnCompleteListener<Void>()
             {
                 @Override
                 public void onComplete(@NonNull Task<Void> task)
                 {
-                    Log.d(TAG,"gmail signed out");
+                    Log.d(TAG, "gmail signed out");
                     finish();
                 }
             });
@@ -257,7 +304,7 @@ public class MainActivity extends AppCompatActivity implements
     {
 
         int stack = getSupportFragmentManager().getBackStackEntryCount();
-        if ( stack> 0)
+        if (stack > 0)
             getSupportFragmentManager().popBackStack();
         else
         {
@@ -287,19 +334,82 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onActivityResult(final int requestCode, int resultCode, Intent data)
     {
-        if (requestCode == PERMISSION_REQUEST_INTERNET && resultCode == RESULT_OK )
+        if (requestCode == PERMISSION_REQUEST_INTERNET && resultCode == RESULT_OK)
         {
-            getCurrentLocation(null);
+            //getCurrentLocation(null);
+            createLocationRequest();
         }
+        else if( requestCode == REQUEST_CHECK_SETTINGS && resultCode == RESULT_OK)
+            createLocationRequest();
         else
         {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
+
     void barcodeReceived(Barcode barcode)
     {
         showProgress(true);
         getCurrentLocation(barcode);
+    }
+
+    protected void createLocationRequest()
+    {
+        LocationRequest locationRequest = LocationRequest.create();
+        locationRequest.setInterval(10000);
+        locationRequest.setFastestInterval(5000);
+        locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+
+        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder()
+                .addLocationRequest(locationRequest);
+        SettingsClient client = LocationServices.getSettingsClient(this);
+        Task<LocationSettingsResponse> task = client.checkLocationSettings(builder.build());
+        task.addOnSuccessListener(this, new OnSuccessListener<LocationSettingsResponse>()
+        {
+            @Override
+            public void onSuccess(LocationSettingsResponse locationSettingsResponse)
+            {
+                // All location settings are satisfied. The client can initialize
+                // location requests here.
+                // ...
+                if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED)
+                {
+                    // here to request the missing permissions, and then overriding
+                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                    //                                          int[] grantResults)
+                    // to handle the case where the user grants the permission. See the documentation
+                    // for ActivityCompat#requestPermissions for more details.
+                    ActivityCompat.requestPermissions(MainActivity.this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},PERMISSION_REQUEST_INTERNET);
+                    return;
+                }
+                else
+                {
+                    fusedLocationProviderClient.requestLocationUpdates(locationRequest,
+                            locationCallback,
+                            Looper.getMainLooper());
+                }
+            }
+        });
+
+        task.addOnFailureListener(this, new OnFailureListener()
+        {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                if (e instanceof ResolvableApiException) {
+                    // Location settings are not satisfied, but this can be fixed
+                    // by showing the user a dialog.
+                    try {
+                        // Show the dialog by calling startResolutionForResult(),
+                        // and check the result in onActivityResult().
+                        ResolvableApiException resolvable = (ResolvableApiException) e;
+                        resolvable.startResolutionForResult(MainActivity.this,
+                                REQUEST_CHECK_SETTINGS);
+                    } catch (IntentSender.SendIntentException sendEx) {
+                        // Ignore the error.
+                    }
+                }
+            }
+        });
     }
     private boolean checkIfLocationEnabled()
     {
@@ -382,9 +492,58 @@ public class MainActivity extends AppCompatActivity implements
                     }
                 });
     }
+    private void  saveCurrentLocation(Location location)
+    {
+        //Get last known location. In some rare situations this can be null
+        if(location!=null)
+        {
+            final double latitude = location.getLatitude();
+            final double longitude = location.getLongitude();
+
+            myLocation = String.valueOf(latitude) + ":" + String.valueOf(longitude) + ":" + "null";
+            Thread thread_location = new Thread()
+            {
+                @Override
+                public void run()
+                {
+                    //get addresses
+                    Geocoder geocoder = new Geocoder(MainActivity.this, Locale.getDefault());
+                    List<Address> addresses;
+                    try
+                    {
+                        addresses = geocoder.getFromLocation(latitude, longitude, 10);
+                        myLocation = String.valueOf(latitude) + ":" + String.valueOf(longitude) + ":" + addresses.get(0).getCountryCode();
+                        //new UpdateLastKnownLocationTask().execute((Void) null);
+                        //if(addresses.get(0).getCountryCode().contentEquals("KE"))
+                        //thread.start();
+                    } catch (IOException e)
+                    {
+                        runOnUiThread(new Runnable()
+                        {
+                            @Override
+                            public void run()
+                            {
+                                //showProgress(false);
+                                //Snackbar.make(getWindow().getDecorView().getRootView(),"Error getting your location.\nPlease try again.", Snackbar.LENGTH_SHORT).show();
+                            }
+                        });
+
+                        Log.e(TAG, "" + e.getMessage());
+                    }
+                }
+            };
+            thread_location.start();
+        }
+    }
     private void getCurrentLocation(final Barcode barcode)
     {
-        checkIfLocationEnabled();
+        String[] loc = myLocation.split(":");
+        if(useQrCode)
+            new RestaurantQRTask(String.valueOf(loc[0]),String.valueOf(loc[1]),"null",barcode.displayValue).execute((Void)null);
+        else
+            new RestaurantsTask(String.valueOf(loc[0]),String.valueOf(loc[1]),"null").execute((Void)null);
+
+        /*checkIfLocationEnabled();
         if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
         {
             //get the users location
@@ -424,13 +583,13 @@ public class MainActivity extends AppCompatActivity implements
                                     showProgress(false);
                                     Snackbar.make(getWindow().getDecorView().getRootView(),"Error getting your location.\nPlease try again.", Snackbar.LENGTH_SHORT).show();
                                     Log.e("address",""+e.getMessage());
-                                }*/
+                                }/
                             }
 
                         }
                     }).addOnFailureListener(this, new OnFailureListener()
             {
-                @Override
+
                 public void onFailure(@NonNull Exception e)
                 {
                     showProgress(false);
@@ -442,7 +601,7 @@ public class MainActivity extends AppCompatActivity implements
         else
         {
             ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},PERMISSION_REQUEST_INTERNET);
-        }
+        }*/
 
     }
     private void getCurrentLocation()
@@ -520,12 +679,9 @@ public class MainActivity extends AppCompatActivity implements
     }
     private void showRestaurants(boolean scan ,Restaurants item)
     {
-        Log.d(TAG," GOT THE RESTRAUNTS");
 
         if(restaurantsList.size()==0)
         {
-            Log.d(TAG," GOT THE RESTRAUNTS 1");
-
             Snackbar.make(getWindow().getDecorView().getRootView(), "No restaurants near you.", Snackbar.LENGTH_LONG)
                     .setAction("Retry", new View.OnClickListener()
                     {
@@ -872,6 +1028,7 @@ implementation of OrdersFragment.java
             if (successful)
             {
                 showRestaurants(true, restaurantsList.get(0));
+
             }
             else
             {
