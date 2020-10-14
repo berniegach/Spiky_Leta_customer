@@ -49,7 +49,6 @@
         </activity>
         <activity android:name=".orders.OrdersActivity" />
         <activity android:name=".shop.ShopA" />
-        <activity android:name=".restaurants.SRRestaurantsA" />
         <activity
             android:name=".barcode.BarcodeCaptureActivity"
             android:theme="@style/AppTheme.NoActionBar" />

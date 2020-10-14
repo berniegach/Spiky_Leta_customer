@@ -6,7 +6,9 @@
 
 package com.spikingacacia.spikyletabuyer.database;
 
-public class Restaurants
+import android.util.Log;
+
+public class Restaurants implements Comparable< Restaurants>
 {
     private int id;
     private String email;
@@ -175,5 +177,11 @@ public class Restaurants
     public void setDiningOptions(String diningOptions)
     {
         this.diningOptions = diningOptions;
+    }
+
+    @Override
+    public int compareTo(Restaurants o)
+    {
+        return Double.compare(distance, o.distance);
     }
 }

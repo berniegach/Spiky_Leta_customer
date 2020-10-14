@@ -5,13 +5,20 @@
   ~ Last modified 8/6/20 3:49 PM
   -->
 
-<androidx.recyclerview.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    android:id="@+id/swipe_container"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/list"
-    android:name="com.spikingacacia.spikyletabuyer.explore.RestaurantsFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    app:layoutManager="LinearLayoutManager"
-    tools:context=".explore.RestaurantsFragment"
-    tools:listitem="@layout/fragment_explore_restaurants" />
+    android:orientation="vertical">
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/list"
+        android:name="com.spikingacacia.spikyletabuyer.explore.RestaurantsFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layoutManager="LinearLayoutManager"
+        tools:context=".explore.RestaurantsFragment"
+        tools:listitem="@layout/fragment_explore_restaurants" />
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

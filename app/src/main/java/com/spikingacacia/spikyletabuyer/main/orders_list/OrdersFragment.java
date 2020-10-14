@@ -144,7 +144,9 @@ public class OrdersFragment extends Fragment
                 refreshList();
             }
         });
-        new OrdersTask(-1, false).execute((Void)null);
+        swipeRefreshLayout.setRefreshing(true);
+        refreshList();
+        //new OrdersTask(-1, false).execute((Void)null);
         return view;
     }
 
@@ -161,12 +163,6 @@ public class OrdersFragment extends Fragment
             throw new RuntimeException(context.toString()
                     + " must implement OnListFragmentInteractionListener");
         }
-    }
-
-    @Override
-    public void onResume()
-    {
-        super.onResume();
     }
 
     @Override

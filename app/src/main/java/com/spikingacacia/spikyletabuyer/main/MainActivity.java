@@ -20,7 +20,6 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
 import android.util.Log;
@@ -35,7 +34,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 import androidx.core.provider.FontRequest;
 import androidx.emoji.bundled.BundledEmojiCompatConfig;
 import androidx.emoji.text.EmojiCompat;
@@ -62,15 +60,12 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.spikingacacia.spikyletabuyer.JSONParser;
 import com.spikingacacia.spikyletabuyer.LoginA;
-import com.spikingacacia.spikyletabuyer.database.Messages;
 import com.spikingacacia.spikyletabuyer.database.MpesaRequests;
 import com.spikingacacia.spikyletabuyer.database.ServerAccount;
-import com.spikingacacia.spikyletabuyer.database.TastyBoard;
 import com.spikingacacia.spikyletabuyer.explore.ExploreActivity;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.SettingsActivity;
@@ -81,11 +76,8 @@ import com.spikingacacia.spikyletabuyer.main.messages.MessagesActivity;
 import com.spikingacacia.spikyletabuyer.main.order.OrderSearchFragment;
 import com.spikingacacia.spikyletabuyer.main.orders_list.OrdersFragment;
 import com.spikingacacia.spikyletabuyer.main.tasty.TastyBoardActivity;
-import com.spikingacacia.spikyletabuyer.main.tasty.TastyBoardFragment;
 import com.spikingacacia.spikyletabuyer.orders.OrdersActivity;
-import com.spikingacacia.spikyletabuyer.restaurants.SRRestaurantsA;
 import com.spikingacacia.spikyletabuyer.shop.ShopA;
-import com.spikingacacia.spikyletabuyer.util.Mpesa;
 import com.spikingacacia.spikyletabuyer.util.MyFirebaseMessagingService;
 import com.spikingacacia.spikyletabuyer.wallet.WalletActivity;
 
@@ -127,12 +119,7 @@ public class MainActivity extends AppCompatActivity implements
     private ProgressBar progressBar;
     private View mainFragment;
     private String TAG = "MainA";
-    public static List<Restaurants> restaurantsList;
     private static boolean useQrCode = false;
-    private boolean amHere = false;
-    private List<MpesaRequests> mpesaRequestsList;
-    private boolean mpesaOrderUpdateInprogress;
-    //private Thread thread;
     ActivityResultLauncher<Intent> mGetBarcode = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
             new ActivityResultCallback<ActivityResult>()
             {
@@ -171,24 +158,10 @@ public class MainActivity extends AppCompatActivity implements
         navController = Navigation.findNavController(this, R.id.nav_host_fragment);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(navView, navController);
-        navController.addOnDestinationChangedListener(new NavController.OnDestinationChangedListener()
-        {
-            @Override
-            public void onDestinationChanged(@NonNull NavController controller, @NonNull NavDestination destination, @Nullable Bundle arguments)
-            {
-                // if(destination.getId() != R.id.navigation_home)
-                //appBarLayout.setExpanded(false, true);
-            }
-        });
         progressBar = findViewById(R.id.progress);
         mainFragment = findViewById(R.id.nav_host_fragment);
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-        start_background_tasks();
-        //checkIfLocationEnabled();
-        //getCurrentLocation();
-        restaurantsList = new LinkedList<>();
-        mpesaRequestsList = new ArrayList<>();
         checkFirebaseToken();
         locationCallback = new LocationCallback() {
             @Override
@@ -350,7 +323,17 @@ public class MainActivity extends AppCompatActivity implements
     void barcodeReceived(Barcode barcode)
     {
         showProgress(true);
-        getCurrentLocation(barcode);
+        try
+        {
+            String[] loc = myLocation.split(":");
+            if(useQrCode)
+                new RestaurantQRTask(String.valueOf(loc[0]),String.valueOf(loc[1]),"null",barcode.displayValue).execute((Void)null);
+
+        }
+        catch (Exception e)
+        {
+            Toast.makeText(getBaseContext(),"Location unavailable",Toast.LENGTH_SHORT);
+        }
     }
 
     protected void createLocationRequest()
@@ -513,21 +496,8 @@ public class MainActivity extends AppCompatActivity implements
                     {
                         addresses = geocoder.getFromLocation(latitude, longitude, 10);
                         myLocation = String.valueOf(latitude) + ":" + String.valueOf(longitude) + ":" + addresses.get(0).getCountryCode();
-                        //new UpdateLastKnownLocationTask().execute((Void) null);
-                        //if(addresses.get(0).getCountryCode().contentEquals("KE"))
-                        //thread.start();
                     } catch (IOException e)
                     {
-                        runOnUiThread(new Runnable()
-                        {
-                            @Override
-                            public void run()
-                            {
-                                //showProgress(false);
-                                //Snackbar.make(getWindow().getDecorView().getRootView(),"Error getting your location.\nPlease try again.", Snackbar.LENGTH_SHORT).show();
-                            }
-                        });
-
                         Log.e(TAG, "" + e.getMessage());
                     }
                 }
@@ -535,138 +505,26 @@ public class MainActivity extends AppCompatActivity implements
             thread_location.start();
         }
     }
-    private void getCurrentLocation(final Barcode barcode)
-    {
-        try
-        {
-            String[] loc = myLocation.split(":");
-            if(useQrCode)
-                new RestaurantQRTask(String.valueOf(loc[0]),String.valueOf(loc[1]),"null",barcode.displayValue).execute((Void)null);
-            else
-                new RestaurantsTask(String.valueOf(loc[0]),String.valueOf(loc[1]),"null").execute((Void)null);
-        }
-        catch (Exception e)
-        {
-            Toast.makeText(getBaseContext(),"Location unavailable",Toast.LENGTH_SHORT);
-        }
-
-    }
-    private void getCurrentLocation()
-    {
-        checkIfLocationEnabled();
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
-        {
-            //get the users location
-            fusedLocationProviderClient.getLastLocation()
-                    .addOnSuccessListener(this, new OnSuccessListener<Location>()
-                    {
-                        @Override
-                        public void onSuccess(Location location)
-                        {
-                            //Get last known location. In some rare situations this can be null
-                            if(location!=null)
-                            {
-                                final double latitude=location.getLatitude();
-                                final double longitude=location.getLongitude();
-
-                                myLocation = String.valueOf(latitude)+":"+String.valueOf(longitude)+":"+"null";
-                                Thread thread_location=new Thread()
-                                {
-                                    @Override
-                                    public void run()
-                                    {
-                                        //get addresses
-                                        Geocoder geocoder=new Geocoder(MainActivity.this, Locale.getDefault());
-                                        List<Address> addresses;
-                                        try
-                                        {
-                                            addresses=geocoder.getFromLocation(latitude,longitude,10);
-                                            myLocation = String.valueOf(latitude)+":"+String.valueOf(longitude)+":"+addresses.get(0).getCountryCode();
-                                            new UpdateLastKnownLocationTask().execute((Void)null);
-                                            //if(addresses.get(0).getCountryCode().contentEquals("KE"))
-                                                //thread.start();
-                                        }
-                                        catch (IOException e)
-                                        {
-                                            runOnUiThread(new Runnable()
-                                            {
-                                                @Override
-                                                public void run()
-                                                {
-                                                    showProgress(false);
-                                                    //Snackbar.make(getWindow().getDecorView().getRootView(),"Error getting your location.\nPlease try again.", Snackbar.LENGTH_SHORT).show();
-                                                }
-                                            });
-
-                                            Log.e(TAG,""+e.getMessage());
-                                        }
-                                    }
-                                };
-                                thread_location.start();
-
-                            }
-
-                        }
-                    }).addOnFailureListener(this, new OnFailureListener()
-            {
-                @Override
-                public void onFailure(@NonNull Exception e)
-                {
-                    showProgress(false);
-                    Log.e(TAG,"location failed");
-                }
-            });
-        }
-        //request the permission
-        else
-        {
-            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},PERMISSION_REQUEST_INTERNET);
-        }
-
-    }
-    private void showRestaurants(boolean scan ,Restaurants item)
+    private void showScannedRestaurants(Restaurants item)
     {
 
-        if(restaurantsList.size()==0)
-        {
-            Snackbar.make(getWindow().getDecorView().getRootView(), "No restaurants near you.", Snackbar.LENGTH_LONG)
-                    .setAction("Retry", new View.OnClickListener()
-                    {
-                        @Override
-                        public void onClick(View v)
-                        {
-                            getCurrentLocation(null);
-                        }
-                    });
-            return;
-        }
-        if(scan)
-        {
-            //if the location of the hotel is kenya then we ask for mpesa payment
-            boolean has_payment = false;
+        //if the location of the hotel is kenya then we ask for mpesa payment
+        boolean has_payment = false;
             /*if( item.getmCode().contentEquals("") ||  item.getmCode().contentEquals("null") || item.getmCode().contentEquals("NULL"))
                 has_payment = false;*/
-            if(item.getCountryCode().contentEquals("KE"))
-                has_payment = true;
-            Intent intent=new Intent(this, ShopA.class);
-            intent.putExtra("seller_names", item.getNames());
-            intent.putExtra("seller_email",item.getEmail());
-            intent.putExtra("order_radius",item.getRadius());
-            intent.putExtra("buyer_distance",item.getDistance());
-            intent.putExtra("number_of_tables",item.getNumberOfTables());
-            intent.putExtra("table_number",item.getTableNumber());
-            intent.putExtra("has_payment", has_payment);
-            intent.putExtra("m_code", has_payment ? item.getmCode() : "");
-            intent.putExtra("dining_options", item.getDiningOptions());
-            startActivity(intent);
-        }
-        else
-        {
-            Intent intent=new Intent(this, SRRestaurantsA.class);
-            //prevent this activity from flickering as we call the next one
-            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-            startActivity(intent);
-        }
+        if(item.getCountryCode().contentEquals("KE"))
+            has_payment = true;
+        Intent intent=new Intent(this, ShopA.class);
+        intent.putExtra("seller_names", item.getNames());
+        intent.putExtra("seller_email",item.getEmail());
+        intent.putExtra("order_radius",item.getRadius());
+        intent.putExtra("buyer_distance",item.getDistance());
+        intent.putExtra("number_of_tables",item.getNumberOfTables());
+        intent.putExtra("table_number",item.getTableNumber());
+        intent.putExtra("has_payment", has_payment);
+        intent.putExtra("m_code", has_payment ? item.getmCode() : "");
+        intent.putExtra("dining_options", item.getDiningOptions());
+        startActivity(intent);
 
 
     }
@@ -677,9 +535,6 @@ public class MainActivity extends AppCompatActivity implements
     {
         progressBar.setVisibility(show? View.VISIBLE : View.GONE);
         mainFragment.setVisibility( show? View.INVISIBLE :View.VISIBLE);
-    }
-    private void start_background_tasks()
-    {
     }
     void proceedToSettings()
     {
@@ -703,20 +558,19 @@ public class MainActivity extends AppCompatActivity implements
             mGetBarcode.launch(intent);
             useQrCode = true;
         }
-        else if(id==2)
-        {
-            //get the users location
-            showProgress(true);
-            getCurrentLocation(null);
-        }
-        else if( id == 3)
+        else if( id == 2)
         {
             //Intent intent = new Intent(this, MapsExploreActivity.class);
             if(checkIfLocationEnabled())
             {
-                Intent intent = new Intent(this, ExploreActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-                startActivity(intent);
+                if(myLocation.contentEquals(""))
+                    Toast.makeText(getBaseContext(),"Please wait",Toast.LENGTH_SHORT).show();
+                else
+                {
+                    Intent intent = new Intent(this, ExploreActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                    startActivity(intent);
+                }
             }
 
         }
@@ -776,118 +630,6 @@ implementation of OrdersFragment.java
         EmojiCompat.init(config);
     }
 
-    private class RestaurantsTask extends AsyncTask<Void, Void, Boolean>
-    {
-        private String url_get_restaurants=base_url+"get_near_restaurants.php";
-        private String TAG_SUCCESS="success";
-        private String TAG_MESSAGE="message";
-        //final private String country;
-        final private String latitude;
-        final private String longitude;
-        final private String location;
-        private JSONParser jsonParser;
-
-        public RestaurantsTask( String latitude, String longitude, String location)
-        {
-            //this.country=country;
-            this.latitude=latitude;
-            this.longitude=longitude;
-            this.location=location;
-            jsonParser=new JSONParser();
-        }
-        @Override
-        protected void onPreExecute()
-        {
-
-            Log.d("CRESTAUNRANTS: ","starting....");
-            if(!restaurantsList.isEmpty())
-                restaurantsList.clear();
-            super.onPreExecute();
-        }
-        @Override
-        protected Boolean doInBackground(Void... params)
-        {
-            //getting columns list
-            List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
-            //info.add(new BasicNameValuePair("country",country));
-            info.add(new BasicNameValuePair("latitude",latitude));
-            info.add(new BasicNameValuePair("longitude",longitude));
-            info.add(new BasicNameValuePair("location",location));
-            info.add(new BasicNameValuePair("which","2"));
-            Log.d(TAG,info.toString());
-            // making HTTP request
-            JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_restaurants,"POST",info);
-            Log.d("cTasks",""+jsonObject.toString());
-            try
-            {
-                JSONArray restArrayList=null;
-                int success=jsonObject.getInt(TAG_SUCCESS);
-                if(success==1)
-                {
-                    restArrayList=jsonObject.getJSONArray("restaurants");
-                    restArrayList=restArrayList.getJSONArray(0);
-                    for(int count=0; count<restArrayList.length(); count+=1)
-                    {
-                        JSONObject jsonObject_restaurants=restArrayList.getJSONObject(count);
-                        int id=jsonObject_restaurants.getInt("id");
-                        String email = jsonObject_restaurants.getString("email");
-                        String names=jsonObject_restaurants.getString("username");
-                        double distance=jsonObject_restaurants.getDouble("distance");
-                        double latitude=jsonObject_restaurants.getDouble("latitude");
-                        double longitude=jsonObject_restaurants.getDouble("longitude");
-                        String locality=jsonObject_restaurants.getString("locality");
-                        String country_code = jsonObject_restaurants.getString("country_code");
-                        int order_radius=jsonObject_restaurants.getInt("order_radius");
-                        int tables = jsonObject_restaurants.getInt("number_of_tables");
-                        String image_type=jsonObject_restaurants.getString("image_type");
-                        int table_number = jsonObject_restaurants.getInt("table_number");
-                        String m_code = jsonObject_restaurants.getString("m_code");
-                        String dining_options = jsonObject_restaurants.getString("dining_options");
-
-                        Restaurants restaurants =new Restaurants(id, email, names,distance,latitude,longitude,locality,country_code,order_radius, tables, image_type, table_number, m_code, dining_options);
-                        restaurantsList.add(restaurants);
-                    }
-                    return true;
-                }
-                else
-                {
-                    String message=jsonObject.getString(TAG_MESSAGE);
-                    Log.e(TAG_MESSAGE,""+message);
-                    return false;
-                }
-            }
-            catch (JSONException e)
-            {
-                Log.e("JSON",""+e.getMessage());
-                return false;
-            }
-        }
-        @Override
-        protected void onPostExecute(final Boolean successful)
-        {
-            showProgress(false);
-            if (successful)
-            {
-                Collections.sort(restaurantsList, new Comparator<Restaurants>(){
-                    public int compare(Restaurants obj1, Restaurants obj2) {
-                        // ## Ascending order
-                        //return obj1.firstName.compareToIgnoreCase(obj2.firstName); // To compare string values
-                        // return Integer.valueOf(obj1.empId).compareTo(Integer.valueOf(obj2.empId)); // To compare integer values
-                        return Double.compare(obj1.getDistance(), obj2.getDistance());
-
-                        // ## Descending order
-                        // return obj2.firstName.compareToIgnoreCase(obj1.firstName); // To compare string values
-                        // return Integer.valueOf(obj2.empId).compareTo(Integer.valueOf(obj1.empId)); // To compare integer values
-                    }
-                });
-                showRestaurants(false, null);
-            }
-            else
-            {
-                Toast.makeText(getBaseContext(),"Error getting restaurants",Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
     private class RestaurantQRTask extends AsyncTask<Void, Void, Boolean>
     {
         private String url_get_restaurants_qr=base_url+"get_restaurant_from_qr_code.php";
@@ -900,6 +642,7 @@ implementation of OrdersFragment.java
         final private String location;
         final private String barcode;
         private  int success;
+        private Restaurants restaurant;
 
 
         public RestaurantQRTask( String latitude, String longitude, String location, String barcode)
@@ -909,8 +652,6 @@ implementation of OrdersFragment.java
             this.location=location;
             this.barcode = barcode;
             jsonParser=new JSONParser();
-            if(!restaurantsList.isEmpty())
-                restaurantsList.clear();
         }
         @Override
         protected Boolean doInBackground(Void... params)
@@ -949,8 +690,7 @@ implementation of OrdersFragment.java
                     String m_code = jsonObject_restaurants.getString("m_code");
                     String dining_options = jsonObject_restaurants.getString("dining_options");
 
-                    Restaurants restaurants =new Restaurants(id, email, names,distance,latitude,longitude,locality,country_code, order_radius, tables, image_type, table_number, m_code, dining_options);
-                    restaurantsList.add(restaurants);
+                    restaurant =new Restaurants(id, email, names,distance,latitude,longitude,locality,country_code, order_radius, tables, image_type, table_number, m_code, dining_options);
                     return true;
                 }
                 else
@@ -974,7 +714,7 @@ implementation of OrdersFragment.java
             useQrCode = false;
             if (successful)
             {
-                showRestaurants(true, restaurantsList.get(0));
+                showScannedRestaurants( restaurant);
 
             }
             else
@@ -991,58 +731,4 @@ implementation of OrdersFragment.java
         }
     }
 
-    private class UpdateLastKnownLocationTask extends AsyncTask<Void, Void, Boolean>
-    {
-        private String url_update_item = base_url+"update_buyer_last_location.php";
-        private String TAG_SUCCESS="success";
-        private String TAG_MESSAGE="message";
-        private JSONParser jsonParser;
-        private int success;
-        UpdateLastKnownLocationTask()
-        {
-            jsonParser = new JSONParser();
-        }
-        @Override
-        protected Boolean doInBackground(Void... params)
-        {
-            //building parameters
-            List<NameValuePair> info=new ArrayList<NameValuePair>();
-            info.add(new BasicNameValuePair("email", LoginA.getServerAccount().getEmail()));
-            info.add(new BasicNameValuePair("location",myLocation));
-            JSONObject jsonObject= jsonParser.makeHttpRequest(url_update_item,"POST",info);
-            try
-            {
-                success=jsonObject.getInt(TAG_SUCCESS);
-                if(success==1)
-                {
-                    return true;
-                }
-                else
-                {
-                    String message=jsonObject.getString(TAG_MESSAGE);
-                    Log.e(TAG_MESSAGE,""+message);
-                    return false;
-                }
-            }
-            catch (JSONException e)
-            {
-                Log.e("JSON",""+e.getMessage());
-                return false;
-            }
-        }
-        @Override
-        protected void onPostExecute(final Boolean successful)
-        {
-            if(successful)
-            {
-
-
-            }
-            else
-            {
-                Log.e(TAG, "updating last known location");
-            }
-
-        }
-    }
 }
