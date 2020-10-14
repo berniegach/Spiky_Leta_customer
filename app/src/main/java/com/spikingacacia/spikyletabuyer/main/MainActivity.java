@@ -537,71 +537,18 @@ public class MainActivity extends AppCompatActivity implements
     }
     private void getCurrentLocation(final Barcode barcode)
     {
-        String[] loc = myLocation.split(":");
-        if(useQrCode)
-            new RestaurantQRTask(String.valueOf(loc[0]),String.valueOf(loc[1]),"null",barcode.displayValue).execute((Void)null);
-        else
-            new RestaurantsTask(String.valueOf(loc[0]),String.valueOf(loc[1]),"null").execute((Void)null);
-
-        /*checkIfLocationEnabled();
-        if(ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED)
+        try
         {
-            //get the users location
-            fusedLocationProviderClient.getLastLocation()
-                    .addOnSuccessListener(this, new OnSuccessListener<Location>()
-                    {
-                        @Override
-                        public void onSuccess(Location location)
-                        {
-                            //Get last known location. In some rare situations this can be null
-                            if(location!=null)
-                            {
-                                double latitude=location.getLatitude();
-                                double longitude=location.getLongitude();
-                                //myLocation = String.valueOf(latitude)+":"+String.valueOf(longitude)+":"+"null";
-                                if(useQrCode)
-                                    new RestaurantQRTask(String.valueOf(latitude),String.valueOf(longitude),"null",barcode.displayValue).execute((Void)null);
-                                else
-                                    new RestaurantsTask(String.valueOf(latitude),String.valueOf(longitude),"null").execute((Void)null);
-                                //get addresses
-                               /* Geocoder geocoder=new Geocoder(MainActivity.this, Locale.getDefault());
-                                List<Address> addresses;
-                                try
-                                {
-                                    addresses=geocoder.getFromLocation(latitude,longitude,10);
-                                    Log.d("LOCATIONS: ", "lat: "+latitude+" long: "+longitude);
-                                    myLocation = String.valueOf(latitude)+":"+String.valueOf(longitude)+":"+addresses.get(0).getCountryCode();
-                                    if(useQrCode)
-                                        new RestaurantQRTask(String.valueOf(latitude),String.valueOf(longitude),addresses.get(0).getLocality(),barcode.displayValue).execute((Void)null);
-                                    else
-                                        new RestaurantsTask(String.valueOf(latitude),String.valueOf(longitude),addresses.get(0).getCountryCode()).execute((Void)null);
-                                    for(int c=0; c<addresses.size(); c+=1)
-                                        Log.d("loc: ",addresses.get(c).getLocality()+"\n");
-                                }
-                                catch (IOException e)
-                                {
-                                    showProgress(false);
-                                    Snackbar.make(getWindow().getDecorView().getRootView(),"Error getting your location.\nPlease try again.", Snackbar.LENGTH_SHORT).show();
-                                    Log.e("address",""+e.getMessage());
-                                }/
-                            }
-
-                        }
-                    }).addOnFailureListener(this, new OnFailureListener()
-            {
-
-                public void onFailure(@NonNull Exception e)
-                {
-                    showProgress(false);
-                    Log.e(TAG,"location failed");
-                }
-            });
+            String[] loc = myLocation.split(":");
+            if(useQrCode)
+                new RestaurantQRTask(String.valueOf(loc[0]),String.valueOf(loc[1]),"null",barcode.displayValue).execute((Void)null);
+            else
+                new RestaurantsTask(String.valueOf(loc[0]),String.valueOf(loc[1]),"null").execute((Void)null);
         }
-        //request the permission
-        else
+        catch (Exception e)
         {
-            ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.ACCESS_FINE_LOCATION},PERMISSION_REQUEST_INTERNET);
-        }*/
+            Toast.makeText(getBaseContext(),"Location unavailable",Toast.LENGTH_SHORT);
+        }
 
     }
     private void getCurrentLocation()
