@@ -549,31 +549,32 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onFindRestaurantMenuClicked(int id)
     {
-        if(id==1)
+        if(checkIfLocationEnabled())
         {
-            //scan the QR code to access the restaurant
-            //scan the item and remove it from the list of unscanned items
-            Intent intent = new Intent(this, BarcodeCaptureActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-            mGetBarcode.launch(intent);
-            useQrCode = true;
-        }
-        else if( id == 2)
-        {
-            //Intent intent = new Intent(this, MapsExploreActivity.class);
-            if(checkIfLocationEnabled())
+            if(myLocation.contentEquals(""))
+                Toast.makeText(getBaseContext(),"Please wait",Toast.LENGTH_SHORT).show();
+            else
             {
-                if(myLocation.contentEquals(""))
-                    Toast.makeText(getBaseContext(),"Please wait",Toast.LENGTH_SHORT).show();
-                else
+                if(id==1)
+                {
+                    //scan the QR code to access the restaurant
+                    //scan the item and remove it from the list of unscanned items
+                    Intent intent = new Intent(this, BarcodeCaptureActivity.class);
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                    mGetBarcode.launch(intent);
+                    useQrCode = true;
+                }
+                else if( id == 2)
                 {
                     Intent intent = new Intent(this, ExploreActivity.class);
                     intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
                     startActivity(intent);
+
                 }
             }
-
         }
+
+
     }
 
 

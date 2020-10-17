@@ -38,6 +38,7 @@ import com.spikingacacia.spikyletabuyer.JSONParser;
 import com.spikingacacia.spikyletabuyer.LoginA;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.database.DMenu;
+import com.spikingacacia.spikyletabuyer.explore.RestaurantsFragment;
 import com.spikingacacia.spikyletabuyer.main.MainActivity;
 import com.spikingacacia.spikyletabuyer.util.Utils;
 
@@ -85,7 +86,7 @@ public class CartBottomSheet extends BottomSheetDialogFragment
     private String currency = null;
     public interface OnListFragmentInteractionListener extends Serializable
     {
-        void onProceed(double new_total, int payment_type);
+        void onProceed(double new_total, int payment_type, boolean pay_with_wallet_fully);
         void totalItemsChanged(LinkedHashMap<String,Integer> cartLinkedHashMap);
     }
 
@@ -147,8 +148,21 @@ public class CartBottomSheet extends BottomSheetDialogFragment
         final RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.list);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(new CartAdapter());
-        if(preOrder && hasMpesa)
-            chip_cash.setEnabled(false);
+        //if the person is not in kenya offer cash only
+        String[] loc = MainActivity.myLocation.split(":");
+        if(loc.length==1)
+        {
+            Toast.makeText(getContext(),"Location unavailable",Toast.LENGTH_SHORT).show();
+            dismiss();
+        }
+        else
+        {
+            if(loc[2].contentEquals("KE"))
+                chip_cash.setVisibility(View.GONE);
+            else
+                chip_mpesa.setVisibility(View.GONE);
+
+        }
         proceed.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -168,12 +182,16 @@ public class CartBottomSheet extends BottomSheetDialogFragment
 
                 if(mTotal<=0.0)
                     Toast.makeText(getContext(),"Cart empty",Toast.LENGTH_SHORT).show();
+                else if(mTotal - deduction <0)
+                    e_deduct.setError("Too high");
                 else
                 {
                     //first check if there is any amount to deduct
-
+                    boolean pay_with_wallet_fully = false;
+                    if(mTotal-deduction==0)
+                        pay_with_wallet_fully = true;
                     removeFromTempTotal(deduction);
-                    mListener.onProceed(mTotal, payment_type);
+                    mListener.onProceed(mTotal, payment_type, pay_with_wallet_fully);
                     dismiss();
                 }
             }
@@ -193,10 +211,11 @@ public class CartBottomSheet extends BottomSheetDialogFragment
                 {
                     int num = Integer.parseInt(s.toString());
                     //we can't allow the final total be less than 5
-                    if(mTotal-num<5)
-                        e_deduct.setError("Total amount cannot be less than 0");
-                    else if(num>wallet)
+                    if(num>wallet)
+                    {
                         e_deduct.setError("Too high");
+                        e_deduct.setText("0");
+                    }
                     else
                     {
                         double new_total = mTotal-num;

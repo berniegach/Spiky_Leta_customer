@@ -86,8 +86,7 @@ public class ShopA extends AppCompatActivity
     private Double deliveryCharge = 0.0;
     private boolean hasPayment = false;
     private boolean preOrder = false;
-    private String mPesaTillNumber;
-    private int taskCounter = 0; //counter for updating order and adding a new mpesa response request in the database
+    private boolean payFullWithWallet = false;
     private ProgressBar progressBar;
     private View mainFragment;
     private FloatingActionButton floatingActionButton;
@@ -111,7 +110,6 @@ public class ShopA extends AppCompatActivity
         numberOfTables=getIntent().getIntExtra("number_of_tables",10);
         tableNumber=getIntent().getIntExtra("table_number",-1);
         hasPayment =  getIntent().getBooleanExtra("has_payment",false);
-        mPesaTillNumber = getIntent().getStringExtra("m_code");
         diningOptions = getIntent().getStringExtra("dining_options");
         if(!seller_names.contentEquals("null") && !seller_names.contentEquals("NULL") && !seller_names.contentEquals(""))
             setTitle(seller_names);
@@ -223,9 +221,10 @@ public class ShopA extends AppCompatActivity
      * implementation of CartBottomSheet.java
      * ************************************************************************************************************************************************************************************/
     @Override
-    public void onProceed(double new_total, int payment_type)
+    public void onProceed(double new_total, int payment_type, boolean pay_with_wallet_fully)
     {
         tempTotal = new_total;
+        payFullWithWallet = pay_with_wallet_fully;
         //first check if the the location is within the restaurants range
         if(!preOrder && buyerDistance>sellerOrderRadius)
         {
@@ -328,7 +327,10 @@ public class ShopA extends AppCompatActivity
     public void onPlacePreOrder(int which, String time, String mobile_mpesa, String mobile_delivery, String instructions, int payment_type)
     {
         floatingActionButton.setVisibility(View.GONE);
-        new OrderTask(tableNumber,time, which, mobile_mpesa, mobile_delivery, instructions, payment_type).execute((Void)null);
+        if(payFullWithWallet)
+            new OrderTaskWallet(tableNumber,time, which, mobile_mpesa, mobile_delivery, instructions, payment_type).execute((Void)null);
+        else
+            new OrderTask(tableNumber,time, which, mobile_mpesa, mobile_delivery, instructions, payment_type).execute((Void)null);
     }
 
     /*************************************************************************************************************************************************************************************
@@ -339,7 +341,10 @@ public class ShopA extends AppCompatActivity
     @Override
     public void onScanToOrderPlaceOrder(int which, int table, String mobile_mpesa, int payment_type)
     {
-        new OrderTask(table,"null", which,mobile_mpesa,"null","null", payment_type).execute((Void)null);
+        if(payFullWithWallet)
+            new OrderTaskWallet(table,"null", which,mobile_mpesa,"null","null", payment_type).execute((Void)null);
+        else
+            new OrderTask(table,"null", which,mobile_mpesa,"null","null", payment_type).execute((Void)null);
     }
 
     private class OrderTask extends AsyncTask<Void, Void, Boolean>
@@ -452,6 +457,151 @@ public class ShopA extends AppCompatActivity
                     //onBackPressed();
                     play_notification();
                 }
+            }
+            else
+            {
+                Snackbar.make(mainFragment,"Order was not successful.\nPlease try again.",Snackbar.LENGTH_LONG).show();
+                floatingActionButton.setVisibility(View.VISIBLE);
+            }
+        }
+        void  formData()
+        {
+            Iterator iterator= cartLinkedHashMap.entrySet().iterator();
+            while(iterator.hasNext())
+            {
+                LinkedHashMap.Entry<String, Integer>set = (LinkedHashMap.Entry<String, Integer>) iterator.next();
+                String id_size = set.getKey();
+                String[] id_size_pieces = id_size.split(":");
+                int id=Integer.parseInt(id_size_pieces[0]);
+                DMenu inv = menuLinkedHashMap.get(id);
+                int quantity = set.getValue();
+
+                int pos = itemPriceSizeLinkedHashMap.get(id_size);
+                String priceString = inv.getPrices();
+                final String[] prices = priceString.split(":");
+                String[] sizes = inv.getSizes().split(":");
+                String price = "0";
+                if(pos >=0 )
+                    price =  prices[pos].contentEquals("null")?"0":prices[pos];
+                if(pos <0)
+                    pos = pos+100;
+                String size = sizes[pos];
+
+                for(int c=0; c<quantity; c++)
+                {
+                    if (!itemsIds.contentEquals(""))
+                    {
+                        itemsIds += ",";
+                        itemPrices += ",";
+                        itemSizes += ",";
+                    }
+                    itemsIds += String.valueOf(inv.getId());
+                    itemPrices += price;
+                    itemSizes += size;
+                }
+            }
+
+        }
+    }
+    private class OrderTaskWallet extends AsyncTask<Void, Void, Boolean>
+    {
+        private String url_place_order = base_url + "place_order_with_wallet.php";
+        private String TAG_MESSAGE = "message";
+        private String TAG_SUCCESS = "success";
+        private String itemsIds="";
+        private String itemSizes="";
+        private String itemPrices="";
+        private int tableNumber=0;
+        private String collectTime;
+        private String orderType;
+        private String deliveryMobile;
+        private String mpesaMobile;
+        private String deliveryInstructions;
+        private int paymentType;
+        private String orderNumber;
+        private String dateAdded;
+
+
+        public OrderTaskWallet(int tableNumber, String collectTime, int orderType, String mpesaMobile, String deliveryMobile, String deliveryInstructions, int paymentType)
+        {
+            this.tableNumber=tableNumber;
+            this.collectTime = collectTime;
+            this.orderType = String.valueOf(orderType);
+            this.mpesaMobile = mpesaMobile;
+            this.deliveryMobile = deliveryMobile;
+            this.deliveryInstructions = deliveryInstructions;
+            this.paymentType = paymentType;
+            formData();
+        }
+        @Override
+        protected void onPreExecute()
+        {
+            super.onPreExecute();
+            showProgress(true);
+
+            for(int c=0; c<items.size(); c++)
+            {
+                itemsIds+=String.valueOf(items.get(c));
+                if(c!=items.size()-1)
+                    itemsIds+=",";
+            }
+        }
+        @Override
+        protected Boolean doInBackground(Void... params)
+        {
+            //getting columns list
+            List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
+            info.add(new BasicNameValuePair("seller_email",sellerEmail));
+            info.add(new BasicNameValuePair("user_email", LoginA.getServerAccount().getEmail()));
+            info.add(new BasicNameValuePair("items_ids",itemsIds));
+            info.add(new BasicNameValuePair("items_sizes",itemSizes));
+            info.add(new BasicNameValuePair("items_prices",itemPrices));
+            info.add(new BasicNameValuePair("table_number",String.valueOf(tableNumber)));
+            info.add(new BasicNameValuePair("has_payment", hasPayment? "1" : "0"));
+            info.add(new BasicNameValuePair("pre_order", preOrder? "1" : "0")); // 1 means pre order 0 means not
+            info.add(new BasicNameValuePair("collect_time", preOrder? collectTime : "null"));
+            info.add(new BasicNameValuePair("payment_type", String.valueOf(paymentType))); // 0 means mpesa , 1 is for cash payment
+            info.add(new BasicNameValuePair("order_type", orderType)); // 0 means eat while eat , 1 is for take away and 2 is for delivery
+            info.add(new BasicNameValuePair("delivery_mobile", deliveryMobile));
+            info.add(new BasicNameValuePair("delivery_instructions", deliveryInstructions));
+            info.add(new BasicNameValuePair("delivery_location", MainActivity.myLocation));
+            info.add(new BasicNameValuePair("delivery_charge", String.valueOf(deliveryCharge.intValue())));
+            // making HTTP request
+            JSONObject jsonObject= jsonParser.makeHttpRequest(url_place_order,"POST",info);
+            Log.d("sItems",""+jsonObject.toString());
+            try
+            {
+                int success=jsonObject.getInt(TAG_SUCCESS);
+                if(success==1)
+                {
+                    orderNumber = jsonObject.getString("order_number");
+                    dateAdded = jsonObject.getString("date_added");
+                    return true;
+                }
+                else
+                {
+                    String message=jsonObject.getString(TAG_MESSAGE);
+                    return false;
+                }
+            }
+            catch (JSONException e)
+            {
+                Log.e("JSON",""+e.getMessage());
+                return false;
+            }
+        }
+        @Override
+        protected void onPostExecute(final Boolean successful) {
+
+            if (successful)
+            {
+                showProgress(false);
+                floatingActionButton.setVisibility(View.VISIBLE);
+                Snackbar.make(mainFragment,"Order Placed",Snackbar.LENGTH_LONG).show();
+                cartLinkedHashMap.clear();
+                tempTotal = 0.0;
+                //onBackPressed();
+                play_notification();
             }
             else
             {

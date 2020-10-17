@@ -36,6 +36,7 @@ import com.spikingacacia.spikyletabuyer.JSONParser;
 import com.spikingacacia.spikyletabuyer.LoginA;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.database.TastyBoard;
+import com.spikingacacia.spikyletabuyer.shop.OrderParamsBottomSheet;
 import com.spikingacacia.spikyletabuyer.util.Utils;
 
 import org.apache.http.NameValuePair;
@@ -45,6 +46,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.ocpsoft.prettytime.PrettyTime;
 
+import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -68,16 +70,25 @@ public class TastyBoardOverviewBottomSheet extends BottomSheetDialogFragment
 {
 
     private static final String ARG_TASTY_BOARD = "param1";
+    private static final String ARG_LISTENER = "param2";
+    private OnListFragmentInteractionListener mListener;
     private static TastyBoard tastyBoard;
     private RecyclerView recyclerView;
     private String TAG = "tasty_board_bottom_sheet";
     private EditText e_comment;
     private ImageButton b_post;
-    public static TastyBoardOverviewBottomSheet newInstance(TastyBoard tastyBoard)
+    public interface OnListFragmentInteractionListener extends Serializable
+    {
+        void onTastyBoardItemPreOrder( TastyBoard tastyBoard);
+        void onGotoMenu(String sellerEmail);
+
+    }
+    public static TastyBoardOverviewBottomSheet newInstance(TastyBoard tastyBoard, OnListFragmentInteractionListener listener)
     {
         final TastyBoardOverviewBottomSheet fragment = new TastyBoardOverviewBottomSheet();
         final Bundle args = new Bundle();
         args.putSerializable(ARG_TASTY_BOARD, tastyBoard);
+        args.putSerializable(ARG_LISTENER, listener);
         fragment.setArguments(args);
         return fragment;
     }
@@ -91,6 +102,7 @@ public class TastyBoardOverviewBottomSheet extends BottomSheetDialogFragment
         if (getArguments() != null)
         {
             tastyBoard =(TastyBoard) getArguments().getSerializable(ARG_TASTY_BOARD);
+            mListener = (OnListFragmentInteractionListener) getArguments().getSerializable(ARG_LISTENER);
         }
         TextView t_title = view.findViewById(R.id.title);
         TextView t_restaurant = (TextView) view.findViewById(R.id.restaurant);
@@ -102,6 +114,31 @@ public class TastyBoardOverviewBottomSheet extends BottomSheetDialogFragment
         e_comment = view.findViewById(R.id.new_comment);
         b_post = view.findViewById(R.id.post);
         recyclerView = view.findViewById(R.id.list);
+
+        b_pre_order.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                if(mListener!=null)
+                {
+                    mListener.onTastyBoardItemPreOrder(tastyBoard);
+                    dismiss();
+                }
+            }
+        });
+        b_menu.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                if(mListener!=null)
+                {
+                    mListener.onGotoMenu(tastyBoard.getSellerEmail());
+                    dismiss();
+                }
+            }
+        });
 
         t_title.setText(tastyBoard.getTitle());
         t_restaurant.setText(tastyBoard.getSellerNames());

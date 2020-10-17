@@ -48,7 +48,7 @@ import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
 
 public class TastyBoardActivity extends AppCompatActivity implements
          TastyBoardFragment.OnListFragmentInteractionListener,
-        TastyBoardOverviewFragment.OnListFragmentInteractionListener,
+        TastyBoardOverviewBottomSheet.OnListFragmentInteractionListener,
         CartBottomSheet.OnListFragmentInteractionListener,
         OrderParamsBottomSheet.OnFragmentInteractionListener
 {
@@ -64,7 +64,7 @@ public class TastyBoardActivity extends AppCompatActivity implements
     private Double deliveryCharge = 0.0;
     private String diningOptions="1:1:0";
     private String sellerEmail="";
-    private int taskCounter = 0; //counter for updating order and adding a new mpesa response request in the database
+    private boolean payFullWithWallet = false;
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -92,15 +92,10 @@ public class TastyBoardActivity extends AppCompatActivity implements
                 has_payment = false;*/
         if(tastyBoard.getCountry().contentEquals("KE"))
             hasPayment = true;
-        TastyBoardOverviewBottomSheet.newInstance(tastyBoard).show(getSupportFragmentManager(), "dialog");
-        /*Fragment fragment= TastyBoardOverviewFragment.newInstance(tastyBoard);
-        FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.base,fragment,"overview");
-        transaction.addToBackStack(null);
-        transaction.commit();*/
+        TastyBoardOverviewBottomSheet.newInstance(tastyBoard, TastyBoardActivity.this).show(getSupportFragmentManager(), "dialog");
     }
     /*
-     * implementation of TastyBoardOverviewFragment.java
+     * implementation of TastyBoardOverviewBottomSheet.java
      */
     @Override
     public void onTastyBoardItemPreOrder(TastyBoard tastyBoard)
@@ -130,13 +125,13 @@ public class TastyBoardActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onGotoMenu()
+    public void onGotoMenu( String sellerEmail)
     {
         showProgress(true);
         if(!MainActivity.myLocation.contentEquals(""))
         {
             String[] location = MainActivity.myLocation.split(":");
-            new RestaurantTask(location[0], location[1]).execute((Void)null);
+            new RestaurantTask(location[0], location[1], sellerEmail).execute((Void)null);
         }
     }
     void showProgress(boolean show)
@@ -188,9 +183,10 @@ public class TastyBoardActivity extends AppCompatActivity implements
 * implementation of CartBottomSheet.java
  */
     @Override
-    public void onProceed(double new_total, int payment_type)
+    public void onProceed(double new_total, int payment_type, boolean pay_with_wallet_fully)
     {
         total = new_total;
+        payFullWithWallet = pay_with_wallet_fully;
         OrderParamsBottomSheet.newInstance(hasPayment,diningOptions,deliveryCharge,total, payment_type,this).show(getSupportFragmentManager(), "dialog");
     }
 
@@ -204,7 +200,10 @@ public class TastyBoardActivity extends AppCompatActivity implements
     @Override
     public void onPlacePreOrder(int which, String time, String mobile_mpesa, String mobile_delivery, String instructions,  int payment_type)
     {
-        new OrderTask(-1,time, which, mobile_mpesa, mobile_delivery, instructions, payment_type).execute((Void)null);
+        if(payFullWithWallet)
+            new OrderTaskWallet(-1,time, which, mobile_mpesa, mobile_delivery, instructions, payment_type).execute((Void)null);
+        else
+            new OrderTask(-1,time, which, mobile_mpesa, mobile_delivery, instructions, payment_type).execute((Void)null);
     }
 
     private class RestaurantTask extends AsyncTask<Void, Void, Boolean>
@@ -218,12 +217,14 @@ public class TastyBoardActivity extends AppCompatActivity implements
         final private String longitude;
         private  int success;
         private Restaurants restaurant;
+        private String sellerEmail;
 
 
-        public RestaurantTask( String latitude, String longitude)
+        public RestaurantTask( String latitude, String longitude, String sellerEmail)
         {
             this.latitude=latitude;
             this.longitude=longitude;
+            this.sellerEmail = sellerEmail;
             jsonParser=new JSONParser();
 
         }
@@ -236,7 +237,7 @@ public class TastyBoardActivity extends AppCompatActivity implements
             info.add(new BasicNameValuePair("latitude",latitude));
             info.add(new BasicNameValuePair("longitude",longitude));
             info.add(new BasicNameValuePair("location",""));
-            info.add(new BasicNameValuePair("seller_email",tastyBoard.getSellerEmail()));
+            info.add(new BasicNameValuePair("seller_email",sellerEmail));
             // making HTTP request
             JSONObject jsonObject= jsonParser.makeHttpRequest(url_get_restaurant,"POST",info);
             //Log.d(TAG,"json:"+jsonObject.toString());
@@ -400,6 +401,141 @@ public class TastyBoardActivity extends AppCompatActivity implements
                     onBackPressed();
                     play_notification();
                 }
+            }
+            else
+            {
+                Snackbar.make(mainFragment,"Order was not successful.\nPlease try again.",Snackbar.LENGTH_LONG).show();
+            }
+        }
+        void  formData()
+        {
+            Iterator iterator= cartLinkedHashMap.entrySet().iterator();
+            while(iterator.hasNext())
+            {
+                LinkedHashMap.Entry<String, Integer>set = (LinkedHashMap.Entry<String, Integer>) iterator.next();
+                String id_size = set.getKey();
+                String[] id_size_pieces = id_size.split(":");
+                int id=Integer.parseInt(id_size_pieces[0]);
+                DMenu inv = menuLinkedHashMap.get(id);
+                int quantity = set.getValue();
+
+                int pos = itemPriceSizeLinkedHashMap.get(id_size);
+                String priceString = inv.getPrices();
+                final String[] prices = priceString.split(":");
+                String[] sizes = inv.getSizes().split(":");
+                String  price =  prices[pos].contentEquals("null")?"0":prices[pos];
+                String size = sizes[pos];
+                for(int c=0; c<quantity; c++)
+                {
+                    if (!itemsIds.contentEquals(""))
+                    {
+                        itemsIds += ",";
+                        itemPrices += ",";
+                        itemSizes += ",";
+                    }
+                    itemsIds += String.valueOf(inv.getId());
+                    itemPrices += price;
+                    itemSizes += size;
+                }
+            }
+
+        }
+    }
+    private class OrderTaskWallet extends AsyncTask<Void, Void, Boolean>
+    {
+        private String url_place_order = base_url + "place_order_1.php";
+        private String TAG_MESSAGE = "message";
+        private String TAG_SUCCESS = "success";
+        private JSONParser jsonParser;
+        private String itemsIds="";
+        private String itemSizes="";
+        private String itemPrices="";
+        private int tableNumber=0;
+        private String collectTime;
+        private String orderType;
+        private String deliveryMobile;
+        private String mpesaMobile;
+        private String deliveryInstructions;
+        private int paymentType;
+        private String orderNumber;
+        private String dateAdded;
+
+
+        public OrderTaskWallet(int tableNumber, String collectTime, int orderType, String mpesaMobile, String deliveryMobile, String deliveryInstructions, int paymentType)
+        {
+            jsonParser = new JSONParser();
+            this.tableNumber=tableNumber;
+            this.collectTime = collectTime;
+            this.orderType = String.valueOf(orderType);
+            this.mpesaMobile = mpesaMobile;
+            this.deliveryMobile = deliveryMobile;
+            this.deliveryInstructions = deliveryInstructions;
+            this.paymentType = paymentType;
+            formData();
+        }
+        @Override
+        protected void onPreExecute()
+        {
+            super.onPreExecute();
+            showProgress(true);
+
+            Log.d("ORDERING","starting....");
+        }
+        @Override
+        protected Boolean doInBackground(Void... params)
+        {
+            //getting columns list
+            List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
+            info.add(new BasicNameValuePair("seller_email",sellerEmail));
+            info.add(new BasicNameValuePair("user_email", LoginA.getServerAccount().getEmail()));
+            info.add(new BasicNameValuePair("items_ids",itemsIds));
+            info.add(new BasicNameValuePair("items_sizes",itemSizes));
+            info.add(new BasicNameValuePair("items_prices",itemPrices));
+            info.add(new BasicNameValuePair("table_number",String.valueOf(tableNumber)));
+            info.add(new BasicNameValuePair("has_payment", hasPayment? "1" : "0"));
+            info.add(new BasicNameValuePair("pre_order",  "1" )); // 1 means pre order 0 means not
+            info.add(new BasicNameValuePair("collect_time", collectTime ));
+            info.add(new BasicNameValuePair("payment_type", String.valueOf(paymentType))); // 0 means mpesa , 1 is for cash payment
+            info.add(new BasicNameValuePair("order_type", orderType)); // 0 means eat while eat , 1 is for take away and 2 is for delivery
+            info.add(new BasicNameValuePair("delivery_mobile", deliveryMobile));
+            info.add(new BasicNameValuePair("delivery_instructions", deliveryInstructions));
+            info.add(new BasicNameValuePair("delivery_location", MainActivity.myLocation));
+            info.add(new BasicNameValuePair("delivery_charge", String.valueOf(deliveryCharge.intValue())));
+            // making HTTP request
+            JSONObject jsonObject= jsonParser.makeHttpRequest(url_place_order,"POST",info);
+            Log.d("sItems",""+jsonObject.toString());
+            try
+            {
+                int success=jsonObject.getInt(TAG_SUCCESS);
+                if(success==1)
+                {
+                    orderNumber = jsonObject.getString("order_number");
+                    dateAdded = jsonObject.getString("date_added");
+                    return true;
+                }
+                else
+                {
+                    String message=jsonObject.getString(TAG_MESSAGE);
+                    return false;
+                }
+            }
+            catch (JSONException e)
+            {
+                Log.e("JSON",""+e.getMessage());
+                return false;
+            }
+        }
+        @Override
+        protected void onPostExecute(final Boolean successful) {
+
+            if (successful)
+            {
+                showProgress(false);
+                Snackbar.make(mainFragment,"Order Placed",Snackbar.LENGTH_LONG).show();
+                cartLinkedHashMap.clear();
+                total = 0.0;
+                onBackPressed();
+                play_notification();
             }
             else
             {
