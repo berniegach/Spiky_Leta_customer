@@ -17,23 +17,21 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.android.volley.toolbox.ImageLoader;
-import com.android.volley.toolbox.NetworkImageView;
 import com.bumptech.glide.Glide;
-import com.spikingacacia.spikyletabuyer.AppController;
 import com.spikingacacia.spikyletabuyer.LoginA;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.database.Orders;
-import com.spikingacacia.spikyletabuyer.database.TastyBoard;
-import com.spikingacacia.spikyletabuyer.main.orders_list.OrdersFragment.OnListFragmentInteractionListener;
 
 import org.ocpsoft.prettytime.PrettyTime;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+
+import static com.spikingacacia.spikyletabuyer.main.orders_list.OrdersListFragment.*;
 
 public class MyOrderRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 {
@@ -43,13 +41,15 @@ public class MyOrderRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVie
     private List<Orders> itemsCopy;
     private final OnListFragmentInteractionListener mListener;
     private Context context;
+    private int whichPager = 1;
 
-    public MyOrderRecyclerViewAdapter(OnListFragmentInteractionListener listener, Context context)
+    public MyOrderRecyclerViewAdapter(OnListFragmentInteractionListener listener, Context context, int whichPager)
     {
         mValues = new LinkedList<>();
         mListener = listener;
         itemsCopy=new ArrayList<>();
         this.context = context;
+        this.whichPager = whichPager;
     }
 
     @Override
@@ -261,7 +261,27 @@ public class MyOrderRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerVie
                 {
                     // Notify the active callbacks interface (the activity, if the
                     // fragment is attached to one) that an item has been selected.
-                    mListener.onOrderClicked(holder.mItem);
+                    String date_added_1=holder.mItem.getDateAdded();
+                    String[] date_pieces=date_added_1.split(" ");
+                    String unique_name=date_pieces[0]+":"+holder.mItem.getOrderNumber();
+                    LinkedHashMap<Integer, Orders> ordersLinkedHashMap = new LinkedHashMap<>();
+                    List<Orders> ordersList = new LinkedList<>();
+                    if(whichPager == 1)
+                        ordersLinkedHashMap = ordersLinkedHashMapPending;
+                    else if(whichPager == 2)
+                        ordersLinkedHashMap = ordersLinkedHashMapFinished;
+                    for (LinkedHashMap.Entry<Integer, Orders> set : ordersLinkedHashMap.entrySet())
+                    {
+                        Orders orders = set.getValue();
+                        int order_number = orders.getOrderNumber();
+                        String date_added = orders.getDateAdded();
+                        String[] date = date_added.split(" ");
+                        if (!(date[0] + ":" + order_number).contentEquals(unique_name))
+                            continue;
+                        ordersList.add(orders);
+                    }
+
+                    mListener.onOrderClicked( ordersList);
                 }
             }
         });

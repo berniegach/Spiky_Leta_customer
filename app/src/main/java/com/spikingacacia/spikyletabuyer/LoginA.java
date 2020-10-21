@@ -63,10 +63,6 @@ public class LoginA extends AppCompatActivity implements View.OnClickListener
     private ProgressBar progressBar;
     private View mainView;
     public final static String SAVE_INSTANCE_SERVER_ACCOUNT = "save_server_account";
-    public interface MyListener
-    {
-        public void onLogin(boolean success, int success_value, ServerAccount account);
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)

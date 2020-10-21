@@ -6,7 +6,9 @@
 
 package com.spikingacacia.spikyletabuyer.database;
 
-public class Orders
+import java.io.Serializable;
+
+public class Orders implements Serializable
 {
     private int id;
     private String waiterEmail;

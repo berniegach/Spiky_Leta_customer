@@ -12,6 +12,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -26,6 +27,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -33,13 +35,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.provider.FontRequest;
 import androidx.emoji.bundled.BundledEmojiCompatConfig;
 import androidx.emoji.text.EmojiCompat;
 import androidx.emoji.text.FontRequestEmojiCompatConfig;
 import androidx.navigation.NavController;
-import androidx.navigation.NavDestination;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
@@ -60,11 +62,12 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.gms.vision.barcode.Barcode;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.button.MaterialButton;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.spikingacacia.spikyletabuyer.JSONParser;
 import com.spikingacacia.spikyletabuyer.LoginA;
-import com.spikingacacia.spikyletabuyer.database.MpesaRequests;
+import com.spikingacacia.spikyletabuyer.NavigationIconClickListener;
 import com.spikingacacia.spikyletabuyer.database.ServerAccount;
 import com.spikingacacia.spikyletabuyer.explore.ExploreActivity;
 import com.spikingacacia.spikyletabuyer.R;
@@ -74,7 +77,7 @@ import com.spikingacacia.spikyletabuyer.database.Restaurants;
 import com.spikingacacia.spikyletabuyer.database.Orders;
 import com.spikingacacia.spikyletabuyer.main.messages.MessagesActivity;
 import com.spikingacacia.spikyletabuyer.main.order.OrderSearchFragment;
-import com.spikingacacia.spikyletabuyer.main.orders_list.OrdersFragment;
+import com.spikingacacia.spikyletabuyer.main.orders_list.OrdersListFragment;
 import com.spikingacacia.spikyletabuyer.main.tasty.TastyBoardActivity;
 import com.spikingacacia.spikyletabuyer.orders.OrdersActivity;
 import com.spikingacacia.spikyletabuyer.shop.ShopA;
@@ -88,10 +91,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
@@ -106,7 +107,7 @@ import static com.spikingacacia.spikyletabuyer.LoginA.mGoogleSignInClient;
 
 public class MainActivity extends AppCompatActivity implements
         OrderSearchFragment.OnFragmentInteractionListener,
-        OrdersFragment.OnListFragmentInteractionListener
+        OrdersListFragment.OnListFragmentInteractionListener
 {
     /** Change this to {@code false} when you want to use the downloadable Emoji font. */
     private static final boolean USE_BUNDLED_EMOJI = true;
@@ -147,6 +148,8 @@ public class MainActivity extends AppCompatActivity implements
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
         initEmojiCompat();
 
         BottomNavigationView navView = findViewById(R.id.nav_view);
@@ -160,6 +163,11 @@ public class MainActivity extends AppCompatActivity implements
         NavigationUI.setupWithNavController(navView, navController);
         progressBar = findViewById(R.id.progress);
         mainFragment = findViewById(R.id.nav_host_fragment);
+        mainFragment.setBackgroundColor(Color.WHITE);
+        myToolbar.setNavigationIcon(R.drawable.ic_baseline_menu_w);
+        myToolbar.setNavigationOnClickListener(new NavigationIconClickListener(this, mainFragment, new AccelerateDecelerateInterpolator(),
+                getBaseContext().getResources().getDrawable(R.drawable.ic_baseline_menu_w), getBaseContext().getResources().getDrawable( R.drawable.ic_baseline_menu_open_w)));
+        setMenuOnclickListeners();
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         checkFirebaseToken();
@@ -195,6 +203,76 @@ public class MainActivity extends AppCompatActivity implements
     private void stopLocationUpdates() {
         fusedLocationProviderClient.removeLocationUpdates(locationCallback);
     }
+    private void setMenuOnclickListeners()
+    {
+        MaterialButton b_wallet = findViewById(R.id.action_wallet);
+        MaterialButton b_messages = findViewById(R.id.action_messages);
+        MaterialButton b_tasty_board = findViewById(R.id.action_tasty_board);
+        MaterialButton b_sign_out = findViewById(R.id.action_sign_out);
+        MaterialButton b_settings = findViewById(R.id.action_settings);
+
+        b_wallet.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                Intent intent = new Intent(MainActivity.this, WalletActivity.class);
+                //prevent this activity from flickering as we call the next one
+                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                startActivity(intent);
+            }
+        });
+        b_messages.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                Intent intent = new Intent(MainActivity.this, MessagesActivity.class);
+                //prevent this activity from flickering as we call the next one
+                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                startActivity(intent);
+            }
+        });
+        b_tasty_board.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                Intent intent = new Intent(MainActivity.this, TastyBoardActivity.class);
+                //prevent this activity from flickering as we call the next one
+                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                startActivity(intent);
+            }
+        });
+        b_sign_out.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                mGoogleSignInClient.signOut().addOnCompleteListener(MainActivity.this, new OnCompleteListener<Void>()
+                {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task)
+                    {
+                        Log.d(TAG, "gmail signed out");
+                        finish();
+                    }
+                });
+            }
+        });
+        b_settings.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                Intent intent=new Intent(MainActivity.this, SettingsActivity.class);
+                //prevent this activity from flickering as we call the next one
+                intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+                startActivity(intent);
+            }
+        });
+
+    }
 
 
     // This callback is called only when there is a saved instance that is previously saved by using
@@ -218,13 +296,6 @@ public class MainActivity extends AppCompatActivity implements
         super.onSaveInstanceState(outState);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main_menu, menu);
-        return true;
-    }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item)
@@ -253,7 +324,7 @@ public class MainActivity extends AppCompatActivity implements
             startActivity(intent);
         } else if (id == R.id.action_settings)
         {
-            proceedToSettings();
+            //proceedToSettings();
             return true;
         } else if (id == R.id.action_sign_out)
         {
@@ -536,13 +607,7 @@ public class MainActivity extends AppCompatActivity implements
         progressBar.setVisibility(show? View.VISIBLE : View.GONE);
         mainFragment.setVisibility( show? View.INVISIBLE :View.VISIBLE);
     }
-    void proceedToSettings()
-    {
-        Intent intent=new Intent(MainActivity.this, SettingsActivity.class);
-        //prevent this activity from flickering as we call the next one
-        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-        startActivity(intent);
-    }
+
     /*
      * implementation of OrderSearchFragment.java
      * */
@@ -582,18 +647,11 @@ public class MainActivity extends AppCompatActivity implements
 implementation of OrdersFragment.java
  */
     @Override
-    public void onOrderClicked(Orders item)
+    public void onOrderClicked(List<Orders> ordersList)
     {
-        String date_added=item.getDateAdded();
-        String[] date_pieces=date_added.split(" ");
-        String unique_name=date_pieces[0]+":"+item.getOrderNumber();
         Intent intent = new Intent(this, OrdersActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
-        intent.putExtra("unique_order_name",unique_name);
-        intent.putExtra("order_format",item.getOrderFormat());
-        intent.putExtra("order_status",item.getOrderStatus());
-        intent.putExtra("pre_order", item.getPreOrder());
-        intent.putExtra("seller_names",item.getSellerNames());
+        //intent.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        intent.putExtra("orders", (Serializable) ordersList);
         startActivity(intent);
     }
 

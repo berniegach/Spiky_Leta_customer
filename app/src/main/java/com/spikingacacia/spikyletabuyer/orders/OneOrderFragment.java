@@ -14,23 +14,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
 import androidx.fragment.app.Fragment;
 
 import com.spikingacacia.spikyletabuyer.JSONParser;
 import com.spikingacacia.spikyletabuyer.LoginA;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.database.Orders;
-import com.spikingacacia.spikyletabuyer.main.orders_list.OrdersFragment;
 import com.spikingacacia.spikyletabuyer.util.Utils;
 
 import org.apache.http.NameValuePair;
@@ -38,11 +33,9 @@ import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Objects;
 
 import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
 
@@ -51,11 +44,8 @@ import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
  */
 public class OneOrderFragment extends Fragment
 {
-
-    private static final String ARG_ORDER = "order";
-    private static final String ARG_FORMAT = "order_format";
-    private static final String ARG_ORDER_STATUS = "order_status";
-    private static final String ARG_PRE_ORDER = "pre_order";
+    private static final String ARG_ORDERS = "arg1";
+    private List<Orders> ordersList;
     private CheckPaymentTask checkPaymentTask;
     private String mOrder;
     private int mOrderFormat;
@@ -69,14 +59,11 @@ public class OneOrderFragment extends Fragment
     private int total;
 
 
-    public static OneOrderFragment newInstance(String order, int format, int status, int pre_order)
+    public static OneOrderFragment newInstance(String order, int format, int status, int pre_order, List<Orders> ordersList)
     {
         OneOrderFragment fragment = new OneOrderFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_ORDER, order);
-        args.putInt(ARG_FORMAT, format);
-        args.putInt(ARG_ORDER_STATUS, status);
-        args.putInt(ARG_PRE_ORDER, pre_order);
+        args.putSerializable(ARG_ORDERS, (Serializable) ordersList);
         fragment.setArguments(args);
         return fragment;
     }
@@ -87,10 +74,7 @@ public class OneOrderFragment extends Fragment
         super.onCreate(savedInstanceState);
         if (getArguments() != null)
         {
-            mOrder = getArguments().getString(ARG_ORDER);
-            mOrderFormat = getArguments().getInt(ARG_FORMAT);
-            mOrderStatus = getArguments().getInt(ARG_ORDER_STATUS);
-            mPreOrder = getArguments().getInt(ARG_PRE_ORDER);
+            ordersList = (List<Orders>) getArguments().getSerializable(ARG_ORDERS);
         }
     }
 
@@ -205,21 +189,16 @@ public class OneOrderFragment extends Fragment
         String url_code_start_delivery ="";
         String url_code_end_delivery = "";
         int order_number = 0;
-        for (LinkedHashMap.Entry<Integer, Orders> set : OrdersFragment.ordersLinkedHashMap.entrySet())
+        for(int c = 0; c<ordersList.size(); c++)
         {
-            Orders orders = set.getValue();
-            int itemId = orders.getItemId();
+            //Orders orders = set.getValue();
+            Orders orders = ordersList.get(c);
             order_number = orders.getOrderNumber();
-            int orderStatus = orders.getOrderStatus();
             String orderName = orders.getItem();
             orderName = orderName.replace("_", " ");
             String size = orders.getSize();
             double price = orders.getPrice();
-            String date_added = orders.getDateAdded();
             String date_added_local = orders.getDateAddedLocal();
-            String[] date = date_added.split(" ");
-            if (!(date[0] + ":" + order_number).contentEquals(mOrder))
-                continue;
             username = orders.getSellerNames();
             waiter = orders.getWaiterNames();
             table = orders.getTableNumber();

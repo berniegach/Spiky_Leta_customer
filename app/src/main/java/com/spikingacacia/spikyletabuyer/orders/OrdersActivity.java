@@ -33,6 +33,7 @@ import com.spikingacacia.spikyletabuyer.LoginA;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.JSONParser;
 import com.spikingacacia.spikyletabuyer.barcode.BarcodeCaptureActivity;
+import com.spikingacacia.spikyletabuyer.database.Orders;
 import com.spikingacacia.spikyletabuyer.database.Restaurants;
 import com.spikingacacia.spikyletabuyer.main.MainActivity;
 
@@ -88,12 +89,13 @@ public class OrdersActivity extends AppCompatActivity
        int order_status = getIntent().getIntExtra("order_status",-2);
        int pre_order = getIntent().getIntExtra("pre_order",0);
        String seller_names = getIntent().getStringExtra("seller_names");
+       List<Orders> ordersList = (List<Orders>) getIntent().getSerializableExtra("orders");
        setTitle(seller_names);
 
         progressBar = findViewById(R.id.progress);
         mainView = findViewById(R.id.base);
 
-        Fragment fragment= OneOrderFragment.newInstance(unique_order_name, order_format, order_status, pre_order);
+        Fragment fragment= OneOrderFragment.newInstance(unique_order_name, order_format, order_status, pre_order, ordersList);
         FragmentTransaction transaction=getSupportFragmentManager().beginTransaction();
         transaction.add(R.id.base,fragment,"order");
         transaction.commit();
