@@ -222,13 +222,13 @@ public class menuFragment extends Fragment implements MymenuRecyclerViewAdapter.
     @Override
     public void onOptionsMenuChooseAccompaniments(DMenu dMenu, List<DMenu> dMenuList)
     {
+        Log.d(TAG," ACCOMPANIEMTS CALLED");
         LinkedItemListDialogFragment.newInstance(dMenu,dMenuList, mListener).show(getChildFragmentManager(), "dialog");
     }
 
 
     public interface OnListFragmentInteractionListener extends Serializable
     {
-        // TODO: Update argument type and name
         //void onEditMenu(int which, DMenu dMenu);
         void onMenuItemInteraction(List<DMenu> item, List<Integer>items_new_sizes_prices_index, List<Boolean> areItemsFree);
         //void onCategoryItemInteraction(Categories item);

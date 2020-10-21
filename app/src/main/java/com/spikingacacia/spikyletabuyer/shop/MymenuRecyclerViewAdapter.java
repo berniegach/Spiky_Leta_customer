@@ -54,6 +54,7 @@ public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecycl
     private FragmentManager fragmentManager;
     private static int lastImageFaded = -1;
     OptionsListener optionsListener;
+    private String TAG = "my_menu_rva";
 
 
     public interface OptionsListener
@@ -93,11 +94,11 @@ public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecycl
         String[] prices = mValues.get(position).getPrices().split(":");
         String[] sizePrice;
         String location = MainActivity.myLocation;
-        String[] location_pieces = location.split(",");
+        String[] location_pieces = location.split(":");
         if(sizes.length == 1)
         {
             if(location_pieces.length==3)
-                sizePrice = new String[]{getCurrencyCode(location_pieces[3])+" "+prices[0]};
+                sizePrice = new String[]{getCurrencyCode(location_pieces[2])+" "+prices[0]};
             else
                 sizePrice = new String[]{prices[0]};
         }
@@ -107,8 +108,8 @@ public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecycl
             for(int c=0; c<sizes.length; c++)
             {
 
-                if(location_pieces.length==4)
-                    sizePrice[c] = sizes[c]+" @ "+getCurrencyCode(location_pieces[3])+" "+prices[c];
+                if(location_pieces.length==3)
+                    sizePrice[c] = sizes[c]+" @ "+getCurrencyCode(location_pieces[2])+" "+prices[c];
                 else
                     sizePrice[c] = sizes[c]+" @ "+prices[c];
             }
@@ -137,7 +138,6 @@ public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecycl
             {
                 //first choose accompaniment
                 chooseLinkedFood(holder.mItem, holder.mPriceView.getSelectedItemPosition());
-                //mListener.onMenuItemInteraction(holder.mItem);
             }
         });
 
@@ -235,13 +235,16 @@ public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecycl
     }
     private void chooseLinkedFood(final DMenu dMenu, int main_item_size)
     {
+        //when chhosing linked food don't use mValues data . Use the itemscopy
+        //mvalues data may reflect less items if the user had filtered the menu
+        //items copy retains all menu info no matter what
         final List<DMenu> dMenuList = new ArrayList<>();
         final List<Integer>items_new_sizes_prices_index = new ArrayList<>();
         String linked_foods = dMenu.getLinkedItems();
         String[] links = linked_foods.split(":");
-        String[] items = new String[mValues.size()];
-        final String[] ids = new String[mValues.size()];
-        final boolean[] items_checked = new boolean[mValues.size()];
+        String[] items = new String[itemsCopy.size()];
+        final String[] ids = new String[itemsCopy.size()];
+        final boolean[] items_checked = new boolean[itemsCopy.size()];
 
         if(links.length==1 && links[0].contentEquals("null"))
             links[0]="-1";
@@ -250,15 +253,15 @@ public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecycl
         int itemsCount = 0;
         for(int c=0; c<items.length; c++)
         {
-            items[c] = mValues.get(c).getItem();
-            ids[c] = String.valueOf(mValues.get(c).getId());
+            items[c] = itemsCopy.get(c).getItem();
+            ids[c] = String.valueOf(itemsCopy.get(c).getId());
             //set the linked item to true
             for( int d=0; d<links.length; d++)
             {
                 int id = Integer.valueOf(links[d]);
-                for(int e=0; e<mValues.size(); e++)
+                for(int e=0; e<itemsCopy.size(); e++)
                 {
-                    if( id==mValues.get(c).getId())
+                    if( id==itemsCopy.get(c).getId())
                     {
                         items_checked[c]=true;
                         itemsCount+=1;
@@ -276,8 +279,8 @@ public class MymenuRecyclerViewAdapter extends RecyclerView.Adapter<MymenuRecycl
         {
             if(items_checked[c])
             {
-                items_new[index]= mValues.get(c).getItem();
-                dmenu_new[index] = mValues.get(c);
+                items_new[index]= itemsCopy.get(c).getItem();
+                dmenu_new[index] = itemsCopy.get(c);
                 index+=1;
 
             }
