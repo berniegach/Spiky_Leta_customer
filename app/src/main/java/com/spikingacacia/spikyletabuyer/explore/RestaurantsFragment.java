@@ -266,7 +266,6 @@ public class RestaurantsFragment extends Fragment
         protected Boolean doInBackground(Void... params)
         {
             //getting columns list
-            Log.e("LAST","LAST "+last_index);
             List<NameValuePair> info=new ArrayList<NameValuePair>(); //info for staff count
             info.add(new BasicNameValuePair("last_index",String.valueOf(last_index)));
             info.add(new BasicNameValuePair("latitude",latitude));
@@ -331,7 +330,6 @@ public class RestaurantsFragment extends Fragment
         @Override
         protected void onPostExecute(final Boolean successful)
         {
-
             if(load_more)
             {
                 myRestaurantsRecyclerViewAdapter.listRemoveProgressBar();

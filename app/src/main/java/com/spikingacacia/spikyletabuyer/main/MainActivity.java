@@ -468,6 +468,9 @@ public class MainActivity extends AppCompatActivity implements
     private boolean checkIfLocationEnabled()
     {
         LocationManager lm = (LocationManager)getBaseContext().getSystemService(Context.LOCATION_SERVICE);
+        //the device may use gps which has high accuracy or network which has low accuracy
+        //if gps is enabled its well and fine that means we can get the accurate location
+        //if gps is not available but internet is we can use coarse location which is better than the user not been able to access the loaction at all
         boolean gps_enabled = false;
         boolean network_enabled = false;
 
@@ -520,7 +523,7 @@ public class MainActivity extends AppCompatActivity implements
                     .show();
             network_enabled = false;
         }
-        return gps_enabled && network_enabled;
+        return gps_enabled || network_enabled;
     }
     private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager

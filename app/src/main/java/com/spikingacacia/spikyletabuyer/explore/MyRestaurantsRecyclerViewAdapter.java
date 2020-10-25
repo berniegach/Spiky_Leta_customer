@@ -134,6 +134,7 @@ public class MyRestaurantsRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
     public void listUpdated(List<Restaurants> newitems)
     {
         mValues.clear();
+        itemsCopy.clear();
         mValues.addAll(newitems);
         itemsCopy.addAll(newitems);
         notifyDataSetChanged();
