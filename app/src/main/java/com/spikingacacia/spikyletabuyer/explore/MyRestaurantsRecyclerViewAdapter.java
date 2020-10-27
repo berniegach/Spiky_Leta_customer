@@ -101,6 +101,8 @@ public class MyRestaurantsRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
         public final TextView tNames;
         public final TextView tDistance;
         public final TextView tLocality;
+        public final ImageView unavailable;
+        public final TextView tClosingTime;
         public Restaurants mItem;
 
         public ViewHolder(View view)
@@ -111,6 +113,8 @@ public class MyRestaurantsRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
             tNames = view.findViewById(R.id.names);
             tDistance = view.findViewById(R.id.distance);
             tLocality = view.findViewById(R.id.locality);
+            unavailable = view.findViewById(R.id.unavailable);
+            tClosingTime = view.findViewById(R.id.closing_time);
         }
 
         @Override
@@ -171,6 +175,12 @@ public class MyRestaurantsRecyclerViewAdapter extends RecyclerView.Adapter<Recyc
 
         String url= LoginA.base_url+"src/sellers_pics/"+ mValues.get(position).getId()+'_'+mValues.get(position).getImage_type();
         Glide.with(context).load(url).into(holder.imageView);
+        if(!holder.mItem.isOpened())
+        {
+            holder.unavailable.setVisibility(View.VISIBLE);
+            holder.mView.setEnabled(false);
+            holder.tClosingTime.setText("Closed at "+holder.mItem.getClosingTime());
+        }
 
         holder.mView.setOnClickListener(new View.OnClickListener()
         {

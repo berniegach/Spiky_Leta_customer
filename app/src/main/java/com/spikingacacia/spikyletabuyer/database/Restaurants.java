@@ -24,11 +24,14 @@ public class Restaurants implements Comparable< Restaurants>
     private int tableNumber;
     private String mCode;
     private String diningOptions;
+    private String openingTime;
+    private String closingTime;
+    private boolean opened;
 
 
 
     public Restaurants(int id, String email, String names, double distance, double latitude, double longitude, String locality, String countryCode, int radius, int numberOfTables, String image_type,
-                       int tableNumber,  String mCode, String diningOptions)
+                       int tableNumber,  String mCode, String diningOptions, String openingTime, String closingTime, boolean opened)
     {
         this.id = id;
         this.email = email;
@@ -44,6 +47,9 @@ public class Restaurants implements Comparable< Restaurants>
         this.tableNumber = tableNumber;
         this.mCode = mCode;
         this.diningOptions = diningOptions;
+        this.openingTime = openingTime;
+        this.closingTime = closingTime;
+        this.opened = opened;
     }
 
     public int getId()
@@ -183,5 +189,35 @@ public class Restaurants implements Comparable< Restaurants>
     public int compareTo(Restaurants o)
     {
         return Double.compare(distance, o.distance);
+    }
+
+    public String getOpeningTime()
+    {
+        return openingTime;
+    }
+
+    public void setOpeningTime(String openingTime)
+    {
+        this.openingTime = openingTime;
+    }
+
+    public String getClosingTime()
+    {
+        return closingTime;
+    }
+
+    public void setClosingTime(String closingTime)
+    {
+        this.closingTime = closingTime;
+    }
+
+    public boolean isOpened()
+    {
+        return opened;
+    }
+
+    public void setOpened(boolean opened)
+    {
+        this.opened = opened;
     }
 }

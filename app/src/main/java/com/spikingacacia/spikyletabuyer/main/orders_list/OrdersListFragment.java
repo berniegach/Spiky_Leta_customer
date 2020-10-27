@@ -65,7 +65,6 @@ public class OrdersListFragment extends Fragment
         View view = inflater.inflate(R.layout.fragment_orders_list, container, false);
         Bundle args = getArguments();
         whichPage = args.getInt(ARG_OBJECT) + 1;
-        Log.d("TAG","WHICH "+whichPage);
 
         swipeRefreshLayout = view.findViewById(R.id.swipe_container);
         ordersLinkedHashMapPending = new LinkedHashMap<>();

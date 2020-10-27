@@ -29,7 +29,7 @@
     <fragment
         android:id="@+id/navigation_orders"
         android:name="com.spikingacacia.spikyletabuyer.main.orders_list.OrdersFragment"
-        android:label="Order"
+        android:label="Orders"
         tools:layout="@layout/fragment_orders_list" />
     <!--<fragment
         android:id="@+id/navigation_messages"

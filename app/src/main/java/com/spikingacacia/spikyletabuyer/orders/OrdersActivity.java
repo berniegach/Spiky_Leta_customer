@@ -296,8 +296,12 @@ public class OrdersActivity extends AppCompatActivity
                     int table_number = jsonObject_restaurants.getInt("table_number");
                     String m_code = jsonObject_restaurants.getString("m_code");
                     String dining_options = jsonObject_restaurants.getString("dining_options");
+                    String opening_time = jsonObject_restaurants.getString("opening_time");
+                    String closing_time = jsonObject_restaurants.getString("closing_time");
+                    boolean opened = jsonObject_restaurants.getBoolean("opened");
 
-                    restaurants =new Restaurants(id, email, names,distance,latitude,longitude,locality,country_code, order_radius, tables, image_type, table_number, m_code, dining_options);
+                    restaurants =new Restaurants(id, email, names,distance,latitude,longitude,locality,country_code, order_radius,
+                            tables, image_type, table_number, m_code, dining_options, opening_time, closing_time, opened);
                     return true;
                 }
                 else
