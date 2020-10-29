@@ -45,12 +45,9 @@ import static com.spikingacacia.spikyletabuyer.LoginA.base_url;
 public class OneOrderFragment extends Fragment
 {
     private static final String ARG_ORDERS = "arg1";
+    private static final String ARG_STATUS = "arg2";
     private List<Orders> ordersList;
     private CheckPaymentTask checkPaymentTask;
-    private String mOrder;
-    private int mOrderFormat;
-    private int mOrderStatus;
-    private int mPreOrder;
     private OnFragmentInteractionListener mListener;
     private String TAG = "one_order_f";
     private String sellerEmail;
@@ -147,9 +144,11 @@ public class OneOrderFragment extends Fragment
         // -3 for new order, -2 = unpaid, -1 = paid, 0 = deleted, 1 = pending, 2 = ..... until 5 = finished
         String[] status_strings_1 = new String[]{"pending","in progress","delivery","payment","finished"};
         String[] status_strings_2 = new String[]{"pending","payment","in progress","delivery","finished"};
-
+        int mOrderStatus = ordersList.get(0).getOrderStatus();
+        Log.d(TAG,"ORDER STATUS =="+mOrderStatus);
         if( mOrderStatus == -2)
         {
+            Log.d(TAG,"ORDER STATUS -2");
             //payment not gone through yet
             b_check_payment.setEnabled(true);
         }
@@ -159,23 +158,6 @@ public class OneOrderFragment extends Fragment
             ;//l_payment_failed.setVisibility(View.VISIBLE);
             b_pay.setEnabled(true);
             b_delete.setEnabled(true);
-        }
-        else
-            ;//t_status.setText(mOrderFormat==1?status_strings_1[mOrderStatus-1]:status_strings_2[mOrderStatus-1]);
-        //show the respective buttons and change their labels accordingly
-        //for pending the buttons remain as they are
-        if(mOrderFormat==1)
-        {
-            //pending--in progress--delivery--payment--finished
-            if(mOrderStatus == 4)
-                ;//b_pay.setVisibility(View.VISIBLE);
-
-        }
-        else
-        {
-            //pending--payment--in progress--delivery--finished
-            if(mOrderStatus == 2)
-                ;//b_pay.setVisibility(View.VISIBLE);
         }
         String username="";
         int table=0;
@@ -189,6 +171,7 @@ public class OneOrderFragment extends Fragment
         String url_code_start_delivery ="";
         String url_code_end_delivery = "";
         int order_number = 0;
+        int mPreOrder = 0;
         for(int c = 0; c<ordersList.size(); c++)
         {
             //Orders orders = set.getValue();
@@ -214,6 +197,7 @@ public class OneOrderFragment extends Fragment
             sellerEmail = orders.getSellerEmail();
             orderNumber = orders.getOrderNumber();
             dateAdded = orders.getDateAdded();
+            mPreOrder = orders.getPreOrder();
             //add the layouts
             //cardview
             View layout = inflater.inflate(R.layout.order_cardview_layout, null);
