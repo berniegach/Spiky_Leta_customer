@@ -58,6 +58,7 @@
             android:textAppearance="?attr/textAppearanceBody2"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/add"
+            android:backgroundTint="@color/colorIcons"
             app:layout_constraintStart_toEndOf="@+id/image" />
         <ImageButton
             android:visibility="gone"
@@ -70,11 +71,11 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
         <ImageButton
+            style="@style/MainImageButtonStyle"
             android:id="@+id/add"
             android:layout_width="50dp"
             android:layout_height="50dp"
             android:src="@drawable/ic_baseline_add_box_26"
-            android:backgroundTint="@android:color/transparent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"  />
 

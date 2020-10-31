@@ -23,6 +23,7 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
@@ -90,8 +91,7 @@ public class OrdersActivity extends AppCompatActivity
        int pre_order = getIntent().getIntExtra("pre_order",0);
        String seller_names = getIntent().getStringExtra("seller_names");
        List<Orders> ordersList = (List<Orders>) getIntent().getSerializableExtra("orders");
-       setTitle(seller_names);
-
+       setTitle("Order");
         progressBar = findViewById(R.id.progress);
         mainView = findViewById(R.id.base);
 

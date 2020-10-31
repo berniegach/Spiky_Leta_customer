@@ -34,12 +34,16 @@
             android:checkable="true"
             android:clickable="true"
             android:text="Sit in"
+            app:chipBackgroundColor="@color/colorButtonBackgroundTint_1"
+            app:checkedIconTint="@color/colorIcons"
             android:focusable="true" />
         <com.google.android.material.chip.Chip
             android:id="@+id/chip_take_away"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:checkable="true"
+            app:chipBackgroundColor="@color/colorButtonBackgroundTint_1"
+            app:checkedIconTint="@color/colorIcons"
             android:clickable="true"
             android:text="Take away"
             android:focusable="true" />
@@ -70,7 +74,7 @@
             </LinearLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.Dense"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:id="@+id/l_mpesa"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -126,6 +130,7 @@
     </LinearLayout>
 
     <Button
+        style="@style/MainButtonStyle"
         android:id="@+id/button_order"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

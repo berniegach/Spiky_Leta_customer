@@ -288,6 +288,8 @@ public class menuFragment extends Fragment implements MymenuRecyclerViewAdapter.
             chip.setTag(categories.getId());
             chip.setClickable(true);
             chip.setCheckable(true);
+            chip.setChipBackgroundColorResource(R.color.colorButtonBackgroundTint_1);
+            chip.setCheckedIconTintResource(R.color.colorIcons);
             chipGroupCategeories.addView(chip);
         }
     }
@@ -302,6 +304,8 @@ public class menuFragment extends Fragment implements MymenuRecyclerViewAdapter.
             chip.setClickable(true);
             chip.setCheckable(true);
             chip.setVisibility(View.GONE);
+            chip.setChipBackgroundColorResource(R.color.colorButtonBackgroundTint_1);
+            chip.setCheckedIconTintResource(R.color.colorIcons);
             chipGroupGroups.addView(chip);
         }
     }

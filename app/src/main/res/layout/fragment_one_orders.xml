@@ -129,6 +129,7 @@
             android:orientation="horizontal"
             android:gravity="center_horizontal">
             <Button
+                style="@style/MainButtonStyle"
                 android:enabled="false"
                 android:id="@+id/pay"
                 android:layout_width="wrap_content"
@@ -139,6 +140,7 @@
                 android:fontFamily="@font/roboto_condensed_regular"
                 android:layout_marginEnd="10dp"/>
             <Button
+                style="@style/MainButtonStyle"
                 android:enabled="false"
                 android:id="@+id/check_payment"
                 android:layout_width="wrap_content"
@@ -149,6 +151,7 @@
                 android:fontFamily="@font/roboto_condensed_regular"
                 android:layout_marginEnd="10dp"/>
             <Button
+                style="@style/MainButtonStyle"
                 android:enabled="false"
                 android:id="@+id/b_delete"
                 android:layout_width="wrap_content"
@@ -163,6 +166,7 @@
                 android:orientation="horizontal"
                 android:gravity="center">
                 <Button
+                    style="@style/MainButtonStyle"
                     android:enabled="false"
                     android:id="@+id/am_here"
                     android:layout_width="wrap_content"

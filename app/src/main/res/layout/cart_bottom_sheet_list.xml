@@ -35,6 +35,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="M-Pesa"
+            app:chipBackgroundColor="@color/colorButtonBackgroundTint_1"
+            app:checkedIconTint="@color/colorIcons"
             android:clickable="true"
             android:checkable="true"
             android:focusable="true" />
@@ -43,6 +45,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Cash"
+            app:chipBackgroundColor="@color/colorButtonBackgroundTint_1"
+            app:checkedIconTint="@color/colorIcons"
             android:clickable="true"
             android:checkable="true"
             android:focusable="true" />
@@ -110,6 +114,7 @@
             android:textAppearance="?attr/textAppearanceBody2"/>
     </LinearLayout>
     <Button
+        style="@style/MainButtonStyle"
         android:id="@+id/proceed"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
