@@ -29,8 +29,18 @@ public class Utils
     public Utils()
     {}
     //to retrieve currency code
-    public static String getCurrencyCode(String countryCode) {
-        return Currency.getInstance(new Locale("", countryCode)).getCurrencyCode();
+    public static String getCurrencyCode(String countryCode)
+    {
+        String currency = "";
+        try
+        {
+            currency = Currency.getInstance(new Locale("", countryCode)).getCurrencyCode();
+        }
+        catch (Exception e)
+        {
+            Log.e(TAG,""+e.getMessage());
+        }
+        return currency;
     }
     //to retrieve currency symbol
     public static String getCurrencySymbol(String countryCode) {

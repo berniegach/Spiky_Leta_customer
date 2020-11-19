@@ -240,7 +240,7 @@ public class OrdersActivity extends AppCompatActivity
     }
     private class RestaurantQRTask extends AsyncTask<Void, Void, Boolean>
     {
-        private String url_get_restaurants_qr=base_url+"get_restaurant_from_qr_code.php";
+        private String url_get_restaurants_qr=base_url+"get_restaurant_from_qr_code_1.php";
         private String TAG_SUCCESS="success";
         private String TAG_MESSAGE="message";
         private JSONParser jsonParser;
@@ -299,9 +299,10 @@ public class OrdersActivity extends AppCompatActivity
                     String opening_time = jsonObject_restaurants.getString("opening_time");
                     String closing_time = jsonObject_restaurants.getString("closing_time");
                     boolean opened = jsonObject_restaurants.getBoolean("opened");
+                    int delivery_radius = jsonObject_restaurants.getInt("delivery_radius");
 
                     restaurants =new Restaurants(id, email, names,distance,latitude,longitude,locality,country_code, order_radius,
-                            tables, image_type, table_number, m_code, dining_options, opening_time, closing_time, opened);
+                            tables, image_type, table_number, m_code, dining_options, opening_time, closing_time, opened, delivery_radius);
                     return true;
                 }
                 else

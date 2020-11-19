@@ -598,6 +598,11 @@ public class MainActivity extends AppCompatActivity implements
         intent.putExtra("has_payment", has_payment);
         intent.putExtra("m_code", has_payment ? item.getmCode() : "");
         intent.putExtra("dining_options", item.getDiningOptions());
+        //check if restaurant is within delivery radius
+        boolean withinDeliveryRadius = false;
+        if(item.getDistance()/1000<= (double) item.getDeliveryRadius())
+            withinDeliveryRadius = true;
+        intent.putExtra("within_delivery_radius",withinDeliveryRadius);
         startActivity(intent);
 
 
@@ -694,7 +699,7 @@ implementation of OrdersFragment.java
 
     private class RestaurantQRTask extends AsyncTask<Void, Void, Boolean>
     {
-        private String url_get_restaurants_qr=base_url+"get_restaurant_from_qr_code.php";
+        private String url_get_restaurants_qr=base_url+"get_restaurant_from_qr_code_1.php";
         private String TAG_SUCCESS="success";
         private String TAG_MESSAGE="message";
         private JSONParser jsonParser;
@@ -754,9 +759,10 @@ implementation of OrdersFragment.java
                     String opening_time = jsonObject_restaurants.getString("opening_time");
                     String closing_time = jsonObject_restaurants.getString("closing_time");
                     boolean opened = jsonObject_restaurants.getBoolean("opened");
+                    int delivery_radius = jsonObject_restaurants.getInt("delivery_radius");
 
                     restaurant =new Restaurants(id, email, names,distance,latitude,longitude,locality,country_code, order_radius,
-                            tables, image_type, table_number, m_code, dining_options, opening_time, closing_time, opened);
+                            tables, image_type, table_number, m_code, dining_options, opening_time, closing_time, opened, delivery_radius);
                     return true;
                 }
                 else

@@ -65,6 +65,7 @@ public class TastyBoardActivity extends AppCompatActivity implements
     private String diningOptions="1:1:0";
     private String sellerEmail="";
     private boolean payFullWithWallet = false;
+    private boolean withinDeliveryRadius = false;
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
@@ -175,6 +176,10 @@ public class TastyBoardActivity extends AppCompatActivity implements
         intent.putExtra("has_payment", has_payment);
         intent.putExtra("m_code", has_payment ? item.getmCode() : "");
         intent.putExtra("dining_options", item.getDiningOptions());
+        //check if restaurant is within delivery radius
+        if(item.getDistance()/1000<= (double) item.getDeliveryRadius())
+            withinDeliveryRadius = true;
+        intent.putExtra("within_delivery_radius",withinDeliveryRadius);
         startActivity(intent);
 
 
@@ -187,7 +192,7 @@ public class TastyBoardActivity extends AppCompatActivity implements
     {
         total = new_total;
         payFullWithWallet = pay_with_wallet_fully;
-        OrderParamsBottomSheet.newInstance(hasPayment,diningOptions,deliveryCharge,total, payment_type,this).show(getSupportFragmentManager(), "dialog");
+        OrderParamsBottomSheet.newInstance(hasPayment,diningOptions,deliveryCharge,total, payment_type,this, withinDeliveryRadius).show(getSupportFragmentManager(), "dialog");
     }
 
     @Override
@@ -208,7 +213,7 @@ public class TastyBoardActivity extends AppCompatActivity implements
 
     private class RestaurantTask extends AsyncTask<Void, Void, Boolean>
     {
-        private String url_get_restaurant=base_url+"get_restaurant_from_tasty_board.php";
+        private String url_get_restaurant=base_url+"get_restaurant_from_tasty_board_1.php";
         private String TAG_SUCCESS="success";
         private String TAG_MESSAGE="message";
         private JSONParser jsonParser;
@@ -266,9 +271,10 @@ public class TastyBoardActivity extends AppCompatActivity implements
                     String opening_time = jsonObject_restaurants.getString("opening_time");
                     String closing_time = jsonObject_restaurants.getString("closing_time");
                     boolean opened = jsonObject_restaurants.getBoolean("opened");
+                    int delivery_radius = jsonObject_restaurants.getInt("delivery_radius");
 
                     restaurant =new Restaurants(id, email, names,distance,latitude,longitude,locality,country_code, order_radius,
-                            tables, image_type, table_number, m_code, dining_options, opening_time, closing_time, opened);
+                            tables, image_type, table_number, m_code, dining_options, opening_time, closing_time, opened, delivery_radius);
                     return true;
                 }
                 else

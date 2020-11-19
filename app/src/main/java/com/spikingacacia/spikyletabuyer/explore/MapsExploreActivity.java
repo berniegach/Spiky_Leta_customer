@@ -87,7 +87,7 @@ public class MapsExploreActivity extends AppCompatActivity implements
     private String TAG="explore_a";
     private Marker myMarker;
     private View mapView;
-    private String url_get_restaurants=base_url+"get_near_restaurants_2.php";
+    private String url_get_restaurants=base_url+"get_near_restaurants_3.php";
     private String TAG_SUCCESS="success";
     private String TAG_MESSAGE="message";
     private JSONParser jsonParser;
@@ -446,6 +446,11 @@ public class MapsExploreActivity extends AppCompatActivity implements
         intent.putExtra("has_payment", has_payment);
         intent.putExtra("m_code", has_payment ? item.getmCode() : "");
         intent.putExtra("dining_options", item.getDiningOptions());
+        //check if restaurant is within delivery radius
+        boolean withinDeliveryRadius = false;
+        if(item.getDistance()/1000<= (double) item.getDeliveryRadius())
+            withinDeliveryRadius = true;
+        intent.putExtra("within_delivery_radius",withinDeliveryRadius);
         startActivity(intent);
     }
     private void showRestaurants()
@@ -550,10 +555,11 @@ public class MapsExploreActivity extends AppCompatActivity implements
                         String opening_time = jsonObject_restaurants.getString("opening_time");
                         String closing_time = jsonObject_restaurants.getString("closing_time");
                         boolean opened = jsonObject_restaurants.getBoolean("opened");
+                        int delivery_radius = jsonObject_restaurants.getInt("delivery_radius");
 
 
                         Restaurants restaurants =new Restaurants(id,email,names,distance,latitude,longitude,locality,country_code, order_radius,
-                                number_of_tables, image_type, table_number, m_code, dining_options, opening_time, closing_time, opened);
+                                number_of_tables, image_type, table_number, m_code, dining_options, opening_time, closing_time, opened, delivery_radius);
                         restaurantsList.add(restaurants);
                     }
                     return true;

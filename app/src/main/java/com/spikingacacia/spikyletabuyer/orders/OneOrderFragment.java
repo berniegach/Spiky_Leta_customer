@@ -7,6 +7,7 @@
 package com.spikingacacia.spikyletabuyer.orders;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -20,12 +21,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 
 import com.spikingacacia.spikyletabuyer.JSONParser;
 import com.spikingacacia.spikyletabuyer.LoginA;
 import com.spikingacacia.spikyletabuyer.R;
 import com.spikingacacia.spikyletabuyer.database.Orders;
+import com.spikingacacia.spikyletabuyer.main.MainActivity;
 import com.spikingacacia.spikyletabuyer.util.Utils;
 
 import org.apache.http.NameValuePair;
@@ -95,6 +98,7 @@ public class OneOrderFragment extends Fragment
         Button b_am_here = view.findViewById(R.id.am_here);
         ImageView image_qr_code = view.findViewById(R.id.qr_code);
         TextView t_payment_type = view.findViewById(R.id.payment_type);
+        Button b_cancel = view.findViewById(R.id.cancel);
 
         //set the buttons listeners
         Button b_pay=view.findViewById(R.id.pay);
@@ -140,6 +144,32 @@ public class OneOrderFragment extends Fragment
                     mListener.onAmHereClicked(String.valueOf(orderNumber),dateAdded, sellerEmail);
             }
         });
+        b_cancel.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                new AlertDialog.Builder(getContext())
+                        .setTitle("Cancel Order")
+                        .setMessage("Are you sure you want to cancel this order?\nThe amount paid will be credited to your wallet.")
+                        .setNegativeButton("Cancel", new DialogInterface.OnClickListener()
+                        {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which)
+                            {
+                                dialog.dismiss();
+                            }
+                        })
+                        .setPositiveButton("Ok", new DialogInterface.OnClickListener()
+                        {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which)
+                            {
+                                new UpdateOrderTask(sellerEmail,String.valueOf(orderNumber),dateAdded,"0","0").execute((Void)null);
+                            }
+                        }).create().show();
+            }
+        });
        //the order status are
         // -3 for new order, -2 = unpaid, -1 = paid, 0 = deleted, 1 = pending, 2 = ..... until 5 = finished
         String[] status_strings_1 = new String[]{"pending","in progress","delivery","payment","finished"};
@@ -148,9 +178,12 @@ public class OneOrderFragment extends Fragment
         Log.d(TAG,"ORDER STATUS =="+mOrderStatus);
         if( mOrderStatus == -2)
         {
-            Log.d(TAG,"ORDER STATUS -2");
             //payment not gone through yet
             b_check_payment.setEnabled(true);
+        }
+        else if(mOrderStatus == -1)
+        {
+            b_cancel.setEnabled(true);
         }
         else if( mOrderStatus == -3)
         {

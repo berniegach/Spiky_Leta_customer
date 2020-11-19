@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -45,11 +46,13 @@ public class OrderParamsBottomSheet extends BottomSheetDialogFragment
     private static final String ARG_SUB_TOTAL = "param4";
     private static final String ARG_PAYMENT_TYPE = "param5";
     private static final String ARG_LISTENER = "arg5";
+    private static final String ARG_DELIVERY_RADIUS = "arg6";
     private boolean showMpesa;
     private String mDiningOptions;
     private Double mDeliveryCharge;
     private Double mSubTotal;
     private int paymentType;
+    private boolean withinDeliveryRadius = false;
     private OnFragmentInteractionListener mListener;
     private int which = 2;
     private String time = null;
@@ -63,7 +66,7 @@ public class OrderParamsBottomSheet extends BottomSheetDialogFragment
         void onPlacePreOrder(int which, String time, String mobile_mpesa, String mobile_delivery, String instructions, int payment_type);
     }
 
-    public static OrderParamsBottomSheet newInstance(boolean showMpesa, String dining_options, Double delivery_charge, Double sub_total, int paymentType, OnFragmentInteractionListener listener)
+    public static OrderParamsBottomSheet newInstance(boolean showMpesa, String dining_options, Double delivery_charge, Double sub_total, int paymentType, OnFragmentInteractionListener listener, boolean withinDeliveryRadius)
     {
         final OrderParamsBottomSheet fragment = new OrderParamsBottomSheet();
         final Bundle args = new Bundle();
@@ -73,6 +76,7 @@ public class OrderParamsBottomSheet extends BottomSheetDialogFragment
         args.putDouble(ARG_SUB_TOTAL,sub_total);
         args.putInt(ARG_PAYMENT_TYPE, paymentType);
         args.putSerializable(ARG_LISTENER, listener);
+        args.putBoolean(ARG_DELIVERY_RADIUS, withinDeliveryRadius);
         fragment.setArguments(args);
         return fragment;
     }
@@ -96,6 +100,7 @@ public class OrderParamsBottomSheet extends BottomSheetDialogFragment
             mSubTotal = getArguments().getDouble(ARG_SUB_TOTAL);
             paymentType = getArguments().getInt(ARG_PAYMENT_TYPE);
             mListener = (OnFragmentInteractionListener) getArguments().getSerializable(ARG_LISTENER);
+            withinDeliveryRadius = getArguments().getBoolean(ARG_DELIVERY_RADIUS);
         }
         preferences = new Preferences(getContext());
         ChipGroup chipGroup = view.findViewById(R.id.chip_group);
@@ -151,7 +156,7 @@ public class OrderParamsBottomSheet extends BottomSheetDialogFragment
                     //t_m_pesa_mobile.setEnabled(false);
                     t_mobile_delivery.setEnabled(false);
                     l_delivery_mobile.setVisibility(View.GONE);
-                    l_instructions.setVisibility(View.GONE);
+                    //l_instructions.setVisibility(View.GONE);
                     //l_deliver_to_my_location.setVisibility(View.GONE);
                     which = 0;
                     l_delivery.setVisibility(View.GONE);
@@ -162,7 +167,7 @@ public class OrderParamsBottomSheet extends BottomSheetDialogFragment
                     //t_m_pesa_mobile.setEnabled(false);
                     t_mobile_delivery.setEnabled(false);
                     l_delivery_mobile.setVisibility(View.GONE);
-                    l_instructions.setVisibility(View.GONE);
+                    //l_instructions.setVisibility(View.GONE);
                     //l_deliver_to_my_location.setVisibility(View.GONE);
                     which = 1;
                     l_delivery.setVisibility(View.GONE);
@@ -187,7 +192,8 @@ public class OrderParamsBottomSheet extends BottomSheetDialogFragment
         int[] dining_options = new int[]{Integer.parseInt(s_dining_options[0]), Integer.parseInt(s_dining_options[1]), Integer.parseInt(s_dining_options[2])};
         chip_sit_in.setEnabled(dining_options[0] == 1);
         chip_take_away.setEnabled(dining_options[1] == 1);
-        chip_delivery.setEnabled(dining_options[2] == 1);
+        chip_delivery.setEnabled(dining_options[2] == 1 && withinDeliveryRadius);  //check if the customer is within delivery radius
+
 
         if(dining_options[0] == 0)
         {

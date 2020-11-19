@@ -70,6 +70,7 @@ public class ShopA extends AppCompatActivity
     private int tableNumber;
     private  int which; // which can either be 1 for normal ordering in a restaurant or 2 for pre ordering
     private  String diningOptions;
+    private boolean withinDeliveryRadius;
     private int backgroundTasksProgress=0;
     private final int finalProgressCount=3;
     int whichFragment=1;
@@ -111,6 +112,7 @@ public class ShopA extends AppCompatActivity
         tableNumber=getIntent().getIntExtra("table_number",-1);
         hasPayment =  getIntent().getBooleanExtra("has_payment",false);
         diningOptions = getIntent().getStringExtra("dining_options");
+        withinDeliveryRadius = getIntent().getBooleanExtra("within_delivery_radius",false);
         if(!seller_names.contentEquals("null") && !seller_names.contentEquals("NULL") && !seller_names.contentEquals(""))
             setTitle(seller_names);
         else
@@ -235,7 +237,7 @@ public class ShopA extends AppCompatActivity
         if(preOrder)
         {
             //onOrderClickedPreOder();
-            OrderParamsBottomSheet.newInstance(hasPayment,diningOptions,deliveryCharge,tempTotal, payment_type,this).show(getSupportFragmentManager(), "dialog");
+            OrderParamsBottomSheet.newInstance(hasPayment,diningOptions,deliveryCharge,tempTotal, payment_type,this, withinDeliveryRadius).show(getSupportFragmentManager(), "dialog");
         }
         else
         {

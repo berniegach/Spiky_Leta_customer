@@ -324,7 +324,7 @@ public class MapsFragment extends Fragment implements  ActivityCompat.OnRequestP
      **/
     private class RestaurantsTask extends AsyncTask<Void, Void, Boolean>
     {
-        private String url_get_restaurants=base_url+"get_near_restaurants_2.php";
+        private String url_get_restaurants=base_url+"get_near_restaurants_3.php";
         private String TAG_SUCCESS="success";
         private String TAG_MESSAGE="message";
         //final private String country;
@@ -391,10 +391,11 @@ public class MapsFragment extends Fragment implements  ActivityCompat.OnRequestP
                         String opening_time = jsonObject_restaurants.getString("opening_time");
                         String closing_time = jsonObject_restaurants.getString("closing_time");
                         boolean opened = jsonObject_restaurants.getBoolean("opened");
+                        int delivery_radius = jsonObject_restaurants.getInt("delivery_radius");
 
 
                         Restaurants restaurants =new Restaurants(id,email,names,distance,latitude,longitude,locality,country_code, order_radius,
-                                number_of_tables, image_type, table_number, m_code, dining_options, opening_time, closing_time, opened);
+                                number_of_tables, image_type, table_number, m_code, dining_options, opening_time, closing_time, opened, delivery_radius);
                         restaurantsList.add(restaurants);
                     }
                     return true;

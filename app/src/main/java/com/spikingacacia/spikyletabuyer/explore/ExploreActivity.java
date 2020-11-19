@@ -102,6 +102,13 @@ public class ExploreActivity extends AppCompatActivity implements
         intent.putExtra("has_payment", has_payment);
         intent.putExtra("m_code", has_payment ? item.getmCode() : "");
         intent.putExtra("dining_options", item.getDiningOptions());
+        //check if restaurant is within delivery radius
+        boolean withinDeliveryRadius = false;
+        if(item.getDistance()/1000<= (double) item.getDeliveryRadius())
+            withinDeliveryRadius = true;
+        intent.putExtra("within_delivery_radius",withinDeliveryRadius);
+        Log.e("jkadsajdgsd"," delivery "+withinDeliveryRadius+" distance "+item.getDistance() +" radius "+item.getDeliveryRadius());
+
         startActivity(intent);
     }
 /*

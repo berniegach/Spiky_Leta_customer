@@ -116,6 +116,11 @@ public class SearchableActivity extends AppCompatActivity
         intent.putExtra("has_payment", has_payment);
         intent.putExtra("dining_options", item.getDiningOptions());
         intent.putExtra("m_code", has_payment ? item.getmCode() : "");
+        //check if restaurant is within delivery radius
+        boolean withinDeliveryRadius = false;
+        if(item.getDistance()/1000<= (double) item.getDeliveryRadius())
+            withinDeliveryRadius = true;
+        intent.putExtra("within_delivery_radius",withinDeliveryRadius);
         startActivity(intent);
     }
 }
